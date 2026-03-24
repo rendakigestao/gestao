@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Gestão — Consulta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f11;--surf:#17171a;--surf2:#1e1e22;--bdr:#2a2a30;--acc:#4ade80;--acc2:#86efac;--txt:#e8e8ee;--txt2:#8888a0;--txt3:#55556a;--red:#f87171;--sw:220px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);height:100dvh;display:flex;overflow:hidden}
+#sidebar{width:var(--sw);min-width:var(--sw);background:var(--surf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;transition:transform .22s ease;z-index:100}
+#sidebar.hidden{transform:translateX(calc(-1 * var(--sw)));position:fixed;top:0;left:0;bottom:0}
+.sb-head{padding:16px 14px 10px;border-bottom:1px solid var(--bdr)}
+.sb-logo{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.sb-title{font-size:14px;font-weight:600}
+.sb-srch{padding:8px 10px;border-bottom:1px solid var(--bdr)}
+.sb-srch input{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;padding:6px 9px;color:var(--txt);font-size:12px;outline:none}
+.sb-srch input:focus{border-color:var(--acc)}
+.sb-srch input::placeholder{color:var(--txt3)}
+.tlist{overflow-y:auto;flex:1;padding:4px 0}
+.tgrp{padding:7px 12px 3px;font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase}
+.titem{padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;border-left:2px solid transparent;transition:background .1s}
+.titem:hover{background:var(--surf2)}
+.titem.active{background:rgba(74,222,128,.08);border-left-color:var(--acc)}
+.tname{font-size:12px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titem.active .tname{color:var(--acc2)}
+.tdot{width:5px;height:5px;border-radius:50%;background:var(--txt3);flex-shrink:0}
+.titem.active .tdot{background:var(--acc)}
+.tbadge{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--acc);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:1px 5px;border-radius:8px;flex-shrink:0}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#topbar{height:46px;background:var(--surf);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0}
+#tog{background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:5px;padding:5px 9px;cursor:pointer;font-size:15px;line-height:1;transition:all .12s}
+#tog:hover{border-color:var(--acc);color:var(--acc)}
+#ttitle{font-size:13px;font-weight:500;color:var(--txt);flex:1}
+#rcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt3)}
+#cfgbtn{background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:5px;padding:5px 9px;cursor:pointer;font-size:12px;transition:all .12s}
+#cfgbtn:hover{border-color:var(--acc);color:var(--acc)}
+#loadbar{height:2px;background:var(--bdr);flex-shrink:0;position:relative;overflow:hidden}
+#loadbar.on::after{content:'';position:absolute;top:0;left:-40%;width:40%;height:100%;background:var(--acc);animation:slid .8s ease infinite}
+@keyframes slid{to{left:140%}}
+#twrap{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+#empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--txt3)}
+.ei{font-size:36px;opacity:.3}
+.et{font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.8}
+#tcont{flex:1;overflow:auto;min-height:0;position:relative}
+table{border-collapse:collapse;font-size:11px;width:max-content;min-width:100%}
+thead{position:sticky;top:0;z-index:10}
+thead tr{background:var(--surf)}
+th{padding:0;border-right:1px solid var(--bdr);border-bottom:2px solid var(--bdr);white-space:nowrap;user-select:none;position:relative;min-width:70px}
+.thi{display:flex;align-items:center;padding:0 6px 0 8px;height:30px;cursor:pointer;gap:3px}
+.thi:hover{background:rgba(255,255,255,.04)}
+.thl{flex:1;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:500;color:var(--txt2)}
+.ths{font-size:8px;color:var(--txt3);flex-shrink:0;width:10px}
+.thf{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:3px;font-size:10px;color:var(--txt3);cursor:pointer;transition:all .1s}
+.thf:hover,.thf.on{background:rgba(74,222,128,.15);color:var(--acc)}
+.rzh{position:absolute;right:0;top:0;bottom:0;width:4px;cursor:col-resize;z-index:2}
+.rzh:hover{background:var(--acc);opacity:.4}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04)}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+#pgbar{height:34px;background:var(--surf);border-top:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;font-size:11px;color:var(--txt2)}
+#pgbar button{background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:4px;padding:3px 9px;cursor:pointer;font-size:11px;transition:all .1s}
+#pgbar button:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+#pgbar button:disabled{opacity:.3;cursor:default}
+#pginfo{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px}
+#pgsz{background:var(--surf2);border:1px solid var(--bdr);color:var(--txt);border-radius:4px;padding:2px 5px;font-size:10px}
+
+/* ── Filter dropdown Excel-style ── */
+#fdrop{position:fixed;background:var(--surf);border:1px solid var(--bdr);border-radius:7px;box-shadow:0 8px 32px rgba(0,0,0,.65);z-index:999;width:230px;display:none;flex-direction:column;max-height:360px;overflow:hidden}
+#fdrop.open{display:flex}
+.fdhead{padding:8px 10px 6px;border-bottom:1px solid var(--bdr)}
+.fdsrch{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:4px;padding:5px 8px;color:var(--txt);font-size:11px;outline:none}
+.fdsrch:focus{border-color:var(--acc)}
+.fdacts{display:flex;gap:6px;padding:5px 10px;border-bottom:1px solid var(--bdr)}
+.fda{flex:1;background:var(--surf2);border:1px solid var(--bdr);border-radius:4px;color:var(--txt2);font-size:10px;padding:3px;cursor:pointer;text-align:center;transition:all .1s}
+.fda:hover{border-color:var(--acc);color:var(--acc)}
+.fdlist{overflow-y:auto;flex:1;padding:3px 0}
+.fdi{display:flex;align-items:center;gap:8px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--txt);transition:background .08s}
+.fdi:hover{background:rgba(255,255,255,.04)}
+.fdi input{accent-color:var(--acc);width:13px;height:13px;flex-shrink:0;cursor:pointer}
+.fdapply{margin:6px 10px;background:var(--acc);color:#0a1a0a;border:none;border-radius:4px;padding:6px;font-size:11px;font-weight:600;cursor:pointer}
+.fdapply:hover{background:var(--acc2)}
+
+/* Modal */
+#cfgmod{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+#cfgmod.open{display:flex}
+.mbox{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:22px;width:min(440px,92vw)}
+.mtit{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.mtit span{color:var(--acc);font-family:'IBM Plex Mono',monospace;font-size:11px}
+.mhint{font-size:11px;color:var(--txt3);margin-bottom:14px;line-height:1.6}
+.mhint a{color:var(--acc2);text-decoration:none}
+.mf label{display:block;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.mf input{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;padding:8px 10px;color:var(--txt);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none;margin-bottom:12px}
+.mf input:focus{border-color:var(--acc)}
+.mbtns{display:flex;gap:8px;justify-content:flex-end}
+.btn{padding:7px 16px;border-radius:5px;font-size:12px;cursor:pointer;border:none;transition:all .12s}
+.btnp{background:var(--acc);color:#0a1a0a;font-weight:600}
+.btnp:hover{background:var(--acc2)}
+.btng{background:var(--surf2);color:var(--txt2);border:1px solid var(--bdr)}
+.btng:hover{border-color:var(--txt2)}
+#sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+@media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
+</style>
+</head>
+<body>
+<div id="sbov" onclick="toggleSB()"></div>
+<div id="sidebar">
+  <div class="sb-head"><div class="sb-logo">Sistema de Gestão</div><div class="sb-title">Consulta de Tabelas</div></div>
+  <div class="sb-srch"><input type="text" placeholder="Buscar tabela..." oninput="filterTbls(this.value)"></div>
+  <div class="tlist" id="tlist"></div>
+</div>
+<div id="main">
+  <div id="topbar">
+    <button id="tog" onclick="toggleSB()">☰</button>
+    <div id="ttitle" style="color:var(--txt3)">Selecione uma tabela</div>
+    <div id="rcount"></div>
+    <button id="cfgbtn" onclick="openCfg()">⚙ Conexão</button>
+  </div>
+  <div id="loadbar"></div>
+  <div id="twrap">
+    <div id="empty"><div class="ei">⬡</div><div class="et">configure a conexão e selecione uma tabela</div></div>
+    <div id="tcont" style="display:none"><table><thead id="dhead"></thead><tbody id="dbody"></tbody></table></div>
+  </div>
+  <div id="pgbar" style="display:none">
+    <button onclick="goPage(0)">«</button>
+    <button onclick="goPage(curPage-1)">‹</button>
+    <div id="pginfo"></div>
+    <button onclick="goPage(curPage+1)">›</button>
+    <button onclick="goPage(totalPages-1)">»</button>
+    <span style="color:var(--txt3);font-size:10px">por pág:</span>
+    <select id="pgsz" onchange="chgPs(this.value)"><option>100</option><option>250</option><option>500</option><option selected>1000</option></select>
+  </div>
+</div>
+
+<!-- Filter dropdown -->
+<div id="fdrop">
+  <div class="fdhead"><input type="text" class="fdsrch" id="fdsrch" placeholder="Pesquisar..." oninput="fdFilt(this.value)"></div>
+  <div class="fdacts"><div class="fda" onclick="fdAll()">Selecionar tudo</div><div class="fda" onclick="fdNone()">Limpar</div></div>
+  <div class="fdlist" id="fdlist"></div>
+  <button class="fdapply" onclick="applyFD()">Aplicar</button>
+</div>
+
+<!-- Config modal -->
+<div id="cfgmod">
+  <div class="mbox">
+    <div class="mtit">⚙ Configurar Conexão <span>Neon PostgreSQL</span></div>
+    <div class="mhint">Cole a <strong>DATABASE_URL</strong> do banco. Use um usuário somente leitura.</div>
+    <div class="mf"><label>Database URL</label><input type="password" id="dburl" placeholder="postgresql://user:pass@host/dbname"></div>
+    <div class="mbtns"><button class="btn btng" onclick="closeCfg()">Cancelar</button><button class="btn btnp" onclick="saveCfg()">Conectar</button></div>
+  </div>
+</div>
+
+<script>
+const PROXY='https://rendakigestao.akinbyiyrendaki.workers.dev/';
+const TABLES=[
+  {group:'Telas Principais',name:'tabela_controle', label:'Controle de Mercadorias'},
+  {group:'Telas Principais',name:'snapshot_posicao',label:'Posição de Estoque',badge:true},
+  {group:'Telas Principais',name:'snapshot_sgp',    label:'SGP Empenhos',      badge:true},
+];
+const QUERIES={
+  tabela_controle:`SELECT "Ano","O.C","Cod.Barras","Produto","Tipo","Fornecedor","G","Comprado","Qtd_Pedido","Qtd_Recebida","S_Restante","Media","Dias","Percentual","Situacao","L","CD","Status" FROM tabela_controle ORDER BY "Ano" DESC,"O.C" LIMIT 5000`,
+};
+const CLABELS={
+  tabela_controle:{Qtd_Pedido:'Qtd Pedido',Qtd_Recebida:'Qtd.Recebida',S_Restante:'S.Restante',Media:'Média',Percentual:'%',Situacao:'Situação'},
+};
+
+// State
+let allRows=[],filtRows=[],colFilters={},sortC=-1,sortD=1;
+let curPage=0,pageSize=1000,totalPages=1;
+let curTable=null,colW=[];
+// FD state
+let fdCI=-1,fdAll=[],fdSel=new Set(),fdTerm='';
+
+// Config
+const getCfg=()=>({url:localStorage.getItem('neon_url')||''});
+function openCfg(){document.getElementById('dburl').value=getCfg().url;document.getElementById('cfgmod').classList.add('open')}
+function closeCfg(){document.getElementById('cfgmod').classList.remove('open')}
+function saveCfg(){const u=document.getElementById('dburl').value.trim();if(!u)return alert('Informe a URL.');localStorage.setItem('neon_url',u);closeCfg();buildSB()}
+
+// Sidebar
+function toggleSB(){const s=document.getElementById('sidebar');s.classList.toggle('hidden');document.getElementById('sbov').classList.toggle('vis',!s.classList.contains('hidden')&&window.innerWidth<=640)}
+function filterTbls(q){q=q.toLowerCase();document.querySelectorAll('.titem').forEach(e=>{e.style.display=(!q||e.dataset.l.toLowerCase().includes(q))?'':'none'})}
+function buildSB(){
+  const list=document.getElementById('tlist');list.innerHTML='';
+  const gs={};TABLES.forEach(t=>{(gs[t.group]||(gs[t.group]=[])).push(t)});
+  Object.entries(gs).forEach(([g,ts])=>{
+    const ge=document.createElement('div');ge.className='tgrp';ge.textContent=g;list.appendChild(ge);
+    ts.forEach(t=>{
+      const el=document.createElement('div');el.className='titem';el.dataset.l=t.label;
+      el.innerHTML=`<div class="tdot"></div><div class="tname">${t.label}</div>${t.badge?'<div class="tbadge">live</div>':''}`;
+      el.onclick=()=>loadTable(t.name,t.label,el);
+      list.appendChild(el);
+    });
+  });
+}
+
+// Load table
+async function loadTable(name,label,el){
+  document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');curTable=name;
+  document.getElementById('ttitle').textContent=label;
+  document.getElementById('rcount').textContent='';
+  setLoad(true);
+  document.getElementById('empty').style.display='none';
+  document.getElementById('tcont').style.display='none';
+  document.getElementById('pgbar').style.display='none';
+  if(window.innerWidth<=640)toggleSB();
+  try{
+    const sql=QUERIES[name]||`SELECT * FROM "${name}" LIMIT 5000`;
+    const rows=await qNeon(sql);
+    if(!rows||!rows.length){showEmpty(name);return}
+    allRows=rows;colFilters={};sortC=-1;sortD=1;
+    colW=Object.keys(rows[0]).map(()=>null);
+    applyAll();
+    document.getElementById('tcont').style.display='';
+    document.getElementById('pgbar').style.display='';
+  }catch(e){
+    if(e.message&&e.message.includes('does not exist')&&['snapshot_posicao','snapshot_sgp'].includes(name)){showEmpty(name)}
+    else showErr(e.message);
+  }
+  setLoad(false);
+}
+function showEmpty(n){
+  setLoad(false);document.getElementById('empty').style.display='flex';
+  document.getElementById('empty').innerHTML=`<div class="ei">⏳</div><div class="et">Snapshot ainda não gerado.<br><span style="font-size:10px;color:var(--txt3)">Abra a tela na aplicação desktop<br>e os dados aparecerão aqui.</span></div>`;
+}
+function showErr(m){document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">⚠</div><div class="et" style="color:var(--red)">${m}</div>`}
+
+// Apply filters+sort+page
+function applyAll(){
+  filtRows=allRows.filter(row=>{
+    const v=Object.values(row);
+    return Object.entries(colFilters).every(([ci,sel])=>!sel||sel.has(String(v[ci]??'')));
+  });
+  if(sortC>=0){
+    filtRows.sort((a,b)=>{
+      const av=Object.values(a)[sortC]??'',bv=Object.values(b)[sortC]??'';
+      const an=parseFloat(String(av).replace(/\./g,'').replace(',','.')),bn=parseFloat(String(bv).replace(/\./g,'').replace(',','.'));
+      if(!isNaN(an)&&!isNaN(bn))return(an-bn)*sortD;
+      return String(av).localeCompare(String(bv),'pt-BR')*sortD;
+    });
+  }
+  totalPages=Math.max(1,Math.ceil(filtRows.length/pageSize));
+  if(curPage>=totalPages)curPage=0;
+  render();updCount();
+}
+
+function render(){
+  if(!allRows.length)return;
+  const cols=Object.keys(allRows[0]);
+  const lbls=CLABELS[curTable]||{};
+  const head=document.getElementById('dhead'),body=document.getElementById('dbody');
+  head.innerHTML='';
+  const tr=document.createElement('tr');
+  cols.forEach((col,ci)=>{
+    const th=document.createElement('th');
+    if(colW[ci])th.style.width=colW[ci]+'px';
+    const hf=colFilters[ci]?'on':'';
+    const sa=sortC===ci&&sortD===1,sd=sortC===ci&&sortD===-1;
+    th.innerHTML=`<div class="thi"><div class="thl" title="${col}">${lbls[col]||col}</div><div class="ths">${sa?'▲':sd?'▼':''}</div><div class="thf ${hf}" data-ci="${ci}">▼</div></div><div class="rzh"></div>`;
+    th.querySelector('.thl').onclick=()=>{if(sortC===ci)sortD*=-1;else{sortC=ci;sortD=1}applyAll()};
+    th.querySelector('.ths').onclick=()=>{if(sortC===ci)sortD*=-1;else{sortC=ci;sortD=1}applyAll()};
+    th.querySelector('.thf').onclick=e=>{e.stopPropagation();openFD(ci,e.target)};
+    th.querySelector('.rzh').onmousedown=e=>startRz(e,ci,th);
+    tr.appendChild(th);
+  });
+  head.appendChild(tr);
+
+  const start=curPage*pageSize,slice=filtRows.slice(start,start+pageSize);
+  body.innerHTML='';
+  slice.forEach(row=>{
+    const tr=document.createElement('tr');
+    Object.values(row).forEach(val=>{
+      const td=document.createElement('td');
+      td.textContent=val??'';td.title=String(val??'');
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+
+  document.getElementById('pginfo').textContent=`Página ${curPage+1} de ${totalPages}  —  ${filtRows.length.toLocaleString('pt-BR')} linhas`;
+  ['pg-first','pg-prev'].forEach(id=>{const b=document.querySelector(`[onclick="goPage(0)"],${id==='pg-prev'?'[onclick="goPage(curPage-1)"]':'[onclick="goPage(0)"]'}`);});
+  document.querySelectorAll('#pgbar button').forEach((b,i)=>{
+    b.disabled=i<2?curPage===0:curPage>=totalPages-1;
+  });
+}
+function goPage(p){curPage=Math.max(0,Math.min(p,totalPages-1));render()}
+function chgPs(v){pageSize=parseInt(v);curPage=0;applyAll()}
+function updCount(){
+  const af=Object.values(colFilters).filter(Boolean).length;
+  let t=`${filtRows.length.toLocaleString('pt-BR')} / ${allRows.length.toLocaleString('pt-BR')} linhas`;
+  if(af)t+=` · ${af} filtro(s) ativo(s)`;
+  document.getElementById('rcount').textContent=t;
+}
+
+// Resize
+function startRz(e,ci,th){
+  e.preventDefault();const sx=e.clientX,sw=th.offsetWidth;
+  const mv=e2=>{const w=Math.max(40,sw+e2.clientX-sx);colW[ci]=w;th.style.width=w+'px'};
+  const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up)};
+  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+}
+
+// Filter dropdown
+function openFD(ci,btn){
+  const d=document.getElementById('fdrop');
+  if(d.classList.contains('open')&&fdCI===ci){closeFD();return}
+  fdCI=ci;
+  document.getElementById('fdsrch').value='';fdTerm='';
+  const vals=[...new Set(allRows.map(r=>String(Object.values(r)[ci]??'')))].sort((a,b)=>{
+    const an=parseFloat(a.replace(/\./g,'').replace(',','.')),bn=parseFloat(b.replace(/\./g,'').replace(',','.'));
+    if(!isNaN(an)&&!isNaN(bn))return an-bn;
+    return a.localeCompare(b,'pt-BR');
+  });
+  fdAll=vals;
+  const cur=colFilters[ci];
+  fdSel=cur?new Set(cur):new Set(vals);
+  renderFD();
+  const r=btn.getBoundingClientRect();
+  d.style.top=(r.bottom+2)+'px';
+  d.style.left=Math.min(r.left,window.innerWidth-240)+'px';
+  d.classList.add('open');
+  setTimeout(()=>document.addEventListener('click',outsideFD),0);
+}
+function closeFD(){document.getElementById('fdrop').classList.remove('open');document.removeEventListener('click',outsideFD)}
+function outsideFD(e){if(!document.getElementById('fdrop').contains(e.target))closeFD()}
+function renderFD(){
+  const list=document.getElementById('fdlist');
+  const t=fdTerm.toLowerCase();
+  const vis=fdAll.filter(v=>!t||v.toLowerCase().includes(t));
+  list.innerHTML='';
+  vis.forEach(val=>{
+    const item=document.createElement('div');item.className='fdi';
+    const ch=fdSel.has(val);
+    item.innerHTML=`<input type="checkbox" ${ch?'checked':''}><span>${val||'(vazio)'}</span>`;
+    const cb=item.querySelector('input');
+    cb.onchange=()=>{cb.checked?fdSel.add(val):fdSel.delete(val)};
+    item.onclick=e=>{if(e.target.tagName!=='INPUT'){cb.checked=!cb.checked;cb.checked?fdSel.add(val):fdSel.delete(val)}};
+    list.appendChild(item);
+  });
+}
+function fdFilt(q){fdTerm=q;renderFD()}
+function fdAll2(){fdSel=new Set(fdAll);renderFD()}
+function fdNone(){fdSel=new Set();renderFD()}
+function applyFD(){
+  if(fdSel.size===fdAll.length)delete colFilters[fdCI];
+  else colFilters[fdCI]=new Set(fdSel);
+  curPage=0;closeFD();applyAll();
+}
+
+// Neon
+async function qNeon(sql){
+  const url=getCfg().url;if(!url)throw new Error('Configure a conexão.');
+  const r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:sql,params:[],connectionString:url})});
+  if(!r.ok)throw new Error(`Erro ${r.status}: ${await r.text()}`);
+  const d=await r.json();if(d.message)throw new Error(d.message);
+  return d.rows||[];
+}
+function setLoad(on){document.getElementById('loadbar').classList.toggle('on',on)}
+
+// onclick fixes for fdAll/fdNone buttons
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.fda')[0].onclick=fdAll2;
+  document.querySelectorAll('.fda')[1].onclick=fdNone;
+  buildSB();if(!getCfg().url)setTimeout(openCfg,300);
+});
+</script>
+</body>
+</html>
