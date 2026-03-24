@@ -123,6 +123,17 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 .bsr.highlight{background:#1a2620;border-color:rgba(74,222,128,.25)}
 .bsr.highlight .bslbl{color:#86efac}
 .bsr.highlight .bsval{color:#4ade80;font-size:15px;font-weight:600}
+#bsdet{padding:0 14px 10px;border-bottom:1px solid #252530;flex-shrink:0}
+.bsdet-sel{width:100%;background:#252530;border:1px solid #333340;border-radius:8px;color:#e8e8ee;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:8px 10px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234ade80'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.bsdet-sel:focus{border-color:var(--acc)}
+.bsdet-lbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+#bsdet-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.bsdet-card{background:#1e1e26;border-radius:8px;padding:8px 10px;border:1px solid #2a2a35}
+.bsdet-card .bslbl{font-size:9px;color:var(--txt3)}
+.bsdet-card .bsval{font-size:12px;color:#e8e8ee}
+.bsdet-card.hl{background:#1a2620;border-color:rgba(74,222,128,.2)}
+.bsdet-card.hl .bslbl{color:#86efac}
+.bsdet-card.hl .bsval{color:#4ade80;font-weight:600}
 @media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
 </style>
 </head>
@@ -137,6 +148,13 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
     <div id="bshead">
       <div id="bsbadge">detalhe do item</div>
       <div id="bstitle"></div>
+    </div>
+    <div id="bsdet" style="display:none">
+      <div class="bsdet-lbl">Produtos do item</div>
+      <select class="bsdet-sel" id="bsdet-sel" onchange="loadDetItem(this.value)">
+        <option value="">Selecione um produto...</option>
+      </select>
+      <div id="bsdet-grid"></div>
     </div>
     <div id="bsbody"></div>
   </div>
@@ -430,9 +448,82 @@ function openBSheet(cols,vals){
                  <div class="bsval${isEmpty?' mt':''}">${val||'—'}</div>`;
     body.appendChild(d);
   });
+  // Load detail dropdown if it's posicao table
+  const detDiv = document.getElementById('bsdet');
+  const detSel = document.getElementById('bsdet-sel');
+  const detGrid = document.getElementById('bsdet-grid');
+  detDiv.style.display = 'none';
+  detSel.innerHTML = '<option value="">Selecione um produto...</option>';
+  detGrid.innerHTML = '';
+
+  if(curTable === 'snapshot_posicao') {
+    const tipo = String(vals[0]||'');
+    const gr   = String(vals[1]||'');
+    loadDetSection(tipo, gr);
+  }
   document.getElementById('bsov').classList.add('open');
 }
 function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
+
+// ── Detail dropdown ────────────────────────────────────────────────────────
+let _bsDetRows = [];
+
+async function loadDetSection(tipo, gr) {
+  const detDiv = document.getElementById('bsdet');
+  const sel    = document.getElementById('bsdet-sel');
+  const grid   = document.getElementById('bsdet-grid');
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  grid.innerHTML = '';
+  detDiv.style.display = '';
+
+  try {
+    const rows = await qNeon(
+      `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf
+       FROM snapshot_posicao_det
+       WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}' LIMIT 50`
+    );
+    _bsDetRows = rows || [];
+    sel.innerHTML = '<option value="">Selecione um produto...</option>';
+    _bsDetRows.forEach((r, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${r.codigo} — ${r.descricao}`;
+      sel.appendChild(opt);
+    });
+    if(!_bsDetRows.length) {
+      detDiv.style.display = 'none';
+    }
+  } catch(e) {
+    detDiv.style.display = 'none';
+  }
+}
+
+function loadDetItem(idx) {
+  const grid = document.getElementById('bsdet-grid');
+  grid.innerHTML = '';
+  if(idx === '') return;
+  const r = _bsDetRows[parseInt(idx)];
+  if(!r) return;
+
+  const fields = [
+    {l:'Estoque', v:r.estoque, hl:true},
+    {l:'CD/P',    v:r.cdp,     hl:true},
+    {l:'CD+OC',   v:r.cdpoc,   hl:true},
+    {l:'Média',   v:r.media,   hl:false},
+    {l:'OCs',     v:r.ocs,     hl:false},
+    {l:'S.OCs',   v:r.s_ocs,   hl:false},
+    {l:'S.à Emp.',v:r.s_emp,   hl:false},
+    {l:'D.R.P.',  v:r.drp,     hl:false},
+    {l:'T.Item',  v:r.t_item,  hl:false},
+    {l:'Shelf',   v:r.shelf,   hl:false},
+  ];
+  fields.forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'bsdet-card'+(f.hl?' hl':'');
+    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'—'}</div>`;
+    grid.appendChild(d);
+  });
+}
 
 // Swipe to close removido — fechar apenas pelo botão ✕
 
