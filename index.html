@@ -101,18 +101,25 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 .btng{background:var(--surf2);color:var(--txt2);border:1px solid var(--bdr)}
 .btng:hover{border-color:var(--txt2)}
 #sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
-#bsov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:none;align-items:flex-end}
+#bsov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
 #bsov.open{display:flex}
-#bsheet{background:var(--surf);border-radius:16px 16px 0 0;width:100%;max-height:82dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,0,.67,0)}
+#bsheet{background:#1a1a1f;border-radius:20px 20px 0 0;width:100%;max-height:85dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.34,1.1,.64,1);box-shadow:0 -8px 40px rgba(0,0,0,.8)}
 #bsov.open #bsheet{transform:translateY(0)}
-.bsh{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 6px;flex-shrink:0;cursor:pointer}
-#bstitle{font-size:11px;font-weight:600;color:var(--txt);padding:0 14px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0;line-height:1.5}
-#bsbody{overflow-y:auto;flex:1;padding:6px 0 24px}
-.bsr{display:flex;align-items:flex-start;padding:7px 14px;border-bottom:1px solid rgba(255,255,255,.04);gap:10px}
-.bsr:last-child{border-bottom:none}
-.bslbl{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);min-width:90px;flex-shrink:0;padding-top:2px}
-.bsval{font-size:12px;color:var(--txt);flex:1;word-break:break-word}
-.bsval.mt{color:var(--txt3);font-style:italic}
+.bsh{width:40px;height:4px;background:#333340;border-radius:2px;margin:12px auto 0;flex-shrink:0;cursor:pointer}
+#bshead{padding:16px 18px 14px;border-bottom:1px solid #252530;flex-shrink:0}
+#bsbadge{display:inline-block;font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:2px 8px;border-radius:10px;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+#bstitle{font-size:15px;font-weight:600;color:#fff;line-height:1.4}
+#bsbody{overflow-y:auto;flex:1;padding:8px 14px 32px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:400px){#bsbody{grid-template-columns:1fr}}
+.bsr{background:#1e1e26;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;border:1px solid #2a2a35}
+.bsr.full{grid-column:1/-1}
+.bsr.empty{opacity:.4}
+.bslbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);letter-spacing:.07em;text-transform:uppercase;font-weight:500}
+.bsval{font-size:13px;color:#e8e8ee;font-weight:400;line-height:1.35;word-break:break-word}
+.bsval.mt{color:#55556a;font-style:italic;font-size:12px}
+.bsr.highlight{background:#1a2620;border-color:rgba(74,222,128,.25)}
+.bsr.highlight .bslbl{color:#86efac}
+.bsr.highlight .bsval{color:#4ade80;font-size:15px;font-weight:600}
 @media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
 </style>
 </head>
@@ -121,7 +128,10 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 <div id="bsov" onclick="closeBSheet()">
   <div id="bsheet" onclick="event.stopPropagation()">
     <div class="bsh" onclick="closeBSheet()"></div>
-    <div id="bstitle"></div>
+    <div id="bshead">
+      <div id="bsbadge">detalhe do item</div>
+      <div id="bstitle"></div>
+    </div>
     <div id="bsbody"></div>
   </div>
 </div>
@@ -396,11 +406,22 @@ function openBSheet(cols,vals){
   document.getElementById('bstitle').textContent=String(vals[0]||'');
   const body=document.getElementById('bsbody');
   body.innerHTML='';
+  // Long columns (descrição, tipo, fornecedor, observações) → full width
+  const longCols=new Set(['Tipo','T. De Merc.','tipo','Fornecedor','fornecedor','Produto','produto',
+    'Observações','observacoes','Obs','DESCRICAO','Descricao','descricao']);
+  const hlCols=new Set(['Est.Lojas','Dias Estoque','Situação Pauta','Dias RC',
+    'CD/P','CD+OC','Comprar','Shelf']);
   cols.forEach((col,i)=>{
     if(i===0)return;
     const val=String(vals[i]??'').trim();
-    const d=document.createElement('div');d.className='bsr';
-    d.innerHTML=`<div class="bslbl">${labels[col]||col}</div><div class="bsval${val?'':' mt'}">${val||'—'}</div>`;
+    const isEmpty=!val;
+    const label=labels[col]||col;
+    const isLong=longCols.has(col)||label.length>14||val.length>20;
+    const isHL=hlCols.has(col);
+    const d=document.createElement('div');
+    d.className='bsr'+(isLong?' full':'')+(isEmpty?' empty':'')+(isHL?' highlight':'');
+    d.innerHTML=`<div class="bslbl">${label}</div>
+                 <div class="bsval${isEmpty?' mt':''}">${val||'—'}</div>`;
     body.appendChild(d);
   });
   document.getElementById('bsov').classList.add('open');
