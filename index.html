@@ -484,15 +484,44 @@ async function loadDetSection(tipo, gr) {
     );
     _bsDetRows = rows || [];
     sel.innerHTML = '<option value="">Selecione um produto...</option>';
+
+    if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
+
+    // Score de riqueza: conta campos preenchidos com valor real
+    const scores = _bsDetRows.map(r => {
+      let s = 0;
+      const nums = [r.estoque, r.cdp, r.media, r.cdpoc, r.ocs, r.s_ocs, r.s_emp, r.drp];
+      nums.forEach(v => { const n=parseFloat(String(v||'').replace(/\./g,'').replace(',','.')); if(!isNaN(n)&&n>0) s++; });
+      if(r.t_item && r.t_item.trim()) s++;
+      if(r.shelf  && r.shelf.trim())  s++;
+      return s;
+    });
+    const maxScore = Math.max(...scores, 1);
+
     _bsDetRows.forEach((r, i) => {
       const opt = document.createElement('option');
       opt.value = i;
       opt.textContent = `${r.codigo} — ${r.descricao}`;
+      // Cor baseada no score: vermelho (cheio) → branco (médio) → cinza (vazio)
+      const ratio = scores[i] / maxScore; // 0..1
+      if(scores[i] === 0) {
+        opt.style.color = '#55556a';  // cinza — sem dados
+      } else if(ratio >= 0.7) {
+        // Vermelho → laranja (muitos dados)
+        const r2 = Math.round(220 + 35*ratio);
+        const g2 = Math.round(80  - 60*ratio);
+        opt.style.color = `rgb(${r2},${g2},80)`;
+      } else if(ratio >= 0.3) {
+        // Laranja → branco (médio)
+        const t = (ratio - 0.3) / 0.4;
+        const r2 = Math.round(255 - 30*t);
+        const g2 = Math.round(200 + 50*t);
+        opt.style.color = `rgb(${r2},${g2},180)`;
+      } else {
+        opt.style.color = '#e8e8ee'; // branco — poucos dados
+      }
       sel.appendChild(opt);
     });
-    if(!_bsDetRows.length) {
-      detDiv.style.display = 'none';
-    }
   } catch(e) {
     detDiv.style.display = 'none';
   }
