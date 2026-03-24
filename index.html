@@ -101,11 +101,30 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 .btng{background:var(--surf2);color:var(--txt2);border:1px solid var(--bdr)}
 .btng:hover{border-color:var(--txt2)}
 #sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+#bsov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:none;align-items:flex-end}
+#bsov.open{display:flex}
+#bsheet{background:var(--surf);border-radius:16px 16px 0 0;width:100%;max-height:82dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,0,.67,0)}
+#bsov.open #bsheet{transform:translateY(0)}
+.bsh{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 6px;flex-shrink:0;cursor:pointer}
+#bstitle{font-size:11px;font-weight:600;color:var(--txt);padding:0 14px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0;line-height:1.5}
+#bsbody{overflow-y:auto;flex:1;padding:6px 0 24px}
+.bsr{display:flex;align-items:flex-start;padding:7px 14px;border-bottom:1px solid rgba(255,255,255,.04);gap:10px}
+.bsr:last-child{border-bottom:none}
+.bslbl{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);min-width:90px;flex-shrink:0;padding-top:2px}
+.bsval{font-size:12px;color:var(--txt);flex:1;word-break:break-word}
+.bsval.mt{color:var(--txt3);font-style:italic}
 @media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
 </style>
 </head>
 <body>
 <div id="sbov" onclick="toggleSB()"></div>
+<div id="bsov" onclick="closeBSheet()">
+  <div id="bsheet" onclick="event.stopPropagation()">
+    <div class="bsh" onclick="closeBSheet()"></div>
+    <div id="bstitle"></div>
+    <div id="bsbody"></div>
+  </div>
+</div>
 <div id="sidebar">
   <div class="sb-head"><div class="sb-logo">Sistema de Gestão</div><div class="sb-title">Consulta de Tabelas</div></div>
   <div class="sb-srch"><input type="text" placeholder="Buscar tabela..." oninput="filterTbls(this.value)"></div>
@@ -272,11 +291,20 @@ function render(){
   body.innerHTML='';
   slice.forEach(row=>{
     const tr=document.createElement('tr');
-    Object.values(row).forEach(val=>{
+    const rowVals=Object.values(row);
+    rowVals.forEach(val=>{
       const td=document.createElement('td');
       td.textContent=val??'';td.title=String(val??'');
       tr.appendChild(td);
     });
+    // Double-click (desktop) → bottom sheet
+    tr.ondblclick=()=>openBSheet(cols,rowVals);
+    // Double-tap (mobile)
+    tr.addEventListener('touchend',e=>{
+      const now=Date.now();
+      if(_lastTapRow===tr&&now-_lastTap<350){e.preventDefault();openBSheet(cols,rowVals);}
+      _lastTap=now;_lastTapRow=tr;
+    },{passive:false});
     body.appendChild(tr);
   });
 
@@ -359,6 +387,33 @@ async function qNeon(sql){
   return d.rows||[];
 }
 function setLoad(on){document.getElementById('loadbar').classList.toggle('on',on)}
+
+// ── Bottom sheet ───────────────────────────────────────────────────────────
+let _lastTap=0,_lastTapRow=null;
+
+function openBSheet(cols,vals){
+  const labels=CLABELS[curTable]||{};
+  document.getElementById('bstitle').textContent=String(vals[0]||'');
+  const body=document.getElementById('bsbody');
+  body.innerHTML='';
+  cols.forEach((col,i)=>{
+    if(i===0)return;
+    const val=String(vals[i]??'').trim();
+    const d=document.createElement('div');d.className='bsr';
+    d.innerHTML=`<div class="bslbl">${labels[col]||col}</div><div class="bsval${val?'':' mt'}">${val||'—'}</div>`;
+    body.appendChild(d);
+  });
+  document.getElementById('bsov').classList.add('open');
+}
+function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
+
+// Swipe down to close
+(function(){
+  let sy=0;
+  const bs=document.getElementById('bsheet');
+  bs.addEventListener('touchstart',e=>{sy=e.touches[0].clientY},{passive:true});
+  bs.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-sy>60)closeBSheet()},{passive:true});
+})();
 
 // onclick fixes for fdAll/fdNone buttons
 document.addEventListener('DOMContentLoaded',()=>{
