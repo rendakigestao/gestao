@@ -103,10 +103,13 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 #sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 #bsov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
 #bsov.open{display:flex}
-#bsheet{background:#1a1a1f;border-radius:20px 20px 0 0;width:100%;max-height:85dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.34,1.1,.64,1);box-shadow:0 -8px 40px rgba(0,0,0,.8)}
+#bsheet{background:#1a1a1f;border-radius:20px 20px 0 0;width:100%;max-height:94dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.34,1.1,.64,1);box-shadow:0 -8px 40px rgba(0,0,0,.8)}
 #bsov.open #bsheet{transform:translateY(0)}
-.bsh{width:40px;height:4px;background:#333340;border-radius:2px;margin:12px auto 0;flex-shrink:0;cursor:pointer}
-#bshead{padding:16px 18px 14px;border-bottom:1px solid #252530;flex-shrink:0}
+.bshtop{display:flex;align-items:center;padding:10px 14px 0;flex-shrink:0}
+.bsh{width:40px;height:4px;background:#333340;border-radius:2px;flex:1;cursor:pointer}
+.bsclose{width:28px;height:28px;border-radius:50%;background:#252530;border:1px solid #333340;color:#8888a0;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1}
+.bsclose:hover{background:#333340;color:#fff}
+#bshead{padding:12px 18px 14px;border-bottom:1px solid #252530;flex-shrink:0}
 #bsbadge{display:inline-block;font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:2px 8px;border-radius:10px;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
 #bstitle{font-size:15px;font-weight:600;color:#fff;line-height:1.4}
 #bsbody{overflow-y:auto;flex:1;padding:8px 14px 32px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -125,9 +128,12 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 </head>
 <body>
 <div id="sbov" onclick="toggleSB()"></div>
-<div id="bsov" onclick="closeBSheet()">
+<div id="bsov">
   <div id="bsheet" onclick="event.stopPropagation()">
-    <div class="bsh" onclick="closeBSheet()"></div>
+    <div class="bshtop">
+      <div class="bsh" onclick="closeBSheet()"></div>
+      <div class="bsclose" onclick="closeBSheet()">✕</div>
+    </div>
     <div id="bshead">
       <div id="bsbadge">detalhe do item</div>
       <div id="bstitle"></div>
