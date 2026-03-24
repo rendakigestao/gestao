@@ -434,13 +434,7 @@ function openBSheet(cols,vals){
 }
 function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
 
-// Swipe down to close
-(function(){
-  let sy=0;
-  const bs=document.getElementById('bsheet');
-  bs.addEventListener('touchstart',e=>{sy=e.touches[0].clientY},{passive:true});
-  bs.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-sy>60)closeBSheet()},{passive:true});
-})();
+// Swipe to close removido — fechar apenas pelo botão ✕
 
 // onclick fixes for fdAll/fdNone buttons
 document.addEventListener('DOMContentLoaded',()=>{
