@@ -481,12 +481,16 @@ function openBSheet(cols,vals){
     body.appendChild(d);
   });
   // Load detail dropdown if it's posicao table
-  const detDiv = document.getElementById('bsdet');
-  const detSel = document.getElementById('bsdet-sel');
+  const detDiv  = document.getElementById('bsdet');
+  const cddList = document.getElementById('cdd-list');
   const detGrid = document.getElementById('bsdet-grid');
-  detDiv.style.display = 'none';
-  detSel.innerHTML = '<option value="">Selecione um produto...</option>';
-  detGrid.innerHTML = '';
+  if(detDiv)  detDiv.style.display = 'none';
+  if(cddList) cddList.innerHTML = '';
+  if(detGrid) detGrid.innerHTML = '';
+  const cddTxt = document.getElementById('cdd-sel-txt');
+  const cddDot = document.getElementById('cdd-sel-dot');
+  if(cddTxt) cddTxt.textContent = 'Selecione um produto...';
+  if(cddDot) cddDot.className = 'cdd-dot sc0';
 
   if(curTable === 'snapshot_posicao') {
     const tipo = String(vals[0]||'');
