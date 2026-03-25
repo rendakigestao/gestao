@@ -505,13 +505,12 @@ function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
 let _bsDetRows = [];
 
 // Score → classe (0=cinza, 1=branco, 2=amarelo, 3=laranja, 4=vermelho)
-function scoreClass(score, max) {
-  if(score === 0) return 0;
-  const r = score / max;
-  if(r >= 0.75) return 4; // vermelho
-  if(r >= 0.50) return 3; // laranja
-  if(r >= 0.25) return 2; // amarelo
-  return 1;               // branco
+function scoreClass(score) {
+  if(score === 0) return 0;       // cinza
+  if(score <= 2)  return 1;       // branco
+  if(score <= 5)  return 2;       // amarelo
+  if(score <= 7)  return 3;       // laranja
+  return 4;                       // vermelho
 }
 function calcScore(r) {
   let s = 0;
@@ -538,7 +537,7 @@ function selectCDDItem(i) {
   const r   = _bsDetRows[i];
   const sc  = _bsDetScores[i];
   const max = Math.max(..._bsDetScores, 1);
-  const cl  = scoreClass(sc, max);
+  const cl  = scoreClass(sc);
   document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
   document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
   document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
@@ -566,15 +565,25 @@ async function loadDetSection(tipo, gr) {
     );
     _bsDetRows   = rows || [];
     _bsDetScores = _bsDetRows.map(calcScore);
-    const maxSc  = Math.max(..._bsDetScores, 1);
-
     if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
 
     document.getElementById('cdd-sel-txt').textContent = 'Selecione um produto...';
 
+    // Opção "voltar" — limpa grid
+    const dVolt = document.createElement('div');
+    dVolt.className = 'cdd-item';
+    dVolt.innerHTML = `
+      <div class="cdd-dot" style="background:#333340"></div>
+      <div class="cdd-txt">
+        <div class="cdd-cod" style="color:#8888a0">← Visão geral</div>
+        <div class="cdd-desc" style="color:#55556a">Mostrar todos os campos do tipo</div>
+      </div>`;
+    dVolt.onclick = () => { closeCDD(); document.getElementById('bsdet-grid').innerHTML=''; document.getElementById('cdd-sel-txt').textContent='Selecione um produto...'; document.getElementById('cdd-sel-dot').className='cdd-dot sc0'; document.querySelectorAll('.cdd-item').forEach(e=>e.classList.remove('sel')); };
+    list.appendChild(dVolt);
+
     _bsDetRows.forEach((r, i) => {
       const sc = _bsDetScores[i];
-      const cl = scoreClass(sc, maxSc);
+      const cl = scoreClass(sc);
       const d  = document.createElement('div');
       d.className = 'cdd-item';
       d.innerHTML = `
