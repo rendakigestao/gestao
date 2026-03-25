@@ -615,18 +615,16 @@ function loadDetItem(idx) {
   if(!r) return;
 
   const fields = [
-    {l:'Estoque CD', v:r.estoque,    hl:true},
-    {l:'CD/P',       v:r.cdp,        hl:true},
-    {l:'CD+OC',      v:r.cdpoc,      hl:true},
-    {l:'Est. Lojas', v:r.est_lojas,  hl:true},
-    {l:'Dias Estoque',v:r.dias_lojas,hl:true},
-    {l:'Média',      v:r.media,      hl:false},
-    {l:'OCs',        v:r.ocs,        hl:false},
-    {l:'S.OCs',      v:r.s_ocs,      hl:false},
-    {l:'S.à Emp.',   v:r.s_emp,      hl:false},
-    {l:'D.R.P.',     v:r.drp,        hl:false},
-    {l:'T.Item',     v:r.t_item,     hl:false},
-    {l:'Shelf',      v:r.shelf,      hl:false},
+    {l:'Estoque CD',  v:r.estoque,    hl:true},
+    {l:'CD/P',        v:r.cdp,        hl:true},
+    {l:'Est. Lojas',  v:r.est_lojas,  hl:true},
+    {l:'Dias Estoque',v:r.dias_lojas, hl:true},
+    {l:'OCs',         v:r.ocs,        hl:false},
+    {l:'Média',       v:r.media,      hl:false},
+    {l:'S.OCs',       v:r.s_ocs,      hl:false},
+    {l:'CD+OC',       v:r.cdpoc,      hl:false},
+    {l:'T.Item',      v:r.t_item,     hl:false},
+    {l:'Shelf',       v:r.shelf,      hl:false},
   ];
   fields.forEach(f => {
     const d = document.createElement('div');
