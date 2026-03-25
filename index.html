@@ -124,9 +124,36 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
 .bsr.highlight .bslbl{color:#86efac}
 .bsr.highlight .bsval{color:#4ade80;font-size:15px;font-weight:600}
 #bsdet{padding:0 14px 10px;border-bottom:1px solid #252530;flex-shrink:0}
-.bsdet-sel{width:100%;background:#252530;border:1px solid #333340;border-radius:8px;color:#e8e8ee;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:8px 10px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234ade80'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
-.bsdet-sel:focus{border-color:var(--acc)}
 .bsdet-lbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+/* Custom dropdown */
+.cdd-wrap{position:relative}
+.cdd-btn{width:100%;background:#252530;border:1px solid #333340;border-radius:8px;color:#e8e8ee;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:8px 32px 8px 10px;text-align:left;cursor:pointer;transition:border-color .15s;display:flex;align-items:center;gap:8px}
+.cdd-btn:hover{border-color:#555560}
+.cdd-btn .cdd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cdd-btn .cdd-arr{position:absolute;right:10px;color:#4ade80;font-size:10px;transition:transform .15s}
+.cdd-btn.open .cdd-arr{transform:rotate(180deg)}
+.cdd-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e26;border:1px solid #333340;border-radius:8px;max-height:220px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none}
+.cdd-list.open{display:block}
+.cdd-item{padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid rgba(255,255,255,.04)}
+.cdd-item:last-child{border-bottom:none}
+.cdd-item:hover{background:rgba(255,255,255,.06)}
+.cdd-item.sel{background:rgba(74,222,128,.08)}
+.cdd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cdd-txt{flex:1;font-size:11px;line-height:1.3}
+.cdd-txt .cdd-cod{font-family:'IBM Plex Mono',monospace;font-size:10px;margin-bottom:1px}
+.cdd-txt .cdd-desc{font-size:11px}
+.cdd-score{font-size:9px;font-family:'IBM Plex Mono',monospace;opacity:.6;flex-shrink:0}
+/* score colors: 0=gray 1=white 2=yellow 3=orange 4=red */
+.sc0{background:#333340;color:#55556a}
+.sc1{background:#e8e8ee;color:#e8e8ee}
+.sc2{background:#fbbf24;color:#fbbf24}
+.sc3{background:#f97316;color:#f97316}
+.sc4{background:#ef4444;color:#ef4444}
+.sc0t{color:#55556a}
+.sc1t{color:#c8c8d4}
+.sc2t{color:#fbbf24}
+.sc3t{color:#f97316}
+.sc4t{color:#ef4444}
 #bsdet-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
 .bsdet-card{background:#1e1e26;border-radius:8px;padding:8px 10px;border:1px solid #2a2a35}
 .bsdet-card .bslbl{font-size:9px;color:var(--txt3)}
@@ -151,9 +178,14 @@ td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowr
     </div>
     <div id="bsdet" style="display:none">
       <div class="bsdet-lbl">Produtos do item</div>
-      <select class="bsdet-sel" id="bsdet-sel" onchange="loadDetItem(this.value)">
-        <option value="">Selecione um produto...</option>
-      </select>
+      <div class="cdd-wrap" id="cdd-wrap">
+        <button class="cdd-btn" id="cdd-btn" onclick="toggleCDD()">
+          <div class="cdd-dot sc0" id="cdd-sel-dot"></div>
+          <span id="cdd-sel-txt">Selecione um produto...</span>
+          <span class="cdd-arr">▼</span>
+        </button>
+        <div class="cdd-list" id="cdd-list"></div>
+      </div>
       <div id="bsdet-grid"></div>
     </div>
     <div id="bsbody"></div>
@@ -468,12 +500,58 @@ function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
 // ── Detail dropdown ────────────────────────────────────────────────────────
 let _bsDetRows = [];
 
+// Score → classe (0=cinza, 1=branco, 2=amarelo, 3=laranja, 4=vermelho)
+function scoreClass(score, max) {
+  if(score === 0) return 0;
+  const r = score / max;
+  if(r >= 0.75) return 4; // vermelho
+  if(r >= 0.50) return 3; // laranja
+  if(r >= 0.25) return 2; // amarelo
+  return 1;               // branco
+}
+function calcScore(r) {
+  let s = 0;
+  [r.estoque, r.cdp, r.media, r.cdpoc, r.ocs, r.s_ocs, r.s_emp, r.drp].forEach(v => {
+    const n = parseFloat(String(v||'').replace(/\./g,'').replace(',','.'));
+    if(!isNaN(n) && n > 0) s++;
+  });
+  if(r.t_item && r.t_item.trim()) s++;
+  if(r.shelf  && r.shelf.trim())  s++;
+  return s;
+}
+
+function toggleCDD() {
+  const btn  = document.getElementById('cdd-btn');
+  const list = document.getElementById('cdd-list');
+  btn.classList.toggle('open');
+  list.classList.toggle('open');
+}
+function closeCDD() {
+  document.getElementById('cdd-btn').classList.remove('open');
+  document.getElementById('cdd-list').classList.remove('open');
+}
+function selectCDDItem(i) {
+  const r   = _bsDetRows[i];
+  const sc  = _bsDetScores[i];
+  const max = Math.max(..._bsDetScores, 1);
+  const cl  = scoreClass(sc, max);
+  document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
+  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
+  document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
+  closeCDD();
+  loadDetItem(i);
+}
+
+let _bsDetScores = [];
+
 async function loadDetSection(tipo, gr) {
   const detDiv = document.getElementById('bsdet');
-  const sel    = document.getElementById('bsdet-sel');
+  const list   = document.getElementById('cdd-list');
   const grid   = document.getElementById('bsdet-grid');
-  sel.innerHTML = '<option value="">Carregando...</option>';
+  list.innerHTML = '';
   grid.innerHTML = '';
+  document.getElementById('cdd-sel-txt').textContent = 'Carregando...';
+  document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
   detDiv.style.display = '';
 
   try {
@@ -482,46 +560,35 @@ async function loadDetSection(tipo, gr) {
        FROM snapshot_posicao_det
        WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}' LIMIT 50`
     );
-    _bsDetRows = rows || [];
-    sel.innerHTML = '<option value="">Selecione um produto...</option>';
+    _bsDetRows   = rows || [];
+    _bsDetScores = _bsDetRows.map(calcScore);
+    const maxSc  = Math.max(..._bsDetScores, 1);
 
     if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
 
-    // Score de riqueza: conta campos preenchidos com valor real
-    const scores = _bsDetRows.map(r => {
-      let s = 0;
-      const nums = [r.estoque, r.cdp, r.media, r.cdpoc, r.ocs, r.s_ocs, r.s_emp, r.drp];
-      nums.forEach(v => { const n=parseFloat(String(v||'').replace(/\./g,'').replace(',','.')); if(!isNaN(n)&&n>0) s++; });
-      if(r.t_item && r.t_item.trim()) s++;
-      if(r.shelf  && r.shelf.trim())  s++;
-      return s;
-    });
-    const maxScore = Math.max(...scores, 1);
+    document.getElementById('cdd-sel-txt').textContent = 'Selecione um produto...';
 
     _bsDetRows.forEach((r, i) => {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = `${r.codigo} — ${r.descricao}`;
-      // Cor baseada no score: vermelho (cheio) → branco (médio) → cinza (vazio)
-      const ratio = scores[i] / maxScore; // 0..1
-      if(scores[i] === 0) {
-        opt.style.color = '#55556a';  // cinza — sem dados
-      } else if(ratio >= 0.7) {
-        // Vermelho → laranja (muitos dados)
-        const r2 = Math.round(220 + 35*ratio);
-        const g2 = Math.round(80  - 60*ratio);
-        opt.style.color = `rgb(${r2},${g2},80)`;
-      } else if(ratio >= 0.3) {
-        // Laranja → branco (médio)
-        const t = (ratio - 0.3) / 0.4;
-        const r2 = Math.round(255 - 30*t);
-        const g2 = Math.round(200 + 50*t);
-        opt.style.color = `rgb(${r2},${g2},180)`;
-      } else {
-        opt.style.color = '#e8e8ee'; // branco — poucos dados
-      }
-      sel.appendChild(opt);
+      const sc = _bsDetScores[i];
+      const cl = scoreClass(sc, maxSc);
+      const d  = document.createElement('div');
+      d.className = 'cdd-item';
+      d.innerHTML = `
+        <div class="cdd-dot sc${cl}"></div>
+        <div class="cdd-txt">
+          <div class="cdd-cod sc${cl}t">${r.codigo}</div>
+          <div class="cdd-desc">${r.descricao}</div>
+        </div>
+        <div class="cdd-score sc${cl}t">${sc}pts</div>`;
+      d.onclick = () => selectCDDItem(i);
+      list.appendChild(d);
     });
+
+    // Close dropdown when clicking outside
+    setTimeout(()=>document.addEventListener('click', e=>{
+      if(!document.getElementById('cdd-wrap').contains(e.target)) closeCDD();
+    }, {once:true}), 0);
+
   } catch(e) {
     detDiv.style.display = 'none';
   }
@@ -530,7 +597,7 @@ async function loadDetSection(tipo, gr) {
 function loadDetItem(idx) {
   const grid = document.getElementById('bsdet-grid');
   grid.innerHTML = '';
-  if(idx === '') return;
+  if(idx === '' || idx === undefined) return;
   const r = _bsDetRows[parseInt(idx)];
   if(!r) return;
 
