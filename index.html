@@ -514,7 +514,7 @@ function scoreClass(score) {
 }
 function calcScore(r) {
   let s = 0;
-  [r.estoque, r.cdp, r.media, r.cdpoc, r.ocs, r.s_ocs, r.s_emp, r.drp].forEach(v => {
+  [r.estoque, r.cdp, r.media, r.cdpoc, r.ocs, r.s_ocs, r.s_emp, r.drp, r.est_lojas, r.dias_lojas].forEach(v => {
     const n = parseFloat(String(v||'').replace(/\./g,'').replace(',','.'));
     if(!isNaN(n) && n > 0) s++;
   });
@@ -559,7 +559,7 @@ async function loadDetSection(tipo, gr) {
 
   try {
     const rows = await qNeon(
-      `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf
+      `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
        WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}' LIMIT 50`
     );
@@ -615,16 +615,18 @@ function loadDetItem(idx) {
   if(!r) return;
 
   const fields = [
-    {l:'Estoque', v:r.estoque, hl:true},
-    {l:'CD/P',    v:r.cdp,     hl:true},
-    {l:'CD+OC',   v:r.cdpoc,   hl:true},
-    {l:'Média',   v:r.media,   hl:false},
-    {l:'OCs',     v:r.ocs,     hl:false},
-    {l:'S.OCs',   v:r.s_ocs,   hl:false},
-    {l:'S.à Emp.',v:r.s_emp,   hl:false},
-    {l:'D.R.P.',  v:r.drp,     hl:false},
-    {l:'T.Item',  v:r.t_item,  hl:false},
-    {l:'Shelf',   v:r.shelf,   hl:false},
+    {l:'Estoque CD', v:r.estoque,    hl:true},
+    {l:'CD/P',       v:r.cdp,        hl:true},
+    {l:'CD+OC',      v:r.cdpoc,      hl:true},
+    {l:'Est. Lojas', v:r.est_lojas,  hl:true},
+    {l:'Dias Estoque',v:r.dias_lojas,hl:true},
+    {l:'Média',      v:r.media,      hl:false},
+    {l:'OCs',        v:r.ocs,        hl:false},
+    {l:'S.OCs',      v:r.s_ocs,      hl:false},
+    {l:'S.à Emp.',   v:r.s_emp,      hl:false},
+    {l:'D.R.P.',     v:r.drp,        hl:false},
+    {l:'T.Item',     v:r.t_item,     hl:false},
+    {l:'Shelf',      v:r.shelf,      hl:false},
   ];
   fields.forEach(f => {
     const d = document.createElement('div');
