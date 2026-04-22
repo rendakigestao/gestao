@@ -383,9 +383,13 @@ async function loadArmazem(el){
     // Monta lista de lojas — exclui IDEMPRESA=1 (CD)
     const lojaMap = {};
     armAllRows.forEach(r => {
-      if(r.loja && r.loja_id !== 1 && !lojaMap[r.loja]) lojaMap[r.loja] = r.loja_id;
+      if(r.loja && parseInt(r.loja_id) !== 1 && !lojaMap[r.loja]) lojaMap[r.loja] = r.loja_id;
     });
-    armLojas = Object.entries(lojaMap).sort((a,b)=>a[1]-b[1]).map(([n,id])=>({nome:n,id:+id}));
+    // Filtra lojas que têm nome válido (formato "N - Nome") e id > 1
+    armLojas = Object.entries(lojaMap)
+      .filter(([n,id]) => +id > 1 && n.includes(' - '))
+      .sort((a,b)=>+a[1]-+b[1])
+      .map(([n,id])=>({nome:n,id:+id}));
     armBuildLojas();
     if(armLojas.length) armSelecionarLoja(armLojas[0].nome);
   } catch(e) {
