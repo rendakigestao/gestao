@@ -385,9 +385,9 @@ async function loadArmazem(el){
     armAllRows.forEach(r => {
       if(r.loja && parseInt(r.loja_id) !== 1 && !lojaMap[r.loja]) lojaMap[r.loja] = r.loja_id;
     });
-    // Filtra lojas que têm nome válido (formato "N - Nome") e id > 1
+    // Filtra: id > 1, nome com " - ", e nome não é só número
     armLojas = Object.entries(lojaMap)
-      .filter(([n,id]) => +id > 1 && n.includes(' - '))
+      .filter(([n,id]) => +id > 1 && n.includes(' - ') && !/^\d+$/.test(n.trim()))
       .sort((a,b)=>+a[1]-+b[1])
       .map(([n,id])=>({nome:n,id:+id}));
     armBuildLojas();
