@@ -79,8 +79,7 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
 .arm-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:6px 14px;display:flex;flex-direction:column;align-items:center;gap:1px}
 .arm-card-n{font-size:20px;font-weight:700;color:var(--acc);font-family:'IBM Plex Mono',monospace}
 .arm-card-l{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em}
-.arm-card.prox{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.25)}
-.arm-card.prox .arm-card-n{font-size:15px}
+
 #arm-body{flex:1;overflow:hidden;display:flex;min-height:0}
 #arm-lojas{width:200px;min-width:200px;background:var(--surf);border-right:1px solid var(--bdr);overflow-y:auto;display:flex;flex-direction:column}
 .arm-lhdr{background:#1e5c37;color:#fff;font-size:10px;font-weight:700;padding:8px 10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0}
@@ -195,10 +194,7 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
           <button class="arm-btn active" id="btn-solic" onclick="armSetFiltro('solicitar')">Somente a Solicitar</button>
         </div>
       </div>
-      <div class="arm-card prox" id="arm-prox-card" style="cursor:default">
-        <div class="arm-card-n" id="arm-prox-dia">—</div>
-        <div class="arm-card-l">Próxima Carga</div>
-      </div>
+
       <div class="arm-fbox">
         <div class="arm-flbl">Est. Central Mín.</div>
         <input class="arm-finp" id="arm-estcd" type="number" value="200" min="0" onchange="armRecalc()">
@@ -421,27 +417,7 @@ function armSelecionarLoja(loja){
   document.querySelectorAll('.arm-litem').forEach(el=>{
     el.classList.toggle('active', el.dataset.loja === loja);
   });
-  // Calcula próxima carga
-  armAtualizarProxCarga(loja);
   armRenderTabela();
-}
-
-function armAtualizarProxCarga(loja){
-  const nome = loja.replace(/^\d+\s*-\s*/,'').trim().toUpperCase();
-  const DIAS_MAP = {'Sáb→Seg':0,'Terça':1,'Quarta':2,'Quinta':3,'Sexta':4};
-  const DIAS_NOME = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-  const hoje = new Date().getDay(); // 0=dom,1=seg...
-  const hojeIdx = hoje===0?6:hoje-1; // converte para 0=seg
-  let diasLoja=[];
-  Object.entries(armExpedicao).forEach(([k,v])=>{
-    if(k.startsWith('__')||k.startsWith('obs|'))return;
-    const vn = String(v).replace(/^\d+\s*-\s*/,'').trim().toUpperCase();
-    if(vn===nome){ const p=k.split('|'); if(p[1]&&DIAS_MAP[p[1]]!==undefined) diasLoja.push(DIAS_MAP[p[1]]); }
-  });
-  if(!diasLoja.length){ document.getElementById('arm-prox-dia').textContent='—'; return; }
-  const prox = diasLoja.sort((a,b)=>a-b);
-  const next = prox.find(d=>d>=hojeIdx) ?? prox[0];
-  document.getElementById('arm-prox-dia').textContent = DIAS_NOME[next];
 }
 
 function armGetDiasCarga(loja){
