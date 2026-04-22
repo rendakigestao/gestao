@@ -6,6 +6,7 @@
 <title>Sistema de Gestão — Consulta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#0f0f11;--surf:#17171a;--surf2:#1e1e22;--bdr:#2a2a30;--acc:#4ade80;--acc2:#86efac;--txt:#e8e8ee;--txt2:#8888a0;--txt3:#55556a;--red:#f87171;--sw:220px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -106,6 +107,8 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
 #arm-table tbody tr.sol-s{background:rgba(251,191,36,.06)}
 #arm-table td.hl{color:var(--acc);font-weight:600}
 #arm-table td.hl-s{color:#fbbf24;font-weight:600}
+.arm-btn-excel{padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1f7a4a;background:#1f7a4a;color:#fff;transition:all .12s}
+.arm-btn-excel:hover{background:#175e38}
 #pgbar{height:34px;background:var(--surf);border-top:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;font-size:11px;color:var(--txt2)}
 #pgbar button{background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:4px;padding:3px 9px;cursor:pointer;font-size:11px;transition:all .1s}
 #pgbar button:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
@@ -203,6 +206,7 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
         <div class="arm-card-n" id="arm-count-sol">0</div>
         <div class="arm-card-l">À Solicitar</div>
       </div>
+      <button class="arm-btn-excel" onclick="armExportarExcel()">📥 Excel</button>
     </div>
     <div id="arm-body">
       <div id="arm-lojas">
@@ -512,6 +516,114 @@ function armRenderTabela(){
     });
     tbody.appendChild(tr);
   });
+}
+
+// ── Exportar Excel ────────────────────────────────────────────────────────
+function armExportarExcel(){
+  if(!armLojaAtual || !window.XLSX){
+    alert('Nenhuma loja selecionada ou SheetJS não carregado.');
+    return;
+  }
+
+  const param    = parseFloat(document.getElementById('arm-param').value)||8;
+  const estCdMin = parseFloat(document.getElementById('arm-estcd').value)||0;
+
+  // Pega linhas visíveis da tabela
+  const rows = [];
+  document.querySelectorAll('#arm-tbody tr').forEach(tr=>{
+    const cells = [...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+    rows.push(cells);
+  });
+
+  if(!rows.length){ alert('Nenhum dado para exportar.'); return; }
+
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
+
+  // Linha 1: título
+  const lojaLabel = armLojaAtual.replace(/^\d+\s*-\s*/,'').trim();
+  const agora = new Date().toLocaleString('pt-BR');
+  ws_data.push([`Análise Armazém — ${lojaLabel}   |   Parâmetro: ${param}   |   Est.Central Mín: ${estCdMin}   |   Gerado: ${agora}`]);
+
+  // Linha 2: cabeçalhos
+  const hdrs = ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
+  ws_data.push(hdrs);
+
+  // Dados
+  rows.forEach(r => {
+    // Converte números (remove ponto de milhar BR)
+    const row = r.map((v,i) => {
+      if(i===0 || v==='S' || v==='') return v;
+      const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
+      return isNaN(n) ? v : n;
+    });
+    ws_data.push(row);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+  // Larguras das colunas
+  ws['!cols'] = [
+    {wch:42},{wch:6},{wch:9},{wch:9},{wch:8},{wch:8},
+    {wch:8},{wch:8},{wch:9},{wch:10},{wch:10},{wch:10}
+  ];
+
+  // Mescla título na linha 1
+  ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:11}}];
+
+  // Estilo da linha de título
+  const tituloCell = ws['A1'];
+  if(tituloCell){
+    tituloCell.s = {
+      font:{bold:true, color:{rgb:'FFFFFF'}, sz:12},
+      fill:{fgColor:{rgb:'217346'}},
+      alignment:{horizontal:'left', vertical:'center', wrapText:false}
+    };
+  }
+
+  // Estilo dos cabeçalhos (linha 2)
+  hdrs.forEach((_,ci)=>{
+    const addr = XLSX.utils.encode_cell({r:1, c:ci});
+    if(!ws[addr]) return;
+    ws[addr].s = {
+      font:{bold:true, color:{rgb:'FFFFFF'}, sz:9},
+      fill:{fgColor:{rgb:'1E5C37'}},
+      alignment:{horizontal:'center', vertical:'center'}
+    };
+  });
+
+  // Estilo das linhas de dados
+  rows.forEach((r, ri)=>{
+    const sol = r[11] || '';
+    const temSol = sol==='S' || (parseFloat(sol)||0)>0;
+    const ehS    = sol==='S';
+    const bgEven = 'F2F2F2';
+    const bgSol  = 'C6EFCE';
+    const bgS    = 'FFEB9C';
+
+    hdrs.forEach((_,ci)=>{
+      const addr = XLSX.utils.encode_cell({r:ri+2, c:ci});
+      if(!ws[addr]) return;
+      const bg = ehS ? bgS : temSol ? bgSol : (ri%2===1 ? bgEven : 'FFFFFF');
+      ws[addr].s = {
+        font:{
+          bold: ci===0 && temSol,
+          sz:9,
+          color:{rgb: ci===11 && temSol ? (ehS?'7B5F00':'1A5C1A') : '252525'}
+        },
+        fill:{fgColor:{rgb: bg}},
+        alignment:{
+          horizontal: ci===0 ? 'left' : 'center',
+          vertical:'center'
+        }
+      };
+    });
+  });
+
+  XLSX.utils.book_append_sheet(wb, ws, lojaLabel.substring(0,31));
+
+  const nome = `Analise_${lojaLabel.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, nome);
 }
 
 // ── Neon/D1 ────────────────────────────────────────────────────────────────
