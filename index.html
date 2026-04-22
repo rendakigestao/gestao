@@ -380,9 +380,11 @@ async function loadArmazem(el){
       const cfgRows = await qNeon(`SELECT valor FROM config WHERE chave='armazem_expedicao' LIMIT 1`);
       if(cfgRows && cfgRows[0]) armExpedicao = JSON.parse(cfgRows[0].valor);
     } catch(e) { armExpedicao = {}; }
-    // Monta lista de lojas
+    // Monta lista de lojas — exclui IDEMPRESA=1 (CD)
     const lojaMap = {};
-    armAllRows.forEach(r => { if(r.loja && !lojaMap[r.loja]) lojaMap[r.loja] = r.loja_id; });
+    armAllRows.forEach(r => {
+      if(r.loja && r.loja_id !== 1 && !lojaMap[r.loja]) lojaMap[r.loja] = r.loja_id;
+    });
     armLojas = Object.entries(lojaMap).sort((a,b)=>a[1]-b[1]).map(([n,id])=>({nome:n,id:+id}));
     armBuildLojas();
     if(armLojas.length) armSelecionarLoja(armLojas[0].nome);
@@ -401,6 +403,7 @@ function armBuildLojas(filtro=''){
     const nome = m ? m[2].trim() : l.nome;
     const el = document.createElement('div');
     el.className = 'arm-litem' + (l.nome===armLojaAtual?' active':'');
+    el.dataset.loja = l.nome;
     el.innerHTML = `<span class="arm-lnum">${num}</span><span>${nome}</span>`;
     el.onclick = () => armSelecionarLoja(l.nome);
     list.appendChild(el);
@@ -412,10 +415,7 @@ function armFiltrarLojas(q){ armBuildLojas(q); }
 function armSelecionarLoja(loja){
   armLojaAtual = loja;
   document.querySelectorAll('.arm-litem').forEach(el=>{
-    const m = el.querySelector('span:last-child');
-    const num = el.querySelector('.arm-lnum');
-    const lojaEl = armLojas.find(l=>{ const mx=l.nome.match(/^(\d+)\s*-\s*(.+)$/); return mx&&mx[1]===(num?num.textContent.trim():'')&&mx[2].trim()===(m?m.textContent.trim():'') || l.nome===loja; });
-    el.classList.toggle('active', lojaEl&&lojaEl.nome===loja);
+    el.classList.toggle('active', el.dataset.loja === loja);
   });
   // Calcula próxima carga
   armAtualizarProxCarga(loja);
