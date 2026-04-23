@@ -6,7 +6,6 @@
 <title>Sistema de Gestão — Consulta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#0f0f11;--surf:#17171a;--surf2:#1e1e22;--bdr:#2a2a30;--acc:#4ade80;--acc2:#86efac;--txt:#e8e8ee;--txt2:#8888a0;--txt3:#55556a;--red:#f87171;--sw:220px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -518,112 +517,85 @@ function armRenderTabela(){
   });
 }
 
-// ── Exportar Excel ────────────────────────────────────────────────────────
+// ── Exportar Excel (via HTML → XLS com estilos) ───────────────────────────
 function armExportarExcel(){
-  if(!armLojaAtual || !window.XLSX){
-    alert('Nenhuma loja selecionada ou SheetJS não carregado.');
-    return;
-  }
+  if(!armLojaAtual){ alert('Nenhuma loja selecionada.'); return; }
 
   const param    = parseFloat(document.getElementById('arm-param').value)||8;
   const estCdMin = parseFloat(document.getElementById('arm-estcd').value)||0;
+  const lojaLabel = armLojaAtual.replace(/^\d+\s*-\s*/,'').trim();
+  const agora = new Date().toLocaleString('pt-BR');
 
-  // Pega linhas visíveis da tabela
+  const hdrs = ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
+
+  // Coleta linhas visíveis
   const rows = [];
   document.querySelectorAll('#arm-tbody tr').forEach(tr=>{
     const cells = [...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
-    rows.push(cells);
+    const sol = cells[11]||'';
+    const temSol = sol==='S'||(parseFloat(sol)||0)>0;
+    const ehS = sol==='S';
+    rows.push({cells, temSol, ehS});
   });
 
   if(!rows.length){ alert('Nenhum dado para exportar.'); return; }
 
-  const wb = XLSX.utils.book_new();
-  const ws_data = [];
+  // Estilos inline
+  const stTitulo = 'background:#217346;color:#fff;font-weight:bold;font-size:13px;padding:6px 10px;';
+  const stHdr    = 'background:#1e5c37;color:#fff;font-weight:bold;font-size:9pt;text-align:center;padding:4px 6px;border:1px solid #145230;';
+  const stSol    = 'background:#c6efce;color:#1a5c1a;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
+  const stSolA   = 'background:#d5edda;color:#1a5c1a;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
+  const stS      = 'background:#ffeb9c;color:#7b5f00;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
+  const stSA     = 'background:#fff5cc;color:#7b5f00;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
+  const stNorm   = 'background:#ffffff;color:#252525;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
+  const stAlt    = 'background:#f2f2f2;color:#252525;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
 
-  // Linha 1: título
-  const lojaLabel = armLojaAtual.replace(/^\d+\s*-\s*/,'').trim();
-  const agora = new Date().toLocaleString('pt-BR');
-  ws_data.push([`Análise Armazém — ${lojaLabel}   |   Parâmetro: ${param}   |   Est.Central Mín: ${estCdMin}   |   Gerado: ${agora}`]);
-
-  // Linha 2: cabeçalhos
-  const hdrs = ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
-  ws_data.push(hdrs);
-
-  // Dados
-  rows.forEach(r => {
-    // Converte números (remove ponto de milhar BR)
-    const row = r.map((v,i) => {
-      if(i===0 || v==='S' || v==='') return v;
-      const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
-      return isNaN(n) ? v : n;
-    });
-    ws_data.push(row);
-  });
-
-  const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-  // Larguras das colunas
-  ws['!cols'] = [
-    {wch:42},{wch:6},{wch:9},{wch:9},{wch:8},{wch:8},
-    {wch:8},{wch:8},{wch:9},{wch:10},{wch:10},{wch:10}
-  ];
-
-  // Mescla título na linha 1
-  ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:11}}];
-
-  // Estilo da linha de título
-  const tituloCell = ws['A1'];
-  if(tituloCell){
-    tituloCell.s = {
-      font:{bold:true, color:{rgb:'FFFFFF'}, sz:12},
-      fill:{fgColor:{rgb:'217346'}},
-      alignment:{horizontal:'left', vertical:'center', wrapText:false}
-    };
+  function stCell(ci, temSol, ehS, alt){
+    let base = ehS ? (alt?stSA:stS) : temSol ? (alt?stSolA:stSol) : (alt?stAlt:stNorm);
+    let extra = '';
+    if(ci===0 && temSol) extra += 'font-weight:bold;';
+    if(ci===0) extra += 'text-align:left;';
+    else extra += 'text-align:right;';
+    if(ci===11 && temSol) extra += ehS?'color:#7b5f00;font-weight:bold;':'color:#1a5c1a;font-weight:bold;';
+    return base + extra;
   }
 
-  // Estilo dos cabeçalhos (linha 2)
-  hdrs.forEach((_,ci)=>{
-    const addr = XLSX.utils.encode_cell({r:1, c:ci});
-    if(!ws[addr]) return;
-    ws[addr].s = {
-      font:{bold:true, color:{rgb:'FFFFFF'}, sz:9},
-      fill:{fgColor:{rgb:'1E5C37'}},
-      alignment:{horizontal:'center', vertical:'center'}
-    };
+  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:x="urn:schemas-microsoft-com:office:excel"
+    xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
+<x:ExcelWorksheet><x:Name>${lojaLabel.substring(0,31)}</x:Name>
+<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head><body><table>`;
+
+  // Título
+  html += `<tr><td colspan="${hdrs.length}" style="${stTitulo}">Análise Armazém — ${lojaLabel} &nbsp;|&nbsp; Parâmetro: ${param} &nbsp;|&nbsp; Est.Central Mín: ${estCdMin} &nbsp;|&nbsp; Gerado: ${agora}</td></tr>`;
+
+  // Cabeçalhos
+  html += '<tr>' + hdrs.map(h=>`<td style="${stHdr}">${h}</td>`).join('') + '</tr>';
+
+  // Dados
+  rows.forEach(({cells,temSol,ehS},ri)=>{
+    html += '<tr>' + cells.map((v,ci)=>{
+      const st = stCell(ci, temSol, ehS, ri%2===1);
+      return `<td style="${st}">${v}</td>`;
+    }).join('') + '</tr>';
   });
 
-  // Estilo das linhas de dados
-  rows.forEach((r, ri)=>{
-    const sol = r[11] || '';
-    const temSol = sol==='S' || (parseFloat(sol)||0)>0;
-    const ehS    = sol==='S';
-    const bgEven = 'F2F2F2';
-    const bgSol  = 'C6EFCE';
-    const bgS    = 'FFEB9C';
+  html += '</table></body></html>';
 
-    hdrs.forEach((_,ci)=>{
-      const addr = XLSX.utils.encode_cell({r:ri+2, c:ci});
-      if(!ws[addr]) return;
-      const bg = ehS ? bgS : temSol ? bgSol : (ri%2===1 ? bgEven : 'FFFFFF');
-      ws[addr].s = {
-        font:{
-          bold: ci===0 && temSol,
-          sz:9,
-          color:{rgb: ci===11 && temSol ? (ehS?'7B5F00':'1A5C1A') : '252525'}
-        },
-        fill:{fgColor:{rgb: bg}},
-        alignment:{
-          horizontal: ci===0 ? 'left' : 'center',
-          vertical:'center'
-        }
-      };
-    });
-  });
-
-  XLSX.utils.book_append_sheet(wb, ws, lojaLabel.substring(0,31));
-
-  const nome = `Analise_${lojaLabel.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
-  XLSX.writeFile(wb, nome);
+  // Download
+  const blob = new Blob([html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `Analise_${lojaLabel.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xls`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ── Neon/D1 ────────────────────────────────────────────────────────────────
