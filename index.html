@@ -68,6 +68,24 @@ tbody tr.sol-s:hover{background:rgba(251,191,36,.1)}
 td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
 td.sol-val{color:var(--acc);font-weight:600}
 td.sol-s-val{color:#fbbf24;font-weight:600}
+/* ── Bottom Sheet ──────────────────────────────────────────────────────── */
+#bsov{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:8000;pointer-events:none;transition:background .22s}
+#bsov.open{background:rgba(0,0,0,.55);pointer-events:all}
+#bsheet{position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-radius:16px 16px 0 0;border-top:1px solid var(--bdr);max-height:80vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);z-index:8001}
+#bsov.open #bsheet{transform:translateY(0)}
+.bsh{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 4px;cursor:pointer;flex-shrink:0}
+#bstitle{font-size:13px;font-weight:600;color:var(--txt);padding:6px 16px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bsbody{overflow-y:auto;padding:10px 12px 20px;display:flex;flex-direction:column;gap:6px}
+.bsr{display:flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:7px;background:var(--surf2);border:1px solid var(--bdr)}
+.bslbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;min-width:110px;flex-shrink:0}
+.bsval{font-size:12px;color:var(--txt);word-break:break-all;flex:1}
+.bsval.mt{color:var(--txt3)}
+/* Score badge */
+.bs-score{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-left:6px}
+.bs-s-hi{background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
+.bs-s-md{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.bs-s-lo{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.25)}
+
 /* Painel Análise Armazém */
 #armazem-wrap{flex:1;overflow:hidden;display:none;flex-direction:column}
 #arm-filters{background:var(--surf);border-bottom:1px solid var(--bdr);padding:8px 12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -304,25 +322,6 @@ function buildSB(){
 }
 
 // ── Tabela genérica ────────────────────────────────────────────────────────
-function showRowDetail(cols,vals){
-  let m=document.getElementById('rdm');if(m)m.remove();
-  m=document.createElement('div');m.id='rdm';
-  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center';
-  m.onclick=e=>{if(e.target===m)m.remove()};
-  const box=document.createElement('div');
-  box.style.cssText='background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:20px;max-width:720px;width:92%;max-height:85vh;overflow-y:auto';
-  box.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <span style="font-size:13px;font-weight:600;color:var(--txt)">Detalhes do Registro</span>
-    <button onclick="document.getElementById('rdm').remove()" style="background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11px">✕</button>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-    ${cols.map((c,i)=>`<div style="padding:7px 10px;background:var(--surf2);border-radius:6px;border:1px solid var(--bdr)">
-      <div style="font-size:9px;color:var(--txt3);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">${c}</div>
-      <div style="font-size:12px;color:var(--txt);word-break:break-all">${vals[i]??'—'}</div>
-    </div>`).join('')}
-  </div>`;
-  m.appendChild(box);document.body.appendChild(m);
-}
 
 async function loadTable(name,label,el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
@@ -378,7 +377,12 @@ function render(){
     const trow=document.createElement('tr');
     Object.values(row).forEach(val=>{const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');trow.appendChild(td);});
     trow.style.cursor='pointer';
-    trow.ondblclick=()=>showRowDetail(cols,Object.values(row));
+    trow.ondblclick=()=>openBSheet(cols,Object.values(row));
+    trow.addEventListener('touchend',e=>{
+      const now=Date.now();
+      if(_lastTapRow===trow&&now-_lastTap<380){e.preventDefault();openBSheet(cols,Object.values(row));}
+      _lastTap=now;_lastTapRow=trow;
+    },{passive:false});
     body.appendChild(trow);
   });
   document.getElementById('pginfo').textContent=`Página ${curPage+1} de ${totalPages}  —  ${filtRows.length.toLocaleString('pt-BR')} linhas`;
@@ -672,9 +676,59 @@ async function qNeon(sql){
 }
 function setLoad(on){document.getElementById('loadbar').classList.toggle('on',on)}
 
+// ── Bottom Sheet ────────────────────────────────────────────────────────────
+let _lastTap=0,_lastTapRow=null;
+
+function openBSheet(cols,vals){
+  const labels=CLABELS[curTable]||{};
+  // Título = primeira coluna
+  document.getElementById('bstitle').textContent=String(vals[0]??'');
+  const body=document.getElementById('bsbody');
+  body.innerHTML='';
+  cols.forEach((col,i)=>{
+    if(i===0)return;
+    const val=vals[i]??'';
+    const sval=String(val).trim();
+    // Score: tenta detectar campo numérico de score/pontuação
+    let scoreHtml='';
+    const n=parseFloat(sval.replace(/\./g,'').replace(',','.'));
+    if(!isNaN(n)&&sval!==''&&col.toLowerCase().match(/sol|pct|score|pont|perc|rank/)){
+      const cls=n>=70?'bs-s-hi':n>=30?'bs-s-md':'bs-s-lo';
+      scoreHtml=`<span class="bs-score ${cls}">${sval}</span>`;
+    }
+    const div=document.createElement('div');
+    div.className='bsr';
+    div.innerHTML=`<span class="bslbl">${labels[col]||col}</span>`+
+      (scoreHtml||`<span class="bsval${!sval?' mt':''}">${sval||'—'}</span>`);
+    body.appendChild(div);
+  });
+  document.getElementById('bsov').classList.add('open');
+  // Swipe down to close
+  const bs=document.getElementById('bsheet');
+  let sy=0;
+  bs._touchStart=e=>{sy=e.touches[0].clientY};
+  bs._touchEnd=e=>{if(e.changedTouches[0].clientY-sy>60)closeBSheet()};
+  bs.addEventListener('touchstart',bs._touchStart,{passive:true});
+  bs.addEventListener('touchend',bs._touchEnd,{passive:true});
+}
+function closeBSheet(){
+  const ov=document.getElementById('bsov');
+  ov.classList.remove('open');
+  const bs=document.getElementById('bsheet');
+  if(bs._touchStart)bs.removeEventListener('touchstart',bs._touchStart);
+  if(bs._touchEnd)bs.removeEventListener('touchend',bs._touchEnd);
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   buildSB();if(!getCfg().url)setTimeout(openCfg,300);
 });
 </script>
+<div id="bsov" onclick="closeBSheet()">
+  <div id="bsheet" onclick="event.stopPropagation()">
+    <div class="bsh" onclick="closeBSheet()"></div>
+    <div id="bstitle"></div>
+    <div id="bsbody"></div>
+  </div>
+</div>
 </body>
 </html>
