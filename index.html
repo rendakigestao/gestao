@@ -914,52 +914,7 @@ async function qNeon(sql){
 }
 function setLoad(on){document.getElementById('loadbar').classList.toggle('on',on)}
 
-// ── Bottom Sheet ────────────────────────────────────────────────────────────
-let _lastTap=0,_lastTapRow=null;
 
-function openBSheet(cols,vals){
-  const labels=CLABELS[curTable]||{};
-  // Título = primeira coluna
-  document.getElementById('bstitle').textContent=String(vals[0]??'');
-  const body=document.getElementById('bsbody');
-  body.innerHTML='';
-  cols.forEach((col,i)=>{
-    if(i===0)return;
-    const val=vals[i]??'';
-    const sval=String(val).trim();
-    // Score: tenta detectar campo numérico de score/pontuação
-    let scoreHtml='';
-    const n=parseFloat(sval.replace(/\./g,'').replace(',','.'));
-    if(!isNaN(n)&&sval!==''&&col.toLowerCase().match(/sol|pct|score|pont|perc|rank/)){
-      const cls=n>=70?'bs-s-hi':n>=30?'bs-s-md':'bs-s-lo';
-      scoreHtml=`<span class="bs-score ${cls}">${sval}</span>`;
-    }
-    const div=document.createElement('div');
-    div.className='bsr';
-    div.innerHTML=`<span class="bslbl">${labels[col]||col}</span>`+
-      (scoreHtml||`<span class="bsval${!sval?' mt':''}">${sval||'—'}</span>`);
-    body.appendChild(div);
-  });
-  document.getElementById('bsov').classList.add('open');
-  // Swipe down to close
-  const bs=document.getElementById('bsheet');
-  let sy=0;
-  bs._touchStart=e=>{sy=e.touches[0].clientY};
-  bs._touchEnd=e=>{if(e.changedTouches[0].clientY-sy>60)closeBSheet()};
-  bs.addEventListener('touchstart',bs._touchStart,{passive:true});
-  bs.addEventListener('touchend',bs._touchEnd,{passive:true});
-}
-function closeBSheet(){
-  const ov=document.getElementById('bsov');
-  ov.classList.remove('open');
-  const bs=document.getElementById('bsheet');
-  if(bs._touchStart)bs.removeEventListener('touchstart',bs._touchStart);
-  if(bs._touchEnd)bs.removeEventListener('touchend',bs._touchEnd);
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  buildSB();if(!getCfg().url)setTimeout(openCfg,300);
-});
 </script>
 </body>
 </html>
