@@ -274,7 +274,20 @@ function openCfg(){document.getElementById('dburl').value=getCfg().url;document.
 function closeCfg(){document.getElementById('cfgmod').classList.remove('open')}
 function saveCfg(){const u=document.getElementById('dburl').value.trim();if(!u)return alert('Informe a URL.');localStorage.setItem('neon_url',u);closeCfg();buildSB()}
 
-function toggleSB(){const s=document.getElementById('sidebar');s.classList.toggle('hidden');document.getElementById('sbov').classList.toggle('vis',!s.classList.contains('hidden')&&window.innerWidth<=640)}
+function toggleSB(){
+  const s=document.getElementById('sidebar');
+  s.classList.toggle('hidden');
+  const hidden=s.classList.contains('hidden');
+  document.getElementById('tog').style.display=hidden?'none':'';
+  document.getElementById('tog-float').style.display=hidden?'':'none';
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  if(window.innerWidth<=640){
+    document.getElementById('sidebar').classList.add('hidden');
+    document.getElementById('tog').style.display='none';
+    document.getElementById('tog-float').style.display='';
+  }
+});
 function filterTbls(q){q=q.toLowerCase();document.querySelectorAll('.titem').forEach(e=>{e.style.display=(!q||e.dataset.l.toLowerCase().includes(q))?'':'none'})}
 function buildSB(){
   const list=document.getElementById('tlist');list.innerHTML='';
@@ -362,10 +375,11 @@ function render(){
   const start=curPage*pageSize,slice=filtRows.slice(start,start+pageSize);
   body.innerHTML='';
   slice.forEach(row=>{
-    const tr=document.createElement('tr');
-    Object.values(row).forEach(val=>{const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');tr.appendChild(td);});
-    tr.ondblclick=()=>showRowDetail(cols,Object.values(row));
-    body.appendChild(tr);
+    const trow=document.createElement('tr');
+    Object.values(row).forEach(val=>{const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');trow.appendChild(td);});
+    trow.style.cursor='pointer';
+    trow.ondblclick=()=>showRowDetail(cols,Object.values(row));
+    body.appendChild(trow);
   });
   document.getElementById('pginfo').textContent=`Página ${curPage+1} de ${totalPages}  —  ${filtRows.length.toLocaleString('pt-BR')} linhas`;
   document.querySelectorAll('#pgbar button').forEach((b,i)=>{b.disabled=i<2?curPage===0:curPage>=totalPages-1;});
