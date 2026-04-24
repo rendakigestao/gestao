@@ -34,6 +34,8 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 #topbar{height:46px;background:var(--surf);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0}
 #tog{background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:5px;padding:5px 9px;cursor:pointer;font-size:15px;line-height:1;transition:all .12s}
 #tog:hover{border-color:var(--acc);color:var(--acc)}
+#tog-float{position:fixed;top:8px;left:8px;z-index:10000;background:var(--surf);border:1px solid var(--bdr);color:var(--txt2);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:16px;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5);transition:all .12s}
+#tog-float:hover{border-color:var(--acc);color:var(--acc)}
 #ttitle{font-size:13px;font-weight:500;color:var(--txt);flex:1}
 #rcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt3)}
 #cfgbtn{background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:5px;padding:5px 9px;cursor:pointer;font-size:12px;transition:all .12s}
@@ -238,6 +240,7 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
     <div id="bsbody"></div>
   </div>
 </div>
+<button id="tog-float" onclick="toggleSB()">☰</button>
 <div id="sidebar">
   <div class="sb-head"><div class="sb-logo">Sistema de Gestão</div><div class="sb-title">Consulta de Tabelas</div></div>
   <div class="sb-srch"><input type="text" placeholder="Buscar tabela..." oninput="filterTbls(this.value)"></div>
@@ -360,7 +363,16 @@ function openCfg(){document.getElementById('dburl').value=getCfg().url;document.
 function closeCfg(){document.getElementById('cfgmod').classList.remove('open')}
 function saveCfg(){const u=document.getElementById('dburl').value.trim();if(!u)return alert('Informe a URL.');localStorage.setItem('neon_url',u);closeCfg();buildSB()}
 
-function toggleSB(){const s=document.getElementById('sidebar');s.classList.toggle('hidden');document.getElementById('sbov').classList.toggle('vis',!s.classList.contains('hidden')&&window.innerWidth<=640)}
+function toggleSB(){
+  const s=document.getElementById('sidebar');
+  s.classList.toggle('hidden');
+  const hidden=s.classList.contains('hidden');
+  const tf=document.getElementById('tog-float');
+  const t=document.getElementById('tog');
+  if(tf){ tf.style.display=hidden?'flex':'none'; }
+  if(t){ t.style.display=hidden?'none':''; }
+  document.getElementById('sbov').classList.toggle('vis',!hidden&&window.innerWidth<=640);
+}
 function filterTbls(q){q=q.toLowerCase();document.querySelectorAll('.titem').forEach(e=>{e.style.display=(!q||e.dataset.l.toLowerCase().includes(q))?'':'none'})}
 function buildSB(){
   const list=document.getElementById('tlist');list.innerHTML='';
@@ -915,6 +927,19 @@ async function qNeon(sql){
 }
 function setLoad(on){document.getElementById('loadbar').classList.toggle('on',on)}
 
+// ── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.fda')[0].onclick=fdAll2;
+  document.querySelectorAll('.fda')[1].onclick=fdNone;
+  buildSB();
+  if(!getCfg().url) setTimeout(openCfg,300);
+  // Mobile: esconde sidebar e mostra botão flutuante
+  if(window.innerWidth<=640){
+    document.getElementById('sidebar').classList.add('hidden');
+    document.getElementById('tog-float').style.display='flex';
+    document.getElementById('tog').style.display='none';
+  }
+});
 
 </script>
 </body>
