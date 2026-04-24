@@ -665,13 +665,12 @@ async function loadArmazem(el){
     armBuildLojas();
     if(armLojas.length) armSelecionarLoja(armLojas[0].nome);
   } catch(e) {
-    document.getElementById('armazem-wrap').style.display='none';
-    document.getElementById('twrap').style.display='flex';
-    document.getElementById('empty').style.display='flex';
     const isNotFound = e.message && (e.message.includes('does not exist') || e.message.includes('not exist'));
-    document.getElementById('empty').innerHTML = isNotFound
-      ? `<div class="ei">📦</div><div class="et">Tabela <strong>analise_armazem</strong> ainda não publicada.<br><span style="font-size:10px;color:var(--txt3)">Abra o app desktop → clique em <strong>Publicar no Site</strong>.</span></div>`
-      : `<div class="ei">⚠</div><div class="et" style="color:var(--red)">${e.message}</div>`;
+    document.getElementById('arm-llist').innerHTML = `<div style="padding:20px 14px;color:${isNotFound?'var(--txt2)':'var(--red)'};font-size:12px;line-height:1.8;text-align:center">
+      ${isNotFound
+        ? '📦 Tabela <strong>analise_armazem</strong> ainda não publicada.<br><span style="font-size:10px;color:var(--txt3)">Abra o app desktop → Publicar no Site.</span>'
+        : '⚠ ' + e.message}
+    </div>`;
   }
   setLoad(false);
 }
