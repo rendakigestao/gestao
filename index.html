@@ -70,7 +70,7 @@ td.sol-val{color:var(--acc);font-weight:600}
 td.sol-s-val{color:#fbbf24;font-weight:600}
 
 /* Painel Análise Armazém */
-#armazem-wrap{flex:1;overflow:hidden;display:none;flex-direction:column}
+#armazem-wrap{position:fixed;top:46px;left:var(--sw);right:0;bottom:0;display:none;flex-direction:column;background:var(--bg);z-index:50}
 #arm-filters{background:var(--surf);border-bottom:1px solid var(--bdr);padding:8px 12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .arm-fbox{background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;gap:2px}
 .arm-flbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em}
@@ -207,7 +207,7 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
 .bsdet-card.hl{background:#1a2620;border-color:rgba(74,222,128,.2)}
 .bsdet-card.hl .bslbl{color:#86efac}
 .bsdet-card.hl .bsval{color:#4ade80;font-weight:600}
-@media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
+
 </style>
 </head>
 <body>
@@ -268,7 +268,9 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
     <select id="pgsz" onchange="chgPs(this.value)"><option>100</option><option>250</option><option>500</option><option selected>1000</option></select>
   </div>
 
-  <!-- Análise Armazém -->
+</div>
+
+<!-- Análise Armazém -->
   <div id="armazem-wrap">
     <div id="arm-filters">
       <div class="arm-fbox">
@@ -307,7 +309,6 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
       </div>
     </div>
   </div>
-</div>
 
 <!-- Filter dropdown -->
 <div id="fdrop">
