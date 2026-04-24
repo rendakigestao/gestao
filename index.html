@@ -6,6 +6,7 @@
 <title>Sistema de Gestão — Consulta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 <style>
 :root{--bg:#0f0f11;--surf:#17171a;--surf2:#1e1e22;--bdr:#2a2a30;--acc:#4ade80;--acc2:#86efac;--txt:#e8e8ee;--txt2:#8888a0;--txt3:#55556a;--red:#f87171;--sw:220px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -290,6 +291,26 @@ function buildSB(){
 }
 
 // ── Tabela genérica ────────────────────────────────────────────────────────
+function showRowDetail(cols,vals){
+  let m=document.getElementById('rdm');if(m)m.remove();
+  m=document.createElement('div');m.id='rdm';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:center;justify-content:center';
+  m.onclick=e=>{if(e.target===m)m.remove()};
+  const box=document.createElement('div');
+  box.style.cssText='background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:20px;max-width:720px;width:92%;max-height:85vh;overflow-y:auto';
+  box.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span style="font-size:13px;font-weight:600;color:var(--txt)">Detalhes do Registro</span>
+    <button onclick="document.getElementById('rdm').remove()" style="background:none;border:1px solid var(--bdr);color:var(--txt2);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:11px">✕</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+    ${cols.map((c,i)=>`<div style="padding:7px 10px;background:var(--surf2);border-radius:6px;border:1px solid var(--bdr)">
+      <div style="font-size:9px;color:var(--txt3);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">${c}</div>
+      <div style="font-size:12px;color:var(--txt);word-break:break-all">${vals[i]??'—'}</div>
+    </div>`).join('')}
+  </div>`;
+  m.appendChild(box);document.body.appendChild(m);
+}
+
 async function loadTable(name,label,el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');curTable=name;
@@ -343,6 +364,7 @@ function render(){
   slice.forEach(row=>{
     const tr=document.createElement('tr');
     Object.values(row).forEach(val=>{const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');tr.appendChild(td);});
+    tr.ondblclick=()=>showRowDetail(cols,Object.values(row));
     body.appendChild(tr);
   });
   document.getElementById('pginfo').textContent=`Página ${curPage+1} de ${totalPages}  —  ${filtRows.length.toLocaleString('pt-BR')} linhas`;
@@ -517,81 +539,109 @@ function armRenderTabela(){
   });
 }
 
-// ── Exportar Excel (via HTML → XLS com estilos) ───────────────────────────
-function armExportarExcel(){
+// ── Exportar Excel com ExcelJS (estilos completos) ────────────────────────
+async function armExportarExcel(){
   if(!armLojaAtual){ alert('Nenhuma loja selecionada.'); return; }
+  if(typeof ExcelJS === 'undefined'){ alert('ExcelJS não carregado.'); return; }
 
-  const param    = parseFloat(document.getElementById('arm-param').value)||8;
-  const estCdMin = parseFloat(document.getElementById('arm-estcd').value)||0;
+  const param     = parseFloat(document.getElementById('arm-param').value)||8;
+  const estCdMin  = parseFloat(document.getElementById('arm-estcd').value)||0;
   const lojaLabel = armLojaAtual.replace(/^\d+\s*-\s*/,'').trim();
-  const agora = new Date().toLocaleString('pt-BR');
-
-  const hdrs = ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
+  const agora     = new Date().toLocaleString('pt-BR');
+  const HDRS      = ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
+  const WIDTHS    = [42,7,9,9,8,8,8,8,10,10,10,10];
 
   // Coleta linhas visíveis
   const rows = [];
   document.querySelectorAll('#arm-tbody tr').forEach(tr=>{
     const cells = [...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
-    const sol = cells[11]||'';
-    const temSol = sol==='S'||(parseFloat(sol)||0)>0;
-    const ehS = sol==='S';
-    rows.push({cells, temSol, ehS});
+    rows.push(cells);
   });
-
   if(!rows.length){ alert('Nenhum dado para exportar.'); return; }
 
-  // Estilos inline
-  const stTitulo = 'background:#217346;color:#fff;font-weight:bold;font-size:13px;padding:6px 10px;';
-  const stHdr    = 'background:#1e5c37;color:#fff;font-weight:bold;font-size:9pt;text-align:center;padding:4px 6px;border:1px solid #145230;';
-  const stSol    = 'background:#c6efce;color:#1a5c1a;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
-  const stSolA   = 'background:#d5edda;color:#1a5c1a;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
-  const stS      = 'background:#ffeb9c;color:#7b5f00;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
-  const stSA     = 'background:#fff5cc;color:#7b5f00;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
-  const stNorm   = 'background:#ffffff;color:#252525;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
-  const stAlt    = 'background:#f2f2f2;color:#252525;font-size:9pt;padding:3px 6px;border:1px solid #ddd;';
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'Sistema de Gestão';
+  wb.created = new Date();
+  const ws = wb.addWorksheet(lojaLabel.substring(0,31));
 
-  function stCell(ci, temSol, ehS, alt){
-    let base = ehS ? (alt?stSA:stS) : temSol ? (alt?stSolA:stSol) : (alt?stAlt:stNorm);
-    let extra = '';
-    if(ci===0 && temSol) extra += 'font-weight:bold;';
-    if(ci===0) extra += 'text-align:left;';
-    else extra += 'text-align:right;';
-    if(ci===11 && temSol) extra += ehS?'color:#7b5f00;font-weight:bold;':'color:#1a5c1a;font-weight:bold;';
-    return base + extra;
-  }
+  // Larguras
+  ws.columns = WIDTHS.map(w=>({width:w}));
 
-  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:x="urn:schemas-microsoft-com:office:excel"
-    xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
-<x:ExcelWorksheet><x:Name>${lojaLabel.substring(0,31)}</x:Name>
-<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-</head><body><table>`;
+  // Linha 1 — título
+  ws.mergeCells(1,1,1,HDRS.length);
+  const r1 = ws.getRow(1);
+  r1.height = 22;
+  const c1 = r1.getCell(1);
+  c1.value = `Análise Armazém — ${lojaLabel}   |   Parâmetro: ${param}   |   Est.Central Mín: ${estCdMin}   |   Gerado: ${agora}`;
+  c1.font  = {bold:true, color:{argb:'FFFFFFFF'}, size:12};
+  c1.fill  = {type:'pattern', pattern:'solid', fgColor:{argb:'FF217346'}};
+  c1.alignment = {vertical:'middle', horizontal:'left'};
 
-  // Título
-  html += `<tr><td colspan="${hdrs.length}" style="${stTitulo}">Análise Armazém — ${lojaLabel} &nbsp;|&nbsp; Parâmetro: ${param} &nbsp;|&nbsp; Est.Central Mín: ${estCdMin} &nbsp;|&nbsp; Gerado: ${agora}</td></tr>`;
-
-  // Cabeçalhos
-  html += '<tr>' + hdrs.map(h=>`<td style="${stHdr}">${h}</td>`).join('') + '</tr>';
-
-  // Dados
-  rows.forEach(({cells,temSol,ehS},ri)=>{
-    html += '<tr>' + cells.map((v,ci)=>{
-      const st = stCell(ci, temSol, ehS, ri%2===1);
-      return `<td style="${st}">${v}</td>`;
-    }).join('') + '</tr>';
+  // Linha 2 — cabeçalhos
+  const r2 = ws.getRow(2);
+  r2.height = 16;
+  HDRS.forEach((h,i)=>{
+    const c = r2.getCell(i+1);
+    c.value = h;
+    c.font  = {bold:true, color:{argb:'FFFFFFFF'}, size:9};
+    c.fill  = {type:'pattern', pattern:'solid', fgColor:{argb:'FF1E5C37'}};
+    c.alignment = {vertical:'middle', horizontal:'center'};
+    c.border = {bottom:{style:'thin',color:{argb:'FF145230'}}};
   });
 
-  html += '</table></body></html>';
+  // Dados
+  rows.forEach((cells, ri)=>{
+    const sol    = cells[11]||'';
+    const temSol = sol==='S'||(parseFloat(sol)||0)>0;
+    const ehS    = sol==='S';
+    const alt    = ri%2===1;
+
+    const bgSol  = alt?'FFD5EDDA':'FFC6EFCE';
+    const bgS    = alt?'FFFFF5CC':'FFFFEB9C';
+    const bgNorm = alt?'FFF2F2F2':'FFFFFFFF';
+    const bg     = ehS?bgS : temSol?bgSol : bgNorm;
+
+    const row = ws.getRow(ri+3);
+    row.height = 15;
+
+    cells.forEach((v,ci)=>{
+      const cell = row.getCell(ci+1);
+
+      // Valor numérico onde possível
+      if(ci>0 && v!=='S' && v!==''){
+        const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
+        cell.value = isNaN(n)?v:n;
+      } else {
+        cell.value = v;
+      }
+
+      cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:bg}};
+      cell.font = {
+        size:9,
+        bold: (ci===0&&temSol)||(ci===11&&temSol),
+        color:{argb: ci===11&&temSol ? (ehS?'FF7B5F00':'FF1A5C1A') : 'FF252525'}
+      };
+      cell.alignment = {
+        vertical:'middle',
+        horizontal: ci===0?'left':'right'
+      };
+      cell.border = {
+        bottom:{style:'hair',color:{argb:'FFDDDDDD'}},
+        right: {style:'hair',color:{argb:'FFDDDDDD'}}
+      };
+    });
+  });
+
+  // Freeze panes
+  ws.views = [{state:'frozen', xSplit:0, ySplit:2}];
 
   // Download
-  const blob = new Blob([html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const buf  = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url;
-  a.download = `Analise_${lojaLabel.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xls`;
+  a.href     = url;
+  a.download = `Analise_${lojaLabel.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
