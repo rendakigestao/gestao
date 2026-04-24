@@ -68,23 +68,6 @@ tbody tr.sol-s:hover{background:rgba(251,191,36,.1)}
 td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
 td.sol-val{color:var(--acc);font-weight:600}
 td.sol-s-val{color:#fbbf24;font-weight:600}
-/* ── Bottom Sheet ──────────────────────────────────────────────────────── */
-#bsov{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:8000;pointer-events:none;transition:background .22s}
-#bsov.open{background:rgba(0,0,0,.55);pointer-events:all}
-#bsheet{position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-radius:16px 16px 0 0;border-top:1px solid var(--bdr);max-height:80vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);z-index:8001}
-#bsov.open #bsheet{transform:translateY(0)}
-.bsh{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 4px;cursor:pointer;flex-shrink:0}
-#bstitle{font-size:13px;font-weight:600;color:var(--txt);padding:6px 16px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#bsbody{overflow-y:auto;padding:10px 12px 20px;display:flex;flex-direction:column;gap:6px}
-.bsr{display:flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:7px;background:var(--surf2);border:1px solid var(--bdr)}
-.bslbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;min-width:110px;flex-shrink:0}
-.bsval{font-size:12px;color:var(--txt);word-break:break-all;flex:1}
-.bsval.mt{color:var(--txt3)}
-/* Score badge */
-.bs-score{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-left:6px}
-.bs-s-hi{background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.25)}
-.bs-s-md{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
-.bs-s-lo{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.25)}
 
 /* Painel Análise Armazém */
 #armazem-wrap{flex:1;overflow:hidden;display:none;flex-direction:column}
@@ -166,11 +149,95 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
 .btng:hover{border-color:var(--txt2)}
 #sbov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 @media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
+#bsov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+#bsov.open{display:flex}
+#bsheet{background:#1a1a1f;border-radius:20px 20px 0 0;width:100%;max-height:94dvh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.34,1.1,.64,1);box-shadow:0 -8px 40px rgba(0,0,0,.8)}
+#bsov.open #bsheet{transform:translateY(0)}
+.bshtop{display:flex;align-items:center;padding:10px 14px 0;flex-shrink:0}
+.bsh{width:40px;height:4px;background:#333340;border-radius:2px;flex:1;cursor:pointer}
+.bsclose{width:28px;height:28px;border-radius:50%;background:#252530;border:1px solid #333340;color:#8888a0;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1}
+.bsclose:hover{background:#333340;color:#fff}
+#bshead{padding:12px 18px 14px;border-bottom:1px solid #252530;flex-shrink:0}
+#bsbadge{display:inline-block;font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:2px 8px;border-radius:10px;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+#bstitle{font-size:15px;font-weight:600;color:#fff;line-height:1.4}
+#bsbody{overflow-y:auto;flex:1;padding:8px 14px 32px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:400px){#bsbody{grid-template-columns:1fr}}
+.bsr{background:#1e1e26;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;border:1px solid #2a2a35}
+.bsr.full{grid-column:1/-1}
+.bsr.empty{opacity:.4}
+.bslbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);letter-spacing:.07em;text-transform:uppercase;font-weight:500}
+.bsval{font-size:13px;color:#e8e8ee;font-weight:400;line-height:1.35;word-break:break-word}
+.bsval.mt{color:#55556a;font-style:italic;font-size:12px}
+.bsr.highlight{background:#1a2620;border-color:rgba(74,222,128,.25)}
+.bsr.highlight .bslbl{color:#86efac}
+.bsr.highlight .bsval{color:#4ade80;font-size:15px;font-weight:600}
+#bsdet{padding:0 14px 10px;border-bottom:1px solid #252530;flex-shrink:0}
+.bsdet-lbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--acc);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.cdd-wrap{position:relative}
+.cdd-btn{width:100%;background:#252530;border:1px solid #333340;border-radius:8px;color:#e8e8ee;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:8px 32px 8px 10px;text-align:left;cursor:pointer;transition:border-color .15s;display:flex;align-items:center;gap:8px}
+.cdd-btn:hover{border-color:#555560}
+.cdd-btn .cdd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cdd-btn .cdd-arr{position:absolute;right:10px;color:#4ade80;font-size:10px;transition:transform .15s}
+.cdd-btn.open .cdd-arr{transform:rotate(180deg)}
+.cdd-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e26;border:1px solid #333340;border-radius:8px;max-height:220px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none}
+.cdd-list.open{display:block}
+.cdd-item{padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid rgba(255,255,255,.04)}
+.cdd-item:last-child{border-bottom:none}
+.cdd-item:hover{background:rgba(255,255,255,.06)}
+.cdd-item.sel{background:rgba(74,222,128,.08)}
+.cdd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cdd-txt{flex:1;font-size:11px;line-height:1.3}
+.cdd-txt .cdd-cod{font-family:'IBM Plex Mono',monospace;font-size:10px;margin-bottom:1px}
+.cdd-txt .cdd-desc{font-size:11px}
+.cdd-score{font-size:9px;font-family:'IBM Plex Mono',monospace;opacity:.6;flex-shrink:0}
+.sc0{background:#333340;color:#55556a}
+.sc1{background:#e8e8ee;color:#e8e8ee}
+.sc2{background:#fbbf24;color:#fbbf24}
+.sc3{background:#f97316;color:#f97316}
+.sc4{background:#ef4444;color:#ef4444}
+.sc0t{color:#55556a}
+.sc1t{color:#c8c8d4}
+.sc2t{color:#fbbf24}
+.sc3t{color:#f97316}
+.sc4t{color:#ef4444}
+#bsdet-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.bsdet-card{background:#1e1e26;border-radius:8px;padding:8px 10px;border:1px solid #2a2a35}
+.bsdet-card .bslbl{font-size:9px;color:var(--txt3)}
+.bsdet-card .bsval{font-size:12px;color:#e8e8ee}
+.bsdet-card.hl{background:#1a2620;border-color:rgba(74,222,128,.2)}
+.bsdet-card.hl .bslbl{color:#86efac}
+.bsdet-card.hl .bsval{color:#4ade80;font-weight:600}
+@media(max-width:640px){#sidebar{position:fixed;top:0;left:0;bottom:0}#sidebar.hidden{transform:translateX(-100%)}#sbov{display:block;opacity:0;pointer-events:none;transition:opacity .22s}#sbov.vis{opacity:1;pointer-events:all}}
 </style>
 </head>
 <body>
 <div id="sbov" onclick="toggleSB()"></div>
 
+<div id="bsov">
+  <div id="bsheet" onclick="event.stopPropagation()">
+    <div class="bshtop">
+      <div class="bsh" onclick="closeBSheet()"></div>
+      <div class="bsclose" onclick="closeBSheet()">✕</div>
+    </div>
+    <div id="bshead">
+      <div id="bsbadge">detalhe do item</div>
+      <div id="bstitle"></div>
+    </div>
+    <div id="bsdet" style="display:none">
+      <div class="bsdet-lbl">Produtos do item</div>
+      <div class="cdd-wrap" id="cdd-wrap">
+        <button class="cdd-btn" id="cdd-btn" onclick="toggleCDD()">
+          <div class="cdd-dot sc0" id="cdd-sel-dot"></div>
+          <span id="cdd-sel-txt">Selecione um produto...</span>
+          <span class="cdd-arr">▼</span>
+        </button>
+        <div class="cdd-list" id="cdd-list"></div>
+      </div>
+      <div id="bsdet-grid"></div>
+    </div>
+    <div id="bsbody"></div>
+  </div>
+</div>
 <div id="sidebar">
   <div class="sb-head"><div class="sb-logo">Sistema de Gestão</div><div class="sb-title">Consulta de Tabelas</div></div>
   <div class="sb-srch"><input type="text" placeholder="Buscar tabela..." oninput="filterTbls(this.value)"></div>
@@ -292,20 +359,7 @@ function openCfg(){document.getElementById('dburl').value=getCfg().url;document.
 function closeCfg(){document.getElementById('cfgmod').classList.remove('open')}
 function saveCfg(){const u=document.getElementById('dburl').value.trim();if(!u)return alert('Informe a URL.');localStorage.setItem('neon_url',u);closeCfg();buildSB()}
 
-function toggleSB(){
-  const s=document.getElementById('sidebar');
-  s.classList.toggle('hidden');
-  const hidden=s.classList.contains('hidden');
-  document.getElementById('tog').style.display=hidden?'none':'';
-  document.getElementById('tog-float').style.display=hidden?'':'none';
-}
-window.addEventListener('DOMContentLoaded',()=>{
-  if(window.innerWidth<=640){
-    document.getElementById('sidebar').classList.add('hidden');
-    document.getElementById('tog').style.display='none';
-    document.getElementById('tog-float').style.display='';
-  }
-});
+function toggleSB(){const s=document.getElementById('sidebar');s.classList.toggle('hidden');document.getElementById('sbov').classList.toggle('vis',!s.classList.contains('hidden')&&window.innerWidth<=640)}
 function filterTbls(q){q=q.toLowerCase();document.querySelectorAll('.titem').forEach(e=>{e.style.display=(!q||e.dataset.l.toLowerCase().includes(q))?'':'none'})}
 function buildSB(){
   const list=document.getElementById('tlist');list.innerHTML='';
@@ -400,6 +454,185 @@ function fdFilt(q){fdTerm=q;renderFD()}
 function fdAll2(){fdSel=new Set(fdAllVals);renderFD()}
 function fdNone(){fdSel=new Set();renderFD()}
 function applyFD(){if(fdSel.size===fdAllVals.length)delete colFilters[fdCI];else colFilters[fdCI]=new Set(fdSel);curPage=0;closeFD();applyAll()}
+
+// ── Bottom sheet ───────────────────────────────────────────────────────────
+let _lastTap=0,_lastTapRow=null;
+
+function openBSheet(cols,vals){
+  const labels=CLABELS[curTable]||{};
+  document.getElementById('bstitle').textContent=String(vals[0]||'');
+  const body=document.getElementById('bsbody');
+  body.innerHTML='';
+  // Long columns (descrição, tipo, fornecedor, observações) → full width
+  const longCols=new Set(['Tipo','T. De Merc.','tipo','Fornecedor','fornecedor','Produto','produto',
+    'Observações','observacoes','Obs','DESCRICAO','Descricao','descricao']);
+  const hlCols=new Set(['Est.Lojas','Dias Estoque','Situação Pauta','Dias RC',
+    'CD/P','CD+OC','Comprar','Shelf']);
+  cols.forEach((col,i)=>{
+    if(i===0)return;
+    const val=String(vals[i]??'').trim();
+    const isEmpty=!val;
+    const label=labels[col]||col;
+    const isLong=longCols.has(col)||label.length>14||val.length>20;
+    const isHL=hlCols.has(col);
+    const d=document.createElement('div');
+    d.className='bsr'+(isLong?' full':'')+(isEmpty?' empty':'')+(isHL?' highlight':'');
+    d.innerHTML=`<div class="bslbl">${label}</div>
+                 <div class="bsval${isEmpty?' mt':''}">${val||'—'}</div>`;
+    body.appendChild(d);
+  });
+  // Load detail dropdown if it's posicao table
+  const detDiv  = document.getElementById('bsdet');
+  const cddList = document.getElementById('cdd-list');
+  const detGrid = document.getElementById('bsdet-grid');
+  if(detDiv)  detDiv.style.display = 'none';
+  if(cddList) cddList.innerHTML = '';
+  if(detGrid) detGrid.innerHTML = '';
+  const cddTxt = document.getElementById('cdd-sel-txt');
+  const cddDot = document.getElementById('cdd-sel-dot');
+  if(cddTxt) cddTxt.textContent = 'Selecione um produto...';
+  if(cddDot) cddDot.className = 'cdd-dot sc0';
+
+  if(curTable === 'snapshot_posicao') {
+    const tipo = String(vals[0]||'');
+    const gr   = String(vals[1]||'');
+    loadDetSection(tipo, gr);
+  }
+  document.getElementById('bsov').classList.add('open');
+}
+function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
+
+// ── Detail dropdown ────────────────────────────────────────────────────────
+let _bsDetRows = [];
+
+// Score → classe (0=cinza, 1=branco, 2=amarelo, 3=laranja, 4=vermelho)
+function scoreClass(score) {
+  if(score === 0) return 0;       // cinza
+  if(score <= 2)  return 1;       // branco
+  if(score <= 5)  return 2;       // amarelo
+  if(score <= 7)  return 3;       // laranja
+  return 4;                       // vermelho
+}
+function calcScore(r) {
+  let s = 0;
+  [r.estoque, r.cdp, r.media, r.cdpoc, r.ocs, r.s_ocs, r.s_emp, r.drp, r.est_lojas, r.dias_lojas].forEach(v => {
+    const n = parseFloat(String(v||'').replace(/\./g,'').replace(',','.'));
+    if(!isNaN(n) && n > 0) s++;
+  });
+  if(r.t_item && r.t_item.trim()) s++;
+  if(r.shelf  && r.shelf.trim())  s++;
+  return s;
+}
+
+function toggleCDD() {
+  const btn  = document.getElementById('cdd-btn');
+  const list = document.getElementById('cdd-list');
+  btn.classList.toggle('open');
+  list.classList.toggle('open');
+}
+function closeCDD() {
+  document.getElementById('cdd-btn').classList.remove('open');
+  document.getElementById('cdd-list').classList.remove('open');
+}
+function selectCDDItem(i) {
+  const r   = _bsDetRows[i];
+  const sc  = _bsDetScores[i];
+  const cl  = scoreClass(sc);
+  document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
+  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
+  document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
+  closeCDD();
+  loadDetItem(i);
+}
+
+let _bsDetScores = [];
+
+async function loadDetSection(tipo, gr) {
+  const detDiv = document.getElementById('bsdet');
+  const list   = document.getElementById('cdd-list');
+  const grid   = document.getElementById('bsdet-grid');
+  list.innerHTML = '';
+  grid.innerHTML = '';
+  document.getElementById('cdd-sel-txt').textContent = 'Carregando...';
+  document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
+  detDiv.style.display = '';
+
+  try {
+    const rows = await qNeon(
+      `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
+       FROM snapshot_posicao_det
+       WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}' LIMIT 50`
+    );
+    _bsDetRows   = rows || [];
+    _bsDetScores = _bsDetRows.map(calcScore);
+    if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
+
+    document.getElementById('cdd-sel-txt').textContent = 'Selecione um produto...';
+
+    const dVolt = document.createElement('div');
+    dVolt.className = 'cdd-item';
+    dVolt.innerHTML = `
+      <div class="cdd-dot" style="background:#333340"></div>
+      <div class="cdd-txt">
+        <div class="cdd-cod" style="color:#8888a0">← Visão geral</div>
+        <div class="cdd-desc" style="color:#55556a">Mostrar todos os campos do tipo</div>
+      </div>`;
+    dVolt.onclick = () => { closeCDD(); document.getElementById('bsdet-grid').innerHTML=''; document.getElementById('cdd-sel-txt').textContent='Selecione um produto...'; document.getElementById('cdd-sel-dot').className='cdd-dot sc0'; document.querySelectorAll('.cdd-item').forEach(e=>e.classList.remove('sel')); };
+    list.appendChild(dVolt);
+
+    _bsDetRows.forEach((r, i) => {
+      const sc = _bsDetScores[i];
+      const cl = scoreClass(sc);
+      const d  = document.createElement('div');
+      d.className = 'cdd-item';
+      d.innerHTML = `
+        <div class="cdd-dot sc${cl}"></div>
+        <div class="cdd-txt">
+          <div class="cdd-cod sc${cl}t">${r.codigo}</div>
+          <div class="cdd-desc">${r.descricao}</div>
+        </div>
+        <div class="cdd-score sc${cl}t">${sc}pts</div>`;
+      d.onclick = () => selectCDDItem(i);
+      list.appendChild(d);
+    });
+
+    setTimeout(()=>document.addEventListener('click', e=>{
+      if(!document.getElementById('cdd-wrap').contains(e.target)) closeCDD();
+    }, {once:true}), 0);
+
+  } catch(e) {
+    detDiv.style.display = 'none';
+  }
+}
+
+function loadDetItem(idx) {
+  const grid = document.getElementById('bsdet-grid');
+  grid.innerHTML = '';
+  if(idx === '' || idx === undefined) return;
+  const r = _bsDetRows[parseInt(idx)];
+  if(!r) return;
+
+  const fields = [
+    {l:'Estoque CD',  v:r.estoque,    hl:true},
+    {l:'CD/P',        v:r.cdp,        hl:true},
+    {l:'Est. Lojas',  v:r.est_lojas,  hl:true},
+    {l:'Dias Estoque',v:r.dias_lojas, hl:true},
+    {l:'OCs',         v:r.ocs,        hl:false},
+    {l:'Média',       v:r.media,      hl:false},
+    {l:'S.OCs',       v:r.s_ocs,      hl:false},
+    {l:'CD+OC',       v:r.cdpoc,      hl:false},
+    {l:'T.Item',      v:r.t_item,     hl:false},
+    {l:'Shelf',       v:r.shelf,      hl:false},
+  ];
+  fields.forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'bsdet-card'+(f.hl?' hl':'');
+    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'—'}</div>`;
+    grid.appendChild(d);
+  });
+}
+
+// Swipe to close removido — fechar apenas pelo botão ✕
 
 // ── Análise Armazém ────────────────────────────────────────────────────────
 async function loadArmazem(el){
@@ -723,12 +956,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   buildSB();if(!getCfg().url)setTimeout(openCfg,300);
 });
 </script>
-<div id="bsov" onclick="closeBSheet()">
-  <div id="bsheet" onclick="event.stopPropagation()">
-    <div class="bsh" onclick="closeBSheet()"></div>
-    <div id="bstitle"></div>
-    <div id="bsbody"></div>
-  </div>
-</div>
 </body>
 </html>
