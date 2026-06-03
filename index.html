@@ -188,8 +188,8 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
 .cdd-btn .cdd-arr{position:absolute;right:10px;color:#4ade80;font-size:10px;transition:transform .15s}
 .cdd-btn.open .cdd-arr{transform:rotate(180deg)}
 .cdd-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e26;border:1px solid #333340;border-radius:8px;max-height:220px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none}
-.cdd-list.open{display:flex;flex-direction:column}
-.cdd-item{flex-shrink:0;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid rgba(255,255,255,.04)}
+.cdd-list.open{display:block}
+.cdd-item{padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid rgba(255,255,255,.04)}
 .cdd-item:last-child{border-bottom:none}
 .cdd-item:hover{background:rgba(255,255,255,.06)}
 .cdd-item.sel{background:rgba(74,222,128,.08)}
@@ -618,246 +618,72 @@ function closeCDD() {
   document.getElementById('cdd-list').classList.remove('open');
 }
 function selectCDDItem(i) {
-  i = Number(i);
-  const r = _bsDetRows[i];
-  if(!r) return;
-
-  const sc = _bsDetScores[i] || 0;
-  const cl = scoreClass(sc);
-
+  const r   = _bsDetRows[i];
+  const sc  = _bsDetScores[i];
+  const cl  = scoreClass(sc);
   document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
-  document.getElementById('cdd-sel-txt').textContent = `${r.codigo || ''} — ${r.descricao || ''}`;
-
-  // Atenção: existe o item "Visão geral" no topo. Por isso a seleção é pelo data-idx,
-  // não pela posição visual do elemento na lista.
-  document.querySelectorAll('#cdd-list .cdd-item').forEach(el => {
-    el.classList.toggle('sel', String(el.dataset.idx || '') === String(i));
-  });
-
+  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
+  document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
   closeCDD();
   loadDetItem(i);
 }
 
 let _bsDetScores = [];
-let _cddOutsideBound = false;
-
-function _pick(r, keys, def='') {
-  for (const k of keys) {
-    if (r && Object.prototype.hasOwnProperty.call(r, k) && r[k] !== undefined && r[k] !== null && r[k] !== '') return r[k];
-  }
-  return def;
-}
-
-function _normDetRow(r) {
-  r = r || {};
-  return {
-    codigo:     String(_pick(r, ['codigo','Código','Cod.Barras','cod_barras','codigo_barras','ean'], '')).trim(),
-    descricao:  String(_pick(r, ['descricao','Descrição','Produto','produto','descritivo'], '')).trim(),
-
-    // aceita tanto a estrutura da snapshot detalhada quanto nomes vindos da posição expandida
-    estoque:    _pick(r, ['estoque','Estoque CD','Quant.','Quant','quant'], ''),
-    ocs:        _pick(r, ['ocs','Ocs','OCS'], ''),
-    s_ocs:      _pick(r, ['s_ocs','S.Ocs','S.OCs','S Ocs'], ''),
-    s_emp:      _pick(r, ['s_emp','S.à Emp.','S.A Emp.','S Emp'], ''),
-    media:      _pick(r, ['media','Média','Media'], ''),
-    cdp:        _pick(r, ['cdp','CD/P'], ''),
-    cdpoc:      _pick(r, ['cdpoc','CD+OC'], ''),
-    drp:        _pick(r, ['drp','D.R.P.'], ''),
-    t_item:     _pick(r, ['t_item','T.Item','T Item','tipo_item'], ''),
-    shelf:      _pick(r, ['shelf','Shelf'], ''),
-    est_lojas:  _pick(r, ['est_lojas','Est.Lojas','Est. Lojas'], ''),
-    dias_lojas: _pick(r, ['dias_lojas','Dias Estoque','Dias Lojas'], '')
-  };
-}
-
-function _appendCDDItem(list, row, idx, score) {
-  const cl = scoreClass(score || 0);
-
-  const d = document.createElement('div');
-  d.className = 'cdd-item';
-  d.dataset.idx = String(idx);
-
-  const dot = document.createElement('div');
-  dot.className = `cdd-dot sc${cl}`;
-
-  const txt = document.createElement('div');
-  txt.className = 'cdd-txt';
-
-  const cod = document.createElement('div');
-  cod.className = `cdd-cod sc${cl}t`;
-  cod.textContent = row.codigo || '—';
-
-  const desc = document.createElement('div');
-  desc.className = 'cdd-desc';
-  desc.textContent = row.descricao || 'Produto sem descrição';
-
-  const scoreEl = document.createElement('div');
-  scoreEl.className = `cdd-score sc${cl}t`;
-  scoreEl.textContent = `${score || 0}pts`;
-
-  txt.appendChild(cod);
-  txt.appendChild(desc);
-  d.appendChild(dot);
-  d.appendChild(txt);
-  d.appendChild(scoreEl);
-
-  d.addEventListener('click', function(ev){
-    ev.preventDefault();
-    ev.stopPropagation();
-    selectCDDItem(idx);
-  });
-
-  list.appendChild(d);
-}
-
-function _appendCDDOverview(list) {
-  const dVolt = document.createElement('div');
-  dVolt.className = 'cdd-item';
-  dVolt.dataset.idx = '';
-
-  const dot = document.createElement('div');
-  dot.className = 'cdd-dot';
-  dot.style.background = '#333340';
-
-  const txt = document.createElement('div');
-  txt.className = 'cdd-txt';
-
-  const cod = document.createElement('div');
-  cod.className = 'cdd-cod';
-  cod.style.color = '#8888a0';
-  cod.textContent = '← Visão geral';
-
-  const desc = document.createElement('div');
-  desc.className = 'cdd-desc';
-  desc.style.color = '#55556a';
-  desc.textContent = 'Mostrar todos os campos do tipo';
-
-  txt.appendChild(cod);
-  txt.appendChild(desc);
-  dVolt.appendChild(dot);
-  dVolt.appendChild(txt);
-
-  dVolt.addEventListener('click', function(ev){
-    ev.preventDefault();
-    ev.stopPropagation();
-    closeCDD();
-    document.getElementById('bsdet-grid').innerHTML = '';
-    document.getElementById('cdd-sel-txt').textContent = `Selecione um produto (${_bsDetRows.length})`;
-    document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
-    document.querySelectorAll('#cdd-list .cdd-item').forEach(e => e.classList.remove('sel'));
-  });
-
-  list.appendChild(dVolt);
-}
 
 async function loadDetSection(tipo, gr) {
   const detDiv = document.getElementById('bsdet');
   const list   = document.getElementById('cdd-list');
   const grid   = document.getElementById('bsdet-grid');
-  const selTxt = document.getElementById('cdd-sel-txt');
-  const selDot = document.getElementById('cdd-sel-dot');
-  const lbl    = detDiv ? detDiv.querySelector('.bsdet-lbl') : null;
-
-  _bsDetRows = [];
-  _bsDetScores = [];
-  list.replaceChildren();
+  list.innerHTML = '';
   grid.innerHTML = '';
-  selTxt.textContent = 'Carregando...';
-  selDot.className = 'cdd-dot sc0';
-  if(lbl) lbl.textContent = 'Produtos do item';
+  document.getElementById('cdd-sel-txt').textContent = 'Carregando...';
+  document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
   detDiv.style.display = '';
 
   try {
-    const tipoSafe = String(tipo || '').replace(/'/g,"''");
-    const grSafe   = String(gr || '').replace(/'/g,"''");
-
-    // Fonte principal: snapshot_posicao_det.
-    // Agora que a snapshot detalhada é limpa e recriada inteira na publicação,
-    // ela deve ser a fonte fiel da posição expandida do app.py.
-    const rowsRaw = await qNeon(
-      `SELECT 
-          codigo AS codigo,
-          descricao AS descricao,
-          estoque AS estoque,
-          ocs AS ocs,
-          s_ocs AS s_ocs,
-          s_emp AS s_emp,
-          media AS media,
-          cdp AS cdp,
-          cdpoc AS cdpoc,
-          drp AS drp,
-          t_item AS t_item,
-          shelf AS shelf,
-          est_lojas AS est_lojas,
-          dias_lojas AS dias_lojas
+    const rows = await qNeon(
+      `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
-       WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
-         AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
-       ORDER BY descricao, codigo`
+       WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}' LIMIT 50`
     );
+    _bsDetRows   = rows || [];
+    _bsDetScores = _bsDetRows.map(calcScore);
+    if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
 
-    const snapshotRows = (Array.isArray(rowsRaw) ? rowsRaw : []).map(_normDetRow);
+    document.getElementById('cdd-sel-txt').textContent = 'Selecione um produto...';
 
-    // Cadastro é só fallback. Se a snapshot trouxe itens, não usa cadastro como mestre,
-    // senão perde as informações de estoque/OC/média e a pontuação vira zero.
-    let finalRows = snapshotRows;
+    const dVolt = document.createElement('div');
+    dVolt.className = 'cdd-item';
+    dVolt.innerHTML = `
+      <div class="cdd-dot" style="background:#333340"></div>
+      <div class="cdd-txt">
+        <div class="cdd-cod" style="color:#8888a0">← Visão geral</div>
+        <div class="cdd-desc" style="color:#55556a">Mostrar todos os campos do tipo</div>
+      </div>`;
+    dVolt.onclick = () => { closeCDD(); document.getElementById('bsdet-grid').innerHTML=''; document.getElementById('cdd-sel-txt').textContent='Selecione um produto...'; document.getElementById('cdd-sel-dot').className='cdd-dot sc0'; document.querySelectorAll('.cdd-item').forEach(e=>e.classList.remove('sel')); };
+    list.appendChild(dVolt);
 
-    if(!finalRows.length) {
-      let cadastroRows = [];
-      try {
-        cadastroRows = await qNeon(
-          `SELECT 
-              codigo AS codigo,
-              descricao AS descricao,
-              tipo_item AS t_item
-           FROM cadastro_produtos
-           WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
-             AND TRIM(UPPER(grupo)) = TRIM(UPPER('${grSafe}'))
-           ORDER BY descricao, codigo`
-        );
-      } catch(e) {
-        console.warn('[POS DET] fallback cadastro_produtos falhou:', e);
-      }
-      finalRows = (Array.isArray(cadastroRows) ? cadastroRows : []).map(_normDetRow);
-    }
-
-    const merged = new Map();
-    finalRows.forEach(r => {
-      const key = r.codigo || `${r.descricao}`;
-      if(key) merged.set(key, r);
+    _bsDetRows.forEach((r, i) => {
+      const sc = _bsDetScores[i];
+      const cl = scoreClass(sc);
+      const d  = document.createElement('div');
+      d.className = 'cdd-item';
+      d.innerHTML = `
+        <div class="cdd-dot sc${cl}"></div>
+        <div class="cdd-txt">
+          <div class="cdd-cod sc${cl}t">${r.codigo}</div>
+          <div class="cdd-desc">${r.descricao}</div>
+        </div>
+        <div class="cdd-score sc${cl}t">${sc}pts</div>`;
+      d.onclick = () => selectCDDItem(i);
+      list.appendChild(d);
     });
 
-    _bsDetRows = Array.from(merged.values()).sort((a,b) =>
-      `${a.descricao || ''}${a.codigo || ''}`.localeCompare(`${b.descricao || ''}${b.codigo || ''}`, 'pt-BR')
-    );
-    _bsDetScores = _bsDetRows.map(calcScore);
-
-    console.log('[POS DET] tipo/gr:', tipo, gr, 'snapshot:', (rowsRaw || []).length, 'combo:', _bsDetRows.length, _bsDetRows);
-
-    if(!_bsDetRows.length) {
-      detDiv.style.display = 'none';
-      return;
-    }
-
-    if(lbl) lbl.textContent = `Produtos do item (${_bsDetRows.length})`;
-    selTxt.textContent = `Selecione um produto (${_bsDetRows.length})`;
-
-    const frag = document.createDocumentFragment();
-    _appendCDDOverview(frag);
-    _bsDetRows.forEach((r, i) => _appendCDDItem(frag, r, i, _bsDetScores[i]));
-    list.replaceChildren(frag);
-    list.dataset.count = String(_bsDetRows.length);
-
-    if(!_cddOutsideBound) {
-      document.addEventListener('click', function(e){
-        const wrap = document.getElementById('cdd-wrap');
-        if(wrap && !wrap.contains(e.target)) closeCDD();
-      });
-      _cddOutsideBound = true;
-    }
+    setTimeout(()=>document.addEventListener('click', e=>{
+      if(!document.getElementById('cdd-wrap').contains(e.target)) closeCDD();
+    }, {once:true}), 0);
 
   } catch(e) {
-    console.error('[POS DET] falha ao carregar combo:', e);
     detDiv.style.display = 'none';
   }
 }
@@ -865,11 +691,8 @@ async function loadDetSection(tipo, gr) {
 function loadDetItem(idx) {
   const grid = document.getElementById('bsdet-grid');
   grid.innerHTML = '';
-
-  idx = Number(idx);
-  if(!Number.isInteger(idx) || idx < 0) return;
-
-  const r = _bsDetRows[idx];
+  if(idx === '' || idx === undefined) return;
+  const r = _bsDetRows[parseInt(idx)];
   if(!r) return;
 
   const fields = [
@@ -884,18 +707,10 @@ function loadDetItem(idx) {
     {l:'T.Item',      v:r.t_item,     hl:false},
     {l:'Shelf',       v:r.shelf,      hl:false},
   ];
-
   fields.forEach(f => {
     const d = document.createElement('div');
     d.className = 'bsdet-card'+(f.hl?' hl':'');
-    const label = document.createElement('div');
-    label.className = 'bslbl';
-    label.textContent = f.l;
-    const val = document.createElement('div');
-    val.className = 'bsval';
-    val.textContent = (f.v === undefined || f.v === null || f.v === '') ? '—' : String(f.v);
-    d.appendChild(label);
-    d.appendChild(val);
+    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'—'}</div>`;
     grid.appendChild(d);
   });
 }
