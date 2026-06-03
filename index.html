@@ -641,13 +641,50 @@ async function loadDetSection(tipo, gr) {
   detDiv.style.display = '';
 
   try {
+    const tipoSafe = tipo.replace(/'/g,"''");
+    const grSafe   = gr.replace(/'/g,"''");
+
     const rows = await qNeon(
       `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
-       WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}'
+       WHERE tipo = '${tipoSafe}' AND gr = '${grSafe}'
        ORDER BY descricao, codigo`
     );
-    _bsDetRows   = rows || [];
+
+    // Complementa com cadastro_produtos para não faltar itens do grupo
+    let cadastroRows = [];
+    try {
+      cadastroRows = await qNeon(
+        `SELECT 
+            COALESCE(cod_barras, codigo_barras, codigo, ean) AS codigo,
+            COALESCE(produto, descricao, descritivo) AS descricao
+         FROM cadastro_produtos
+         WHERE tipo = '${tipoSafe}' AND gr = '${grSafe}'`
+      );
+    } catch(e){ console.warn('fallback cadastro_produtos falhou', e); }
+
+    const merged = new Map();
+
+    (rows || []).forEach(r => {
+      const key = String(r.codigo || '').trim();
+      if(key) merged.set(key, r);
+    });
+
+    (cadastroRows || []).forEach(r => {
+      const key = String(r.codigo || '').trim();
+      if(!key || merged.has(key)) return;
+
+      merged.set(key, {
+        codigo: r.codigo,
+        descricao: r.descricao || 'Produto sem descrição',
+        estoque: 0, ocs: 0, s_ocs: 0, s_emp: 0,
+        media: 0, cdp: 0, cdpoc: 0, drp: 0,
+        t_item: '', shelf: '', est_lojas: 0, dias_lojas: 0
+      });
+    });
+
+    _bsDetRows = Array.from(merged.values())
+      .sort((a,b)=>`${a.descricao||''}${a.codigo||''}`.localeCompare(`${b.descricao||''}${b.codigo||''}`));
     _bsDetScores = _bsDetRows.map(calcScore);
     if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
 
