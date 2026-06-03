@@ -644,7 +644,8 @@ async function loadDetSection(tipo, gr) {
     const rows = await qNeon(
       `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
-       WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}' LIMIT 50`
+       WHERE tipo = '${tipo.replace(/'/g,"''")}' AND gr = '${gr.replace(/'/g,"''")}'
+       ORDER BY descricao, codigo`
     );
     _bsDetRows   = rows || [];
     _bsDetScores = _bsDetRows.map(calcScore);
