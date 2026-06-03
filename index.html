@@ -762,50 +762,88 @@ async function loadDetSection(tipo, gr) {
     const tipoSafe = String(tipo || '').replace(/'/g,"''");
     const grSafe   = String(gr || '').replace(/'/g,"''");
 
-    const rowsRaw = await qNeon(
-      `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
-       FROM snapshot_posicao_det
-       WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
-         AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
-       ORDER BY descricao, codigo`
-    );
-
-    let cadastroRows = [];
+    // 1) Dados operacionais já calculados no snapshot detalhado.
+    //    Pode ter só produtos com saldo/movimento, por isso NÃO pode ser a única fonte do combo.
+    let rowsSnap = [];
     try {
-      cadastroRows = await qNeon(
-        `SELECT 
-            COALESCE(cod_barras, codigo_barras, codigo, ean) AS codigo,
-            COALESCE(produto, descricao, descritivo) AS descricao
-         FROM cadastro_produtos
+      rowsSnap = await qNeon(
+        `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
+         FROM snapshot_posicao_det
          WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
            AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
          ORDER BY descricao, codigo`
       );
     } catch(e) {
-      console.warn('[POS DET] cadastro_produtos ignorado:', e);
+      console.warn('[POS DET] snapshot_posicao_det falhou:', e);
+      rowsSnap = [];
     }
 
+    // 2) Fonte mestre igual ao app.py: cadastro_produtos por Tipo + Grupo.
+    //    No cadastro a coluna do grupo chama "grupo" (não "gr").
+    let rowsCad = [];
+    try {
+      rowsCad = await qNeon(
+        `SELECT codigo, descricao, grupo, tipo_item
+         FROM cadastro_produtos
+         WHERE TRIM(UPPER(tipo))  = TRIM(UPPER('${tipoSafe}'))
+           AND TRIM(UPPER(grupo)) = TRIM(UPPER('${grSafe}'))
+         ORDER BY descricao, codigo`
+      );
+    } catch(e1) {
+      console.warn('[POS DET] cadastro_produtos por grupo falhou, tentando fallback:', e1);
+      // Fallback para ambientes antigos onde a coluna possa ter sido publicada como gr.
+      try {
+        rowsCad = await qNeon(
+          `SELECT codigo, descricao, gr AS grupo, tipo_item
+           FROM cadastro_produtos
+           WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
+             AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
+           ORDER BY descricao, codigo`
+        );
+      } catch(e2) {
+        console.warn('[POS DET] cadastro_produtos fallback também falhou:', e2);
+        rowsCad = [];
+      }
+    }
+
+    // 3) Monta o combo partindo do CADASTRO, e depois sobrepõe informações do snapshot.
+    //    Assim aparecem todos os itens do app.py, inclusive os sem estoque/OC/média no snapshot.
     const merged = new Map();
+    const normKey = (v) => String(v ?? '').trim();
 
-    (Array.isArray(rowsRaw) ? rowsRaw : []).forEach(r => {
-      const nr = _normDetRow(r);
-      const key = nr.codigo || `${nr.descricao}`;
-      if(key) merged.set(key, nr);
+    (Array.isArray(rowsCad) ? rowsCad : []).forEach(r => {
+      const nr = _normDetRow({
+        codigo: r.codigo,
+        descricao: r.descricao,
+        t_item: r.tipo_item || '',
+        estoque: 0, ocs: '', s_ocs: 0, s_emp: 0,
+        media: 0, cdp: 0, cdpoc: 0, drp: 0,
+        shelf: '', est_lojas: 0, dias_lojas: 0
+      });
+      const key = normKey(nr.codigo) || normKey(nr.descricao);
+      if(key && !merged.has(key)) merged.set(key, nr);
     });
 
-    (Array.isArray(cadastroRows) ? cadastroRows : []).forEach(r => {
+    (Array.isArray(rowsSnap) ? rowsSnap : []).forEach(r => {
       const nr = _normDetRow(r);
-      const key = nr.codigo || `${nr.descricao}`;
-      if(!key || merged.has(key)) return;
-      merged.set(key, nr);
+      const key = normKey(nr.codigo) || normKey(nr.descricao);
+      if(!key) return;
+      // Snapshot ganha prioridade nos campos calculados, mas não apaga cadastro que faltou.
+      merged.set(key, Object.assign({}, merged.get(key) || {}, nr));
     });
 
+    // Se por algum motivo o cadastro não retornou, ainda mostra o snapshot.
     _bsDetRows = Array.from(merged.values()).sort((a,b) =>
       `${a.descricao || ''}${a.codigo || ''}`.localeCompare(`${b.descricao || ''}${b.codigo || ''}`, 'pt-BR')
     );
     _bsDetScores = _bsDetRows.map(calcScore);
 
-    console.log('[POS DET] tipo/gr:', tipo, gr, 'snapshot:', (rowsRaw || []).length, 'cadastro:', (cadastroRows || []).length, 'combo:', _bsDetRows.length, _bsDetRows);
+    console.log('[POS DET] tipo/gr:', tipo, gr,
+      'snapshot:', (rowsSnap || []).length,
+      'cadastro:', (rowsCad || []).length,
+      'combo:', _bsDetRows.length,
+      _bsDetRows
+    );
 
     if(!_bsDetRows.length) {
       detDiv.style.display = 'none';
@@ -815,15 +853,12 @@ async function loadDetSection(tipo, gr) {
     if(lbl) lbl.textContent = `Produtos do item (${_bsDetRows.length})`;
     selTxt.textContent = `Selecione um produto (${_bsDetRows.length})`;
 
-    // Montagem limpa: primeiro monta tudo em fragment, depois injeta uma vez.
     const frag = document.createDocumentFragment();
     const tmp = document.createElement('div');
     _appendCDDOverview(tmp);
     _bsDetRows.forEach((r, i) => _appendCDDItem(tmp, r, i, _bsDetScores[i]));
     while(tmp.firstChild) frag.appendChild(tmp.firstChild);
     list.replaceChildren(frag);
-
-    // Diagnóstico visual discreto: deixa no atributo para conferir no inspetor.
     list.dataset.count = String(_bsDetRows.length);
 
     if(!_cddOutsideBound) {
