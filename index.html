@@ -659,7 +659,16 @@ async function loadDetSection(tipo, gr) {
             COALESCE(cod_barras, codigo_barras, codigo, ean) AS codigo,
             COALESCE(produto, descricao, descritivo) AS descricao
          FROM cadastro_produtos
-         WHERE tipo = '${tipoSafe}' AND gr = '${grSafe}'`
+         WHERE (
+            COALESCE(tipo,'') = '${tipoSafe}'
+            OR COALESCE(Tipo,'') = '${tipoSafe}'
+         )
+         AND (
+            COALESCE(gr,'') = '${grSafe}'
+            OR COALESCE(GR,'') = '${grSafe}'
+            OR COALESCE(g,'') = '${grSafe}'
+            OR COALESCE(G,'') = '${grSafe}'
+         )`
       );
     } catch(e){ console.warn('fallback cadastro_produtos falhou', e); }
 
