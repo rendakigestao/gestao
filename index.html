@@ -618,35 +618,23 @@ function closeCDD() {
   document.getElementById('cdd-list').classList.remove('open');
 }
 function selectCDDItem(i) {
-  const idx = Number(i);
-  const r   = _bsDetRows[idx];
-  if(!r) return;
-  const sc  = _bsDetScores[idx] || 0;
+  const r   = _bsDetRows[i];
+  const sc  = _bsDetScores[i];
   const cl  = scoreClass(sc);
   document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
-  document.getElementById('cdd-sel-txt').textContent = `${r.codigo || ''} — ${r.descricao || ''}`;
-  document.querySelectorAll('.cdd-item').forEach(el => {
-    el.classList.toggle('sel', String(el.dataset.idx || '') === String(idx));
-  });
+  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
+  document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
   closeCDD();
-  loadDetItem(idx);
+  loadDetItem(i);
 }
 
 let _bsDetScores = [];
-
-function _detSqlSafe(v){
-  return String(v ?? '').replace(/'/g,"''").trim();
-}
-function _detVal(v){
-  const s = String(v ?? '').trim();
-  return s ? s : '—';
-}
 
 async function loadDetSection(tipo, gr) {
   const detDiv = document.getElementById('bsdet');
   const list   = document.getElementById('cdd-list');
   const grid   = document.getElementById('bsdet-grid');
-  const lbl    = document.querySelector('#bsdet .bsdet-lbl');
+  const lbl    = detDiv ? detDiv.querySelector('.bsdet-lbl') : null;
 
   list.innerHTML = '';
   grid.innerHTML = '';
@@ -656,37 +644,55 @@ async function loadDetSection(tipo, gr) {
   if(lbl) lbl.textContent = 'Produtos do item';
 
   try {
-    const tipoSafe = _detSqlSafe(tipo);
-    const grSafe   = _detSqlSafe(gr);
+    const tipoSafe = String(tipo || '').replace(/'/g,"''").trim();
+    const grSafe   = String(gr   || '').replace(/'/g,"''").trim();
 
-    // Fonte oficial do combo: snapshot_posicao_det.
-    // Depois da correção no app.py, essa tabela já deve vir limpa/recriada e completa,
-    // exatamente como a posição expandida do app.
-    const rows = await qNeon(
+    // Fonte correta: a snapshot detalhada já é a própria posição expandida publicada.
+    // Não usa cadastro_produtos aqui, pois o cadastro só traz produto/código e não traz
+    // as informações que geram a pontuação (OC, média, CD/P, CD+OC, shelf etc.).
+    const rawRows = await qNeon(
       `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
        WHERE TRIM(tipo) = '${tipoSafe}' AND TRIM(gr) = '${grSafe}'
        ORDER BY descricao, codigo`
     );
 
-    _bsDetRows = Array.isArray(rows) ? rows : [];
+    // Normaliza chaves caso o worker/driver retorne nomes em outro formato.
+    const normRow = (r) => ({
+      codigo:     r.codigo     ?? r.CODIGO     ?? r['Código']      ?? r['Cod.Barras'] ?? '',
+      descricao:  r.descricao  ?? r.DESCRICAO  ?? r['Descrição']   ?? r.Produto      ?? '',
+      estoque:    r.estoque    ?? r.ESTOQUE    ?? r['Estoque CD']  ?? r['Quant.']    ?? '',
+      ocs:        r.ocs        ?? r.OCS        ?? r.Ocs            ?? '',
+      s_ocs:      r.s_ocs      ?? r.S_OCS      ?? r['S.Ocs']       ?? '',
+      s_emp:      r.s_emp      ?? r.S_EMP      ?? r['S.à Emp.']    ?? '',
+      media:      r.media      ?? r.MEDIA      ?? r['Média']       ?? '',
+      cdp:        r.cdp        ?? r.CDP        ?? r['CD/P']        ?? '',
+      cdpoc:      r.cdpoc      ?? r.CDPOC      ?? r['CD+OC']       ?? '',
+      drp:        r.drp        ?? r.DRP        ?? r['D.R.P.']      ?? '',
+      t_item:     r.t_item     ?? r.T_ITEM     ?? r['T.Item']      ?? '',
+      shelf:      r.shelf      ?? r.SHELF      ?? r.Shelf          ?? '',
+      est_lojas:  r.est_lojas  ?? r.EST_LOJAS  ?? r['Est.Lojas']   ?? '',
+      dias_lojas: r.dias_lojas ?? r.DIAS_LOJAS ?? r['Dias Estoque']?? ''
+    });
+
+    _bsDetRows = (rawRows || [])
+      .map(normRow)
+      .filter(r => String(r.codigo || '').trim() || String(r.descricao || '').trim());
+
     _bsDetScores = _bsDetRows.map(calcScore);
 
-    if(lbl) lbl.textContent = `Produtos do item (${_bsDetRows.length})`;
-
     if(!_bsDetRows.length) {
-      document.getElementById('cdd-sel-txt').textContent = 'Nenhum produto encontrado';
-      document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
+      detDiv.style.display='none';
       return;
     }
 
+    if(lbl) lbl.textContent = `Produtos do item (${_bsDetRows.length})`;
     document.getElementById('cdd-sel-txt').textContent = 'Selecione um produto...';
 
     const frag = document.createDocumentFragment();
 
     const dVolt = document.createElement('div');
     dVolt.className = 'cdd-item';
-    dVolt.dataset.idx = '';
     dVolt.innerHTML = `
       <div class="cdd-dot" style="background:#333340"></div>
       <div class="cdd-txt">
@@ -703,16 +709,15 @@ async function loadDetSection(tipo, gr) {
     frag.appendChild(dVolt);
 
     _bsDetRows.forEach((r, i) => {
-      const sc = _bsDetScores[i] || 0;
+      const sc = _bsDetScores[i];
       const cl = scoreClass(sc);
       const d  = document.createElement('div');
       d.className = 'cdd-item';
-      d.dataset.idx = String(i);
       d.innerHTML = `
         <div class="cdd-dot sc${cl}"></div>
         <div class="cdd-txt">
-          <div class="cdd-cod sc${cl}t">${_detVal(r.codigo)}</div>
-          <div class="cdd-desc">${_detVal(r.descricao)}</div>
+          <div class="cdd-cod sc${cl}t">${r.codigo || '—'}</div>
+          <div class="cdd-desc">${r.descricao || 'Produto sem descrição'}</div>
         </div>
         <div class="cdd-score sc${cl}t">${sc}pts</div>`;
       d.onclick = () => selectCDDItem(i);
@@ -727,17 +732,16 @@ async function loadDetSection(tipo, gr) {
     }, {once:true}), 0);
 
   } catch(e) {
-    console.error('Erro ao carregar snapshot_posicao_det:', e);
-    document.getElementById('cdd-sel-txt').textContent = 'Erro ao carregar produtos';
-    document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
+    console.error('Erro ao carregar detalhe snapshot_posicao_det:', e);
+    detDiv.style.display = 'none';
   }
 }
 
 function loadDetItem(idx) {
   const grid = document.getElementById('bsdet-grid');
   grid.innerHTML = '';
-  if(idx === '' || idx === undefined || idx === null) return;
-  const r = _bsDetRows[Number(idx)];
+  if(idx === '' || idx === undefined) return;
+  const r = _bsDetRows[parseInt(idx)];
   if(!r) return;
 
   const fields = [
@@ -748,16 +752,14 @@ function loadDetItem(idx) {
     {l:'OCs',         v:r.ocs,        hl:false},
     {l:'Média',       v:r.media,      hl:false},
     {l:'S.OCs',       v:r.s_ocs,      hl:false},
-    {l:'S.à Emp.',    v:r.s_emp,      hl:false},
     {l:'CD+OC',       v:r.cdpoc,      hl:false},
-    {l:'D.R.P.',      v:r.drp,        hl:false},
     {l:'T.Item',      v:r.t_item,     hl:false},
     {l:'Shelf',       v:r.shelf,      hl:false},
   ];
   fields.forEach(f => {
     const d = document.createElement('div');
     d.className = 'bsdet-card'+(f.hl?' hl':'');
-    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${_detVal(f.v)}</div>`;
+    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'—'}</div>`;
     grid.appendChild(d);
   });
 }
