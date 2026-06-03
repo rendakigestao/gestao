@@ -188,8 +188,8 @@ td.sol-s-val{color:#fbbf24;font-weight:600}
 .cdd-btn .cdd-arr{position:absolute;right:10px;color:#4ade80;font-size:10px;transition:transform .15s}
 .cdd-btn.open .cdd-arr{transform:rotate(180deg)}
 .cdd-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1e26;border:1px solid #333340;border-radius:8px;max-height:220px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none}
-.cdd-list.open{display:block}
-.cdd-item{padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid rgba(255,255,255,.04)}
+.cdd-list.open{display:flex;flex-direction:column}
+.cdd-item{flex-shrink:0;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s;border-bottom:1px solid rgba(255,255,255,.04)}
 .cdd-item:last-child{border-bottom:none}
 .cdd-item:hover{background:rgba(255,255,255,.06)}
 .cdd-item.sel{background:rgba(74,222,128,.08)}
@@ -618,40 +618,158 @@ function closeCDD() {
   document.getElementById('cdd-list').classList.remove('open');
 }
 function selectCDDItem(i) {
-  const r   = _bsDetRows[i];
-  const sc  = _bsDetScores[i];
-  const cl  = scoreClass(sc);
+  i = Number(i);
+  const r = _bsDetRows[i];
+  if(!r) return;
+
+  const sc = _bsDetScores[i] || 0;
+  const cl = scoreClass(sc);
+
   document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
-  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
-  document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
+  document.getElementById('cdd-sel-txt').textContent = `${r.codigo || ''} — ${r.descricao || ''}`;
+
+  // Atenção: existe o item "Visão geral" no topo. Por isso a seleção é pelo data-idx,
+  // não pela posição visual do elemento na lista.
+  document.querySelectorAll('#cdd-list .cdd-item').forEach(el => {
+    el.classList.toggle('sel', String(el.dataset.idx || '') === String(i));
+  });
+
   closeCDD();
   loadDetItem(i);
 }
 
 let _bsDetScores = [];
+let _cddOutsideBound = false;
+
+function _normDetRow(r) {
+  r = r || {};
+  return {
+    codigo:     String(r.codigo ?? r.cod_barras ?? r.codigo_barras ?? r.ean ?? '').trim(),
+    descricao:  String(r.descricao ?? r.produto ?? r.descritivo ?? '').trim(),
+    estoque:    r.estoque ?? 0,
+    ocs:        r.ocs ?? 0,
+    s_ocs:      r.s_ocs ?? 0,
+    s_emp:      r.s_emp ?? 0,
+    media:      r.media ?? 0,
+    cdp:        r.cdp ?? 0,
+    cdpoc:      r.cdpoc ?? 0,
+    drp:        r.drp ?? 0,
+    t_item:     r.t_item ?? '',
+    shelf:      r.shelf ?? '',
+    est_lojas:  r.est_lojas ?? 0,
+    dias_lojas: r.dias_lojas ?? 0
+  };
+}
+
+function _appendCDDItem(list, row, idx, score) {
+  const cl = scoreClass(score || 0);
+
+  const d = document.createElement('div');
+  d.className = 'cdd-item';
+  d.dataset.idx = String(idx);
+
+  const dot = document.createElement('div');
+  dot.className = `cdd-dot sc${cl}`;
+
+  const txt = document.createElement('div');
+  txt.className = 'cdd-txt';
+
+  const cod = document.createElement('div');
+  cod.className = `cdd-cod sc${cl}t`;
+  cod.textContent = row.codigo || '—';
+
+  const desc = document.createElement('div');
+  desc.className = 'cdd-desc';
+  desc.textContent = row.descricao || 'Produto sem descrição';
+
+  const scoreEl = document.createElement('div');
+  scoreEl.className = `cdd-score sc${cl}t`;
+  scoreEl.textContent = `${score || 0}pts`;
+
+  txt.appendChild(cod);
+  txt.appendChild(desc);
+  d.appendChild(dot);
+  d.appendChild(txt);
+  d.appendChild(scoreEl);
+
+  d.addEventListener('click', function(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
+    selectCDDItem(idx);
+  });
+
+  list.appendChild(d);
+}
+
+function _appendCDDOverview(list) {
+  const dVolt = document.createElement('div');
+  dVolt.className = 'cdd-item';
+  dVolt.dataset.idx = '';
+
+  const dot = document.createElement('div');
+  dot.className = 'cdd-dot';
+  dot.style.background = '#333340';
+
+  const txt = document.createElement('div');
+  txt.className = 'cdd-txt';
+
+  const cod = document.createElement('div');
+  cod.className = 'cdd-cod';
+  cod.style.color = '#8888a0';
+  cod.textContent = '← Visão geral';
+
+  const desc = document.createElement('div');
+  desc.className = 'cdd-desc';
+  desc.style.color = '#55556a';
+  desc.textContent = 'Mostrar todos os campos do tipo';
+
+  txt.appendChild(cod);
+  txt.appendChild(desc);
+  dVolt.appendChild(dot);
+  dVolt.appendChild(txt);
+
+  dVolt.addEventListener('click', function(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
+    closeCDD();
+    document.getElementById('bsdet-grid').innerHTML = '';
+    document.getElementById('cdd-sel-txt').textContent = `Selecione um produto (${_bsDetRows.length})`;
+    document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
+    document.querySelectorAll('#cdd-list .cdd-item').forEach(e => e.classList.remove('sel'));
+  });
+
+  list.appendChild(dVolt);
+}
 
 async function loadDetSection(tipo, gr) {
   const detDiv = document.getElementById('bsdet');
   const list   = document.getElementById('cdd-list');
   const grid   = document.getElementById('bsdet-grid');
-  list.innerHTML = '';
+  const selTxt = document.getElementById('cdd-sel-txt');
+  const selDot = document.getElementById('cdd-sel-dot');
+  const lbl    = detDiv ? detDiv.querySelector('.bsdet-lbl') : null;
+
+  _bsDetRows = [];
+  _bsDetScores = [];
+  list.replaceChildren();
   grid.innerHTML = '';
-  document.getElementById('cdd-sel-txt').textContent = 'Carregando...';
-  document.getElementById('cdd-sel-dot').className = 'cdd-dot sc0';
+  selTxt.textContent = 'Carregando...';
+  selDot.className = 'cdd-dot sc0';
+  if(lbl) lbl.textContent = 'Produtos do item';
   detDiv.style.display = '';
 
   try {
-    const tipoSafe = tipo.replace(/'/g,"''");
-    const grSafe   = gr.replace(/'/g,"''");
+    const tipoSafe = String(tipo || '').replace(/'/g,"''");
+    const grSafe   = String(gr || '').replace(/'/g,"''");
 
-    const rows = await qNeon(
+    const rowsRaw = await qNeon(
       `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
-       WHERE tipo = '${tipoSafe}' AND gr = '${grSafe}'
+       WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
+         AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
        ORDER BY descricao, codigo`
     );
 
-    // Complementa com cadastro_produtos para não faltar itens do grupo
     let cadastroRows = [];
     try {
       cadastroRows = await qNeon(
@@ -659,78 +777,65 @@ async function loadDetSection(tipo, gr) {
             COALESCE(cod_barras, codigo_barras, codigo, ean) AS codigo,
             COALESCE(produto, descricao, descritivo) AS descricao
          FROM cadastro_produtos
-         WHERE (
-            COALESCE(tipo,'') = '${tipoSafe}'
-            OR COALESCE(Tipo,'') = '${tipoSafe}'
-         )
-         AND (
-            COALESCE(gr,'') = '${grSafe}'
-            OR COALESCE(GR,'') = '${grSafe}'
-            OR COALESCE(g,'') = '${grSafe}'
-            OR COALESCE(G,'') = '${grSafe}'
-         )`
+         WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
+           AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
+         ORDER BY descricao, codigo`
       );
-    } catch(e){ console.warn('fallback cadastro_produtos falhou', e); }
+    } catch(e) {
+      console.warn('[POS DET] cadastro_produtos ignorado:', e);
+    }
 
     const merged = new Map();
 
-    (rows || []).forEach(r => {
-      const key = String(r.codigo || '').trim();
-      if(key) merged.set(key, r);
+    (Array.isArray(rowsRaw) ? rowsRaw : []).forEach(r => {
+      const nr = _normDetRow(r);
+      const key = nr.codigo || `${nr.descricao}`;
+      if(key) merged.set(key, nr);
     });
 
-    (cadastroRows || []).forEach(r => {
-      const key = String(r.codigo || '').trim();
+    (Array.isArray(cadastroRows) ? cadastroRows : []).forEach(r => {
+      const nr = _normDetRow(r);
+      const key = nr.codigo || `${nr.descricao}`;
       if(!key || merged.has(key)) return;
-
-      merged.set(key, {
-        codigo: r.codigo,
-        descricao: r.descricao || 'Produto sem descrição',
-        estoque: 0, ocs: 0, s_ocs: 0, s_emp: 0,
-        media: 0, cdp: 0, cdpoc: 0, drp: 0,
-        t_item: '', shelf: '', est_lojas: 0, dias_lojas: 0
-      });
+      merged.set(key, nr);
     });
 
-    _bsDetRows = Array.from(merged.values())
-      .sort((a,b)=>`${a.descricao||''}${a.codigo||''}`.localeCompare(`${b.descricao||''}${b.codigo||''}`));
+    _bsDetRows = Array.from(merged.values()).sort((a,b) =>
+      `${a.descricao || ''}${a.codigo || ''}`.localeCompare(`${b.descricao || ''}${b.codigo || ''}`, 'pt-BR')
+    );
     _bsDetScores = _bsDetRows.map(calcScore);
-    if(!_bsDetRows.length) { detDiv.style.display='none'; return; }
 
-    document.getElementById('cdd-sel-txt').textContent = 'Selecione um produto...';
+    console.log('[POS DET] tipo/gr:', tipo, gr, 'snapshot:', (rowsRaw || []).length, 'cadastro:', (cadastroRows || []).length, 'combo:', _bsDetRows.length, _bsDetRows);
 
-    const dVolt = document.createElement('div');
-    dVolt.className = 'cdd-item';
-    dVolt.innerHTML = `
-      <div class="cdd-dot" style="background:#333340"></div>
-      <div class="cdd-txt">
-        <div class="cdd-cod" style="color:#8888a0">← Visão geral</div>
-        <div class="cdd-desc" style="color:#55556a">Mostrar todos os campos do tipo</div>
-      </div>`;
-    dVolt.onclick = () => { closeCDD(); document.getElementById('bsdet-grid').innerHTML=''; document.getElementById('cdd-sel-txt').textContent='Selecione um produto...'; document.getElementById('cdd-sel-dot').className='cdd-dot sc0'; document.querySelectorAll('.cdd-item').forEach(e=>e.classList.remove('sel')); };
-    list.appendChild(dVolt);
+    if(!_bsDetRows.length) {
+      detDiv.style.display = 'none';
+      return;
+    }
 
-    _bsDetRows.forEach((r, i) => {
-      const sc = _bsDetScores[i];
-      const cl = scoreClass(sc);
-      const d  = document.createElement('div');
-      d.className = 'cdd-item';
-      d.innerHTML = `
-        <div class="cdd-dot sc${cl}"></div>
-        <div class="cdd-txt">
-          <div class="cdd-cod sc${cl}t">${r.codigo}</div>
-          <div class="cdd-desc">${r.descricao}</div>
-        </div>
-        <div class="cdd-score sc${cl}t">${sc}pts</div>`;
-      d.onclick = () => selectCDDItem(i);
-      list.appendChild(d);
-    });
+    if(lbl) lbl.textContent = `Produtos do item (${_bsDetRows.length})`;
+    selTxt.textContent = `Selecione um produto (${_bsDetRows.length})`;
 
-    setTimeout(()=>document.addEventListener('click', e=>{
-      if(!document.getElementById('cdd-wrap').contains(e.target)) closeCDD();
-    }, {once:true}), 0);
+    // Montagem limpa: primeiro monta tudo em fragment, depois injeta uma vez.
+    const frag = document.createDocumentFragment();
+    const tmp = document.createElement('div');
+    _appendCDDOverview(tmp);
+    _bsDetRows.forEach((r, i) => _appendCDDItem(tmp, r, i, _bsDetScores[i]));
+    while(tmp.firstChild) frag.appendChild(tmp.firstChild);
+    list.replaceChildren(frag);
+
+    // Diagnóstico visual discreto: deixa no atributo para conferir no inspetor.
+    list.dataset.count = String(_bsDetRows.length);
+
+    if(!_cddOutsideBound) {
+      document.addEventListener('click', function(e){
+        const wrap = document.getElementById('cdd-wrap');
+        if(wrap && !wrap.contains(e.target)) closeCDD();
+      });
+      _cddOutsideBound = true;
+    }
 
   } catch(e) {
+    console.error('[POS DET] falha ao carregar combo:', e);
     detDiv.style.display = 'none';
   }
 }
@@ -738,8 +843,11 @@ async function loadDetSection(tipo, gr) {
 function loadDetItem(idx) {
   const grid = document.getElementById('bsdet-grid');
   grid.innerHTML = '';
-  if(idx === '' || idx === undefined) return;
-  const r = _bsDetRows[parseInt(idx)];
+
+  idx = Number(idx);
+  if(!Number.isInteger(idx) || idx < 0) return;
+
+  const r = _bsDetRows[idx];
   if(!r) return;
 
   const fields = [
@@ -754,10 +862,18 @@ function loadDetItem(idx) {
     {l:'T.Item',      v:r.t_item,     hl:false},
     {l:'Shelf',       v:r.shelf,      hl:false},
   ];
+
   fields.forEach(f => {
     const d = document.createElement('div');
     d.className = 'bsdet-card'+(f.hl?' hl':'');
-    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'—'}</div>`;
+    const label = document.createElement('div');
+    label.className = 'bslbl';
+    label.textContent = f.l;
+    const val = document.createElement('div');
+    val.className = 'bsval';
+    val.textContent = (f.v === undefined || f.v === null || f.v === '') ? '—' : String(f.v);
+    d.appendChild(label);
+    d.appendChild(val);
     grid.appendChild(d);
   });
 }
