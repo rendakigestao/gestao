@@ -641,23 +641,32 @@ function selectCDDItem(i) {
 let _bsDetScores = [];
 let _cddOutsideBound = false;
 
+function _pick(r, keys, def='') {
+  for (const k of keys) {
+    if (r && Object.prototype.hasOwnProperty.call(r, k) && r[k] !== undefined && r[k] !== null && r[k] !== '') return r[k];
+  }
+  return def;
+}
+
 function _normDetRow(r) {
   r = r || {};
   return {
-    codigo:     String(r.codigo ?? r.cod_barras ?? r.codigo_barras ?? r.ean ?? '').trim(),
-    descricao:  String(r.descricao ?? r.produto ?? r.descritivo ?? '').trim(),
-    estoque:    r.estoque ?? 0,
-    ocs:        r.ocs ?? 0,
-    s_ocs:      r.s_ocs ?? 0,
-    s_emp:      r.s_emp ?? 0,
-    media:      r.media ?? 0,
-    cdp:        r.cdp ?? 0,
-    cdpoc:      r.cdpoc ?? 0,
-    drp:        r.drp ?? 0,
-    t_item:     r.t_item ?? '',
-    shelf:      r.shelf ?? '',
-    est_lojas:  r.est_lojas ?? 0,
-    dias_lojas: r.dias_lojas ?? 0
+    codigo:     String(_pick(r, ['codigo','Código','Cod.Barras','cod_barras','codigo_barras','ean'], '')).trim(),
+    descricao:  String(_pick(r, ['descricao','Descrição','Produto','produto','descritivo'], '')).trim(),
+
+    // aceita tanto a estrutura da snapshot detalhada quanto nomes vindos da posição expandida
+    estoque:    _pick(r, ['estoque','Estoque CD','Quant.','Quant','quant'], ''),
+    ocs:        _pick(r, ['ocs','Ocs','OCS'], ''),
+    s_ocs:      _pick(r, ['s_ocs','S.Ocs','S.OCs','S Ocs'], ''),
+    s_emp:      _pick(r, ['s_emp','S.à Emp.','S.A Emp.','S Emp'], ''),
+    media:      _pick(r, ['media','Média','Media'], ''),
+    cdp:        _pick(r, ['cdp','CD/P'], ''),
+    cdpoc:      _pick(r, ['cdpoc','CD+OC'], ''),
+    drp:        _pick(r, ['drp','D.R.P.'], ''),
+    t_item:     _pick(r, ['t_item','T.Item','T Item','tipo_item'], ''),
+    shelf:      _pick(r, ['shelf','Shelf'], ''),
+    est_lojas:  _pick(r, ['est_lojas','Est.Lojas','Est. Lojas'], ''),
+    dias_lojas: _pick(r, ['dias_lojas','Dias Estoque','Dias Lojas'], '')
   };
 }
 
@@ -762,88 +771,68 @@ async function loadDetSection(tipo, gr) {
     const tipoSafe = String(tipo || '').replace(/'/g,"''");
     const grSafe   = String(gr || '').replace(/'/g,"''");
 
-    // 1) Dados operacionais já calculados no snapshot detalhado.
-    //    Pode ter só produtos com saldo/movimento, por isso NÃO pode ser a única fonte do combo.
-    let rowsSnap = [];
-    try {
-      rowsSnap = await qNeon(
-        `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
-         FROM snapshot_posicao_det
-         WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
-           AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
-         ORDER BY descricao, codigo`
-      );
-    } catch(e) {
-      console.warn('[POS DET] snapshot_posicao_det falhou:', e);
-      rowsSnap = [];
-    }
+    // Fonte principal: snapshot_posicao_det.
+    // Agora que a snapshot detalhada é limpa e recriada inteira na publicação,
+    // ela deve ser a fonte fiel da posição expandida do app.py.
+    const rowsRaw = await qNeon(
+      `SELECT 
+          codigo AS codigo,
+          descricao AS descricao,
+          estoque AS estoque,
+          ocs AS ocs,
+          s_ocs AS s_ocs,
+          s_emp AS s_emp,
+          media AS media,
+          cdp AS cdp,
+          cdpoc AS cdpoc,
+          drp AS drp,
+          t_item AS t_item,
+          shelf AS shelf,
+          est_lojas AS est_lojas,
+          dias_lojas AS dias_lojas
+       FROM snapshot_posicao_det
+       WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
+         AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
+       ORDER BY descricao, codigo`
+    );
 
-    // 2) Fonte mestre igual ao app.py: cadastro_produtos por Tipo + Grupo.
-    //    No cadastro a coluna do grupo chama "grupo" (não "gr").
-    let rowsCad = [];
-    try {
-      rowsCad = await qNeon(
-        `SELECT codigo, descricao, grupo, tipo_item
-         FROM cadastro_produtos
-         WHERE TRIM(UPPER(tipo))  = TRIM(UPPER('${tipoSafe}'))
-           AND TRIM(UPPER(grupo)) = TRIM(UPPER('${grSafe}'))
-         ORDER BY descricao, codigo`
-      );
-    } catch(e1) {
-      console.warn('[POS DET] cadastro_produtos por grupo falhou, tentando fallback:', e1);
-      // Fallback para ambientes antigos onde a coluna possa ter sido publicada como gr.
+    const snapshotRows = (Array.isArray(rowsRaw) ? rowsRaw : []).map(_normDetRow);
+
+    // Cadastro é só fallback. Se a snapshot trouxe itens, não usa cadastro como mestre,
+    // senão perde as informações de estoque/OC/média e a pontuação vira zero.
+    let finalRows = snapshotRows;
+
+    if(!finalRows.length) {
+      let cadastroRows = [];
       try {
-        rowsCad = await qNeon(
-          `SELECT codigo, descricao, gr AS grupo, tipo_item
+        cadastroRows = await qNeon(
+          `SELECT 
+              codigo AS codigo,
+              descricao AS descricao,
+              tipo_item AS t_item
            FROM cadastro_produtos
            WHERE TRIM(UPPER(tipo)) = TRIM(UPPER('${tipoSafe}'))
-             AND TRIM(UPPER(gr))   = TRIM(UPPER('${grSafe}'))
+             AND TRIM(UPPER(grupo)) = TRIM(UPPER('${grSafe}'))
            ORDER BY descricao, codigo`
         );
-      } catch(e2) {
-        console.warn('[POS DET] cadastro_produtos fallback também falhou:', e2);
-        rowsCad = [];
+      } catch(e) {
+        console.warn('[POS DET] fallback cadastro_produtos falhou:', e);
       }
+      finalRows = (Array.isArray(cadastroRows) ? cadastroRows : []).map(_normDetRow);
     }
 
-    // 3) Monta o combo partindo do CADASTRO, e depois sobrepõe informações do snapshot.
-    //    Assim aparecem todos os itens do app.py, inclusive os sem estoque/OC/média no snapshot.
     const merged = new Map();
-    const normKey = (v) => String(v ?? '').trim();
-
-    (Array.isArray(rowsCad) ? rowsCad : []).forEach(r => {
-      const nr = _normDetRow({
-        codigo: r.codigo,
-        descricao: r.descricao,
-        t_item: r.tipo_item || '',
-        estoque: 0, ocs: '', s_ocs: 0, s_emp: 0,
-        media: 0, cdp: 0, cdpoc: 0, drp: 0,
-        shelf: '', est_lojas: 0, dias_lojas: 0
-      });
-      const key = normKey(nr.codigo) || normKey(nr.descricao);
-      if(key && !merged.has(key)) merged.set(key, nr);
+    finalRows.forEach(r => {
+      const key = r.codigo || `${r.descricao}`;
+      if(key) merged.set(key, r);
     });
 
-    (Array.isArray(rowsSnap) ? rowsSnap : []).forEach(r => {
-      const nr = _normDetRow(r);
-      const key = normKey(nr.codigo) || normKey(nr.descricao);
-      if(!key) return;
-      // Snapshot ganha prioridade nos campos calculados, mas não apaga cadastro que faltou.
-      merged.set(key, Object.assign({}, merged.get(key) || {}, nr));
-    });
-
-    // Se por algum motivo o cadastro não retornou, ainda mostra o snapshot.
     _bsDetRows = Array.from(merged.values()).sort((a,b) =>
       `${a.descricao || ''}${a.codigo || ''}`.localeCompare(`${b.descricao || ''}${b.codigo || ''}`, 'pt-BR')
     );
     _bsDetScores = _bsDetRows.map(calcScore);
 
-    console.log('[POS DET] tipo/gr:', tipo, gr,
-      'snapshot:', (rowsSnap || []).length,
-      'cadastro:', (rowsCad || []).length,
-      'combo:', _bsDetRows.length,
-      _bsDetRows
-    );
+    console.log('[POS DET] tipo/gr:', tipo, gr, 'snapshot:', (rowsRaw || []).length, 'combo:', _bsDetRows.length, _bsDetRows);
 
     if(!_bsDetRows.length) {
       detDiv.style.display = 'none';
@@ -854,10 +843,8 @@ async function loadDetSection(tipo, gr) {
     selTxt.textContent = `Selecione um produto (${_bsDetRows.length})`;
 
     const frag = document.createDocumentFragment();
-    const tmp = document.createElement('div');
-    _appendCDDOverview(tmp);
-    _bsDetRows.forEach((r, i) => _appendCDDItem(tmp, r, i, _bsDetScores[i]));
-    while(tmp.firstChild) frag.appendChild(tmp.firstChild);
+    _appendCDDOverview(frag);
+    _bsDetRows.forEach((r, i) => _appendCDDItem(frag, r, i, _bsDetScores[i]));
     list.replaceChildren(frag);
     list.dataset.count = String(_bsDetRows.length);
 
