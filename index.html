@@ -800,7 +800,7 @@ async function loadHistoricoCargas(el){
   el.classList.add('active');
   curTable='__historico_cargas__';
   document.getElementById('ttitle').textContent='Histórico de Cargas';
-  document.getElementById('rcount').textContent='Últimos registros';
+  document.getElementById('rcount').textContent='Carregando...';
   setLoad(true);
   document.getElementById('twrap').style.display='flex';
   document.getElementById('armazem-wrap').style.display='none';
@@ -808,26 +808,121 @@ async function loadHistoricoCargas(el){
   document.getElementById('pgbar').style.display='none';
   document.getElementById('empty').style.display='none';
   document.getElementById('tcont').style.display='none';
+
+  const dateMs = (v) => {
+    if(!v) return 0;
+    const s = String(v).trim();
+    try{
+      const d = new Date(s);
+      if(!isNaN(d.getTime())) return d.getTime();
+    }catch(_e){}
+    // fallback para datas brasileiras: DD/MM/AAAA ou DD/MM/AAAA HH:MM
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[, ]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if(m){
+      const dd=Number(m[1]), mm=Number(m[2])-1, yy=Number(m[3]);
+      const hh=Number(m[4]||0), mi=Number(m[5]||0), ss=Number(m[6]||0);
+      const d = new Date(yy, mm, dd, hh, mi, ss);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+    return 0;
+  };
+
+  const rowDateMs = (x) => dateMs(x.data_geracao || x.criado_em || x.data_registro);
+
+  const fmtData = (v) => {
+    if(!v) return '';
+    try{
+      const d = new Date(v);
+      if(!isNaN(d.getTime())) return d.toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo'}).slice(0,16);
+    }catch(_e){}
+    return String(v).replace('T',' ').slice(0,16);
+  };
+
+  const parseProdutos = (x) => {
+    let p = [];
+    try{
+      if(Array.isArray(x.produtos)) p = x.produtos;
+      else if(x.produtos_json) p = JSON.parse(x.produtos_json || '[]');
+    }catch(_e){ p = []; }
+    return Array.isArray(p) ? p : [];
+  };
+
+  const produtoCampo = (p, ...keys) => {
+    for(const k of keys){
+      if(p && p[k] !== undefined && p[k] !== null && String(p[k]).trim() !== '') return String(p[k]).trim();
+    }
+    return '';
+  };
+
   try{
-    const r = await fetch(PROXY + 'historico-cargas');
+    // Lê ao vivo do Worker/D1. Não usa mais snapshot local.
+    const r = await fetch(PROXY + 'recebimento/listar', {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status+' ao consultar recebimento/listar');
     const j = await r.json();
-    const rows = (j.rows||[]).map(x=>({
-      ID:x.id||'',
-      Data:x.data||x.created_at||'',
-      Livro:x.livro||'',
-      Conferente:x.conferente||'',
-      Carga:x.carga||'',
-      Produto:x.produto||'',
-      Emb:x.emb||'',
-      Glosa:x.glosa||'',
-      Obs:x.observacao||''
-    }));
-    if(!rows.length){showEmpty('__historico_cargas__'); return;}
+    const baseRaw = Array.isArray(j) ? j : (j.rows || j.results || []);
+    // Ordem correta: maior data/horário primeiro. Isso garante que o limite de 200
+    // sempre preserve os recebimentos mais recentes na visualização.
+    const base = (baseRaw || []).slice().sort((a,b) => {
+      const db = rowDateMs(b);
+      const da = rowDateMs(a);
+      if(db !== da) return db - da;
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
+
+    const rows = [];
+    base.forEach(x=>{
+      const prods = parseProdutos(x);
+      const comuns = {
+        ID: x.id || '',
+        Data: fmtData(x.data_geracao || x.criado_em || x.data_registro),
+        Nota: x.nota_fiscal || x.nota || x.numero_nota || '',
+        Conferente: x.conferente || '',
+        Livro: x.livro || '',
+        Carga: x.carga || '',
+        Emb: x.embalagem || '',
+        Glosa: String(x.glosa || '').toLowerCase()==='sim' ? 'Sim' : 'Não',
+        'Item Glosa': x.glosa_item || '',
+        'Qtd Glosa': x.glosa_qtd || '',
+        'Motivo Glosa': x.glosa_motivo || '',
+        Origem: x.origem || ''
+      };
+
+      if(prods.length){
+        prods.forEach((p,idx)=>{
+          rows.push({
+            ...comuns,
+            '#': idx + 1,
+            Produto: produtoCampo(p,'desc','descricao','produto','nome','item'),
+            'Cód. Barras': produtoCampo(p,'ean','cod_barras','codigo_barras','codigoBarras','gtin'),
+            'Cód. Caixa': produtoCampo(p,'caixa','codigo_caixa','cod_caixa','codigoCaixa'),
+            Validade: produtoCampo(p,'validade','data_validade','vencimento')
+          });
+        });
+      }else{
+        rows.push({
+          ...comuns,
+          '#':'',
+          Produto:'',
+          'Cód. Barras':'',
+          'Cód. Caixa':'',
+          Validade:''
+        });
+      }
+    });
+
+    if(!rows.length){
+      document.getElementById('empty').style.display='flex';
+      document.getElementById('empty').innerHTML=`<div class="ei">📦</div><div class="et">Nenhum histórico de carga encontrado no Cloudflare.</div>`;
+      document.getElementById('rcount').textContent='0 registros';
+      return;
+    }
+
     allRows=rows; colFilters={}; sortC=-1; sortD=1;
     colW=Object.keys(rows[0]).map(()=>null);
     applyAll();
     document.getElementById('tcont').style.display='';
     document.getElementById('pgbar').style.display='';
+    document.getElementById('rcount').textContent=rows.length+' linha(s)';
   }catch(e){showErr(e.message)}
   setLoad(false);
 }
