@@ -351,6 +351,7 @@ const TABLES=[
   {group:'Telas Principais',name:'snapshot_sgp',     label:'SGP Empenhos',       badge:true},
   {group:'Análises',        name:'__armazem__',      label:'Análise Armazém',     badge:true},
   {group:'Operacional',     name:'__recebimento__',  label:'Recebimento de Carga', badge:true},
+  {group:'Operacional',     name:'__historico_cargas__',  label:'Histórico de Cargas', badge:true},
 ];
 const QUERIES={
   tabela_controle:`SELECT "Ano","O.C","Cod.Barras","Produto","Tipo","Fornecedor","G","Comprado","Qtd_Pedido","Qtd_Recebida","S_Restante","Media","Dias","Percentual","Situacao","L","CD","Status" FROM tabela_controle ORDER BY "Ano" DESC,"O.C" LIMIT 5000`,
@@ -451,7 +452,7 @@ function buildSB(){
     ts.forEach(t=>{
       const el=document.createElement('div');el.className='titem';el.dataset.l=t.label;
       el.innerHTML=`<div class="tdot"></div><div class="tname">${t.label}</div>${t.badge?'<div class="tbadge">live</div>':''}`;
-      el.onclick=()=>t.name==='__armazem__'?loadArmazem(el):(t.name==='__recebimento__'?loadRecebimento(el):loadTable(t.name,t.label,el));
+      el.onclick=()=>t.name==='__armazem__'?loadArmazem(el):(t.name==='__recebimento__'?loadRecebimento(el):(t.name==='__historico_cargas__'?loadHistoricoCargas(el):loadTable(t.name,t.label,el)));
       list.appendChild(el);
     });
   });
@@ -791,6 +792,44 @@ function loadRecebimento(el){
     frame.srcdoc=_decodeB64Utf8(RECEBIMENTO_HTML_B64);
     recebimentoLoaded=true;
   }
+}
+
+
+async function loadHistoricoCargas(el){
+  document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  curTable='__historico_cargas__';
+  document.getElementById('ttitle').textContent='Histórico de Cargas';
+  document.getElementById('rcount').textContent='Últimos registros';
+  setLoad(true);
+  document.getElementById('twrap').style.display='flex';
+  document.getElementById('armazem-wrap').style.display='none';
+  const rw=document.getElementById('recebimento-wrap'); if(rw) rw.style.display='none';
+  document.getElementById('pgbar').style.display='none';
+  document.getElementById('empty').style.display='none';
+  document.getElementById('tcont').style.display='none';
+  try{
+    const r = await fetch(PROXY + 'historico-cargas');
+    const j = await r.json();
+    const rows = (j.rows||[]).map(x=>({
+      ID:x.id||'',
+      Data:x.data||x.created_at||'',
+      Livro:x.livro||'',
+      Conferente:x.conferente||'',
+      Carga:x.carga||'',
+      Produto:x.produto||'',
+      Emb:x.emb||'',
+      Glosa:x.glosa||'',
+      Obs:x.observacao||''
+    }));
+    if(!rows.length){showEmpty('__historico_cargas__'); return;}
+    allRows=rows; colFilters={}; sortC=-1; sortD=1;
+    colW=Object.keys(rows[0]).map(()=>null);
+    applyAll();
+    document.getElementById('tcont').style.display='';
+    document.getElementById('pgbar').style.display='';
+  }catch(e){showErr(e.message)}
+  setLoad(false);
 }
 
 // ── Análise Armazém ────────────────────────────────────────────────────────
