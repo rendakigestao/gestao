@@ -422,6 +422,7 @@ let recebimentoLoaded=false;
 let allRows=[],filtRows=[],colFilters={},sortC=-1,sortD=1;
 let curPage=0,pageSize=1000,totalPages=1;
 let curTable=null,colW=[];
+let histColOrder=null;
 let fdCI=-1,fdAllVals=[],fdSel=new Set(),fdTerm='';
 
 // State armazém
@@ -486,26 +487,89 @@ async function loadTable(name,label,el){
 }
 function showEmpty(n){setLoad(false);document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">⏳</div><div class="et">Snapshot ainda não gerado.</div>`}
 function showErr(m){document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">⚠</div><div class="et" style="color:var(--red)">${m}</div>`}
+function _parseDateHist(v){
+  if(!v) return 0;
+  const s=String(v).trim();
+  // ISO Cloudflare: 2026-06-08T17:23:16.866Z
+  let t=Date.parse(s);
+  if(!isNaN(t)) return t;
+  // BR: 08/06/2026 14:23 ou 08/06/2026, 14:23:16
+  const m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m){
+    const dd=+m[1], mm=+m[2]-1, yy=+m[3], hh=+(m[4]||0), mi=+(m[5]||0), ss=+(m[6]||0);
+    return new Date(yy,mm,dd,hh,mi,ss).getTime();
+  }
+  return 0;
+}
+function _histGetOrder(cols){
+  const saved=JSON.parse(localStorage.getItem('hist_cargas_col_order')||'[]');
+  const base=cols.filter(c=>!['#','ID','Id','id','Origem','origem'].includes(c));
+  if(saved && saved.length){
+    const ordered=saved.filter(c=>base.includes(c));
+    base.forEach(c=>{if(!ordered.includes(c)) ordered.push(c)});
+    return ordered;
+  }
+  return base;
+}
+function _histSaveConfig(cols){
+  if(curTable!=='__historico_cargas__') return;
+  try{
+    localStorage.setItem('hist_cargas_col_order', JSON.stringify(cols));
+    localStorage.setItem('hist_cargas_col_widths', JSON.stringify(colW||{}));
+  }catch(e){}
+}
 function applyAll(){
   filtRows=allRows.filter(row=>{const v=Object.values(row);return Object.entries(colFilters).every(([ci,sel])=>!sel||sel.has(String(v[ci]??'')));});
-  if(sortC>=0){filtRows.sort((a,b)=>{const av=Object.values(a)[sortC]??'',bv=Object.values(b)[sortC]??'';const an=parseFloat(String(av).replace(/\./g,'').replace(',','.')),bn=parseFloat(String(bv).replace(/\./g,'').replace(',','.'));if(!isNaN(an)&&!isNaN(bn))return(an-bn)*sortD;return String(av).localeCompare(String(bv),'pt-BR')*sortD;});}
+  if(curTable==='__historico_cargas__'){
+    // Ordem fixa correta para Histórico: maior ano > maior mês > maior dia > hora.
+    filtRows.sort((a,b)=>_parseDateHist(b.DataISO||b.Data||b.criado_em||b.data_geracao)-_parseDateHist(a.DataISO||a.Data||a.criado_em||a.data_geracao));
+  }else if(sortC>=0){
+    filtRows.sort((a,b)=>{const av=Object.values(a)[sortC]??'',bv=Object.values(b)[sortC]??'';const an=parseFloat(String(av).replace(/\./g,'').replace(',','.')),bn=parseFloat(String(bv).replace(/\./g,'').replace(',','.'));if(!isNaN(an)&&!isNaN(bn))return(an-bn)*sortD;return String(av).localeCompare(String(bv),'pt-BR')*sortD;});
+  }
   totalPages=Math.max(1,Math.ceil(filtRows.length/pageSize));
   if(curPage>=totalPages)curPage=0;
   render();updCount();
 }
 function render(){
   if(!allRows.length)return;
-  const cols=Object.keys(allRows[0]);const lbls=CLABELS[curTable]||{};
+  let cols=Object.keys(allRows[0]);const lbls=CLABELS[curTable]||{};
+  if(curTable==='__historico_cargas__'){
+    cols=_histGetOrder(cols).filter(c=>c!=='DataISO');
+    histColOrder=cols.slice();
+  }
   const head=document.getElementById('dhead'),body=document.getElementById('dbody');
   head.innerHTML='';
   const tr=document.createElement('tr');
   cols.forEach((col,ci)=>{
-    const th=document.createElement('th');if(colW[ci])th.style.width=colW[ci]+'px';
-    const hf=colFilters[ci]?'on':'';const sa=sortC===ci&&sortD===1,sd=sortC===ci&&sortD===-1;
-    th.innerHTML=`<div class="thi"><div class="thl" title="${col}">${lbls[col]||col}</div><div class="ths">${sa?'▲':sd?'▼':''}</div><div class="thf ${hf}" data-ci="${ci}">▼</div></div><div class="rzh"></div>`;
-    th.querySelector('.thl').onclick=()=>{if(sortC===ci)sortD*=-1;else{sortC=ci;sortD=1}applyAll()};
-    th.querySelector('.thf').onclick=e=>{e.stopPropagation();openFD(ci,e.target)};
-    th.querySelector('.rzh').onmousedown=e=>startRz(e,ci,th);
+    const th=document.createElement('th');
+    const realCi=Object.keys(allRows[0]).indexOf(col);
+    const w=(curTable==='__historico_cargas__' ? colW[col] : colW[realCi]);
+    if(w)th.style.width=w+'px';
+    const hf=colFilters[realCi]?'on':'';const sa=sortC===realCi&&sortD===1,sd=sortC===realCi&&sortD===-1;
+    th.draggable = curTable==='__historico_cargas__';
+    th.dataset.col=col;
+    th.innerHTML=`<div class="thi"><div class="thl" title="${col}">${lbls[col]||col}</div><div class="ths">${sa?'▲':sd?'▼':''}</div><div class="thf ${hf}" data-ci="${realCi}">▼</div></div><div class="rzh"></div>`;
+    th.querySelector('.thl').onclick=()=>{if(curTable==='__historico_cargas__' && col==='Data'){ sortC=-1; applyAll(); return; } if(sortC===realCi)sortD*=-1;else{sortC=realCi;sortD=1}applyAll()};
+    th.querySelector('.thf').onclick=e=>{e.stopPropagation();openFD(realCi,e.target)};
+    th.querySelector('.rzh').onmousedown=e=>startRz(e,realCi,th,col);
+    if(curTable==='__historico_cargas__'){
+      th.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain', col)});
+      th.addEventListener('dragover',e=>e.preventDefault());
+      th.addEventListener('drop',e=>{
+        e.preventDefault();
+        const from=e.dataTransfer.getData('text/plain');
+        const to=col;
+        const order=_histGetOrder(Object.keys(allRows[0])).filter(c=>c!=='DataISO');
+        const fi=order.indexOf(from), ti=order.indexOf(to);
+        if(fi>=0 && ti>=0){
+          const [m]=order.splice(fi,1);
+          order.splice(ti,0,m);
+          localStorage.setItem('hist_cargas_col_order', JSON.stringify(order));
+          histColOrder=order;
+          render();
+        }
+      });
+    }
     tr.appendChild(th);
   });
   head.appendChild(tr);
@@ -513,12 +577,12 @@ function render(){
   body.innerHTML='';
   slice.forEach(row=>{
     const trow=document.createElement('tr');
-    Object.values(row).forEach(val=>{const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');trow.appendChild(td);});
+    cols.forEach(col=>{const val=row[col]; const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');trow.appendChild(td);});
     trow.style.cursor='pointer';
-    trow.ondblclick=()=>openBSheet(cols,Object.values(row));
+    trow.ondblclick=()=>openBSheet(cols,cols.map(c=>row[c]));
     trow.addEventListener('touchend',e=>{
       const now=Date.now();
-      if(_lastTapRow===trow&&now-_lastTap<380){e.preventDefault();openBSheet(cols,Object.values(row));}
+      if(_lastTapRow===trow&&now-_lastTap<380){e.preventDefault();openBSheet(cols,cols.map(c=>row[c]));}
       _lastTap=now;_lastTapRow=trow;
     },{passive:false});
     body.appendChild(trow);
@@ -529,7 +593,7 @@ function render(){
 function goPage(p){curPage=Math.max(0,Math.min(p,totalPages-1));render()}
 function chgPs(v){pageSize=parseInt(v);curPage=0;applyAll()}
 function updCount(){const af=Object.values(colFilters).filter(Boolean).length;let t=`${filtRows.length.toLocaleString('pt-BR')} / ${allRows.length.toLocaleString('pt-BR')} linhas`;if(af)t+=` · ${af} filtro(s)`;document.getElementById('rcount').textContent=t}
-function startRz(e,ci,th){e.preventDefault();const sx=e.clientX,sw=th.offsetWidth;const mv=e2=>{const w=Math.max(40,sw+e2.clientX-sx);colW[ci]=w;th.style.width=w+'px'};const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up)};document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)}
+function startRz(e,ci,th,colName=null){e.preventDefault();const sx=e.clientX,sw=th.offsetWidth;const mv=e2=>{const w=Math.max(40,sw+e2.clientX-sx);if(curTable==='__historico_cargas__' && colName){colW[colName]=w;}else{colW[ci]=w;}th.style.width=w+'px'};const up=()=>{if(curTable==='__historico_cargas__')_histSaveConfig(histColOrder||[]);document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up)};document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)}
 function openFD(ci,btn){const d=document.getElementById('fdrop');if(d.classList.contains('open')&&fdCI===ci){closeFD();return}fdCI=ci;document.getElementById('fdsrch').value='';fdTerm='';const vals=[...new Set(allRows.map(r=>String(Object.values(r)[ci]??'')))].sort((a,b)=>{const an=parseFloat(a.replace(/\./g,'').replace(',','.')),bn=parseFloat(b.replace(/\./g,'').replace(',','.'));if(!isNaN(an)&&!isNaN(bn))return an-bn;return a.localeCompare(b,'pt-BR')});fdAllVals=vals;const cur=colFilters[ci];fdSel=cur?new Set(cur):new Set(vals);renderFD();const r=btn.getBoundingClientRect();d.style.top=(r.bottom+2)+'px';d.style.left=Math.min(r.left,window.innerWidth-240)+'px';d.classList.add('open');setTimeout(()=>document.addEventListener('click',outsideFD),0)}
 function closeFD(){document.getElementById('fdrop').classList.remove('open');document.removeEventListener('click',outsideFD)}
 function outsideFD(e){if(!document.getElementById('fdrop').contains(e.target))closeFD()}
@@ -800,7 +864,7 @@ async function loadHistoricoCargas(el){
   el.classList.add('active');
   curTable='__historico_cargas__';
   document.getElementById('ttitle').textContent='Histórico de Cargas';
-  document.getElementById('rcount').textContent='Carregando...';
+  document.getElementById('rcount').textContent='Últimos registros';
   setLoad(true);
   document.getElementById('twrap').style.display='flex';
   document.getElementById('armazem-wrap').style.display='none';
@@ -808,121 +872,49 @@ async function loadHistoricoCargas(el){
   document.getElementById('pgbar').style.display='none';
   document.getElementById('empty').style.display='none';
   document.getElementById('tcont').style.display='none';
-
-  const dateMs = (v) => {
-    if(!v) return 0;
-    const s = String(v).trim();
-    try{
-      const d = new Date(s);
-      if(!isNaN(d.getTime())) return d.getTime();
-    }catch(_e){}
-    // fallback para datas brasileiras: DD/MM/AAAA ou DD/MM/AAAA HH:MM
-    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[, ]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-    if(m){
-      const dd=Number(m[1]), mm=Number(m[2])-1, yy=Number(m[3]);
-      const hh=Number(m[4]||0), mi=Number(m[5]||0), ss=Number(m[6]||0);
-      const d = new Date(yy, mm, dd, hh, mi, ss);
-      return isNaN(d.getTime()) ? 0 : d.getTime();
-    }
-    return 0;
-  };
-
-  const rowDateMs = (x) => dateMs(x.data_geracao || x.criado_em || x.data_registro);
-
-  const fmtData = (v) => {
-    if(!v) return '';
-    try{
-      const d = new Date(v);
-      if(!isNaN(d.getTime())) return d.toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo'}).slice(0,16);
-    }catch(_e){}
-    return String(v).replace('T',' ').slice(0,16);
-  };
-
-  const parseProdutos = (x) => {
-    let p = [];
-    try{
-      if(Array.isArray(x.produtos)) p = x.produtos;
-      else if(x.produtos_json) p = JSON.parse(x.produtos_json || '[]');
-    }catch(_e){ p = []; }
-    return Array.isArray(p) ? p : [];
-  };
-
-  const produtoCampo = (p, ...keys) => {
-    for(const k of keys){
-      if(p && p[k] !== undefined && p[k] !== null && String(p[k]).trim() !== '') return String(p[k]).trim();
-    }
-    return '';
-  };
-
   try{
-    // Lê ao vivo do Worker/D1. Não usa mais snapshot local.
-    const r = await fetch(PROXY + 'recebimento/listar', {cache:'no-store'});
-    if(!r.ok) throw new Error('HTTP '+r.status+' ao consultar recebimento/listar');
+    const r = await fetch(PROXY + 'recebimento/listar');
     const j = await r.json();
-    const baseRaw = Array.isArray(j) ? j : (j.rows || j.results || []);
-    // Ordem correta: maior data/horário primeiro. Isso garante que o limite de 200
-    // sempre preserve os recebimentos mais recentes na visualização.
-    const base = (baseRaw || []).slice().sort((a,b) => {
-      const db = rowDateMs(b);
-      const da = rowDateMs(a);
-      if(db !== da) return db - da;
-      return Number(b.id || 0) - Number(a.id || 0);
-    });
-
-    const rows = [];
-    base.forEach(x=>{
-      const prods = parseProdutos(x);
-      const comuns = {
-        ID: x.id || '',
-        Data: fmtData(x.data_geracao || x.criado_em || x.data_registro),
-        Nota: x.nota_fiscal || x.nota || x.numero_nota || '',
-        Conferente: x.conferente || '',
-        Livro: x.livro || '',
-        Carga: x.carga || '',
-        Emb: x.embalagem || '',
-        Glosa: String(x.glosa || '').toLowerCase()==='sim' ? 'Sim' : 'Não',
-        'Item Glosa': x.glosa_item || '',
-        'Qtd Glosa': x.glosa_qtd || '',
-        'Motivo Glosa': x.glosa_motivo || '',
-        Origem: x.origem || ''
-      };
-
-      if(prods.length){
-        prods.forEach((p,idx)=>{
-          rows.push({
-            ...comuns,
-            '#': idx + 1,
-            Produto: produtoCampo(p,'desc','descricao','produto','nome','item'),
-            'Cód. Barras': produtoCampo(p,'ean','cod_barras','codigo_barras','codigoBarras','gtin'),
-            'Cód. Caixa': produtoCampo(p,'caixa','codigo_caixa','cod_caixa','codigoCaixa'),
-            Validade: produtoCampo(p,'validade','data_validade','vencimento')
-          });
-        });
-      }else{
-        rows.push({
-          ...comuns,
-          '#':'',
-          Produto:'',
-          'Cód. Barras':'',
-          'Cód. Caixa':'',
-          Validade:''
-        });
-      }
-    });
-
-    if(!rows.length){
-      document.getElementById('empty').style.display='flex';
-      document.getElementById('empty').innerHTML=`<div class="ei">📦</div><div class="et">Nenhum histórico de carga encontrado no Cloudflare.</div>`;
-      document.getElementById('rcount').textContent='0 registros';
-      return;
+    const baseRows = Array.isArray(j) ? j : (j.rows || j.results || []);
+    const rows=[];
+    function fmtData(v){
+      if(!v) return '';
+      const d=new Date(v);
+      if(!isNaN(d.getTime())) return d.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return String(v).slice(0,16);
     }
-
-    allRows=rows; colFilters={}; sortC=-1; sortD=1;
-    colW=Object.keys(rows[0]).map(()=>null);
+    for(const x of baseRows){
+      let produtos=[];
+      try{ produtos=JSON.parse(x.produtos_json||'[]'); if(!Array.isArray(produtos)) produtos=[]; }catch(e){ produtos=[]; }
+      if(!produtos.length) produtos=[{}];
+      produtos.forEach((p,idx)=>{
+        rows.push({
+          Data: fmtData(x.data_geracao || x.criado_em || x.data_registro),
+          DataISO: x.data_geracao || x.criado_em || x.data_registro || '',
+          Nota: x.nota_fiscal || '',
+          Conferente: x.conferente || '',
+          Produto: p.desc || p.descricao || p.produto || p.nome || '',
+          'Cód. Barras': p.ean || p.cod_barras || p.codigo_barras || '',
+          'Cód. Caixa': p.caixa || p.codigo_caixa || p.cod_caixa || '',
+          Validade: p.validade || '',
+          Embalagem: x.embalagem || '',
+          Livro: x.livro || '',
+          Carga: x.carga || '',
+          Glosa: String(x.glosa||'').toLowerCase()==='sim' ? 'Sim' : 'Não',
+          'Glosa Item': x.glosa_item || '',
+          'Glosa Qtd': x.glosa_qtd || '',
+          'Glosa Motivo': x.glosa_motivo || '',
+          Mensagem: x.mensagem || ''
+        });
+      });
+    }
+    rows.sort((a,b)=>_parseDateHist(b.DataISO||b.Data)-_parseDateHist(a.DataISO||a.Data));
+    if(!rows.length){showEmpty('__historico_cargas__'); return;}
+    allRows=rows; colFilters={}; sortC=-1; sortD=1; curPage=0;
+    colW=JSON.parse(localStorage.getItem('hist_cargas_col_widths')||'{}');
     applyAll();
     document.getElementById('tcont').style.display='';
     document.getElementById('pgbar').style.display='';
-    document.getElementById('rcount').textContent=rows.length+' linha(s)';
   }catch(e){showErr(e.message)}
   setLoad(false);
 }
