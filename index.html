@@ -70,6 +70,12 @@ tbody tr.sol-s:hover{background:rgba(251,191,36,.1)}
 td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
 td.sol-val{color:var(--acc);font-weight:600}
 td.sol-s-val{color:#fbbf24;font-weight:600}
+/* Histórico de Cargas — saldo CD abaixo de 500 */
+tbody tr.hist-saldo-baixo{background:rgba(248,113,113,.10)!important}
+tbody tr.hist-saldo-baixo:hover{background:rgba(248,113,113,.16)!important}
+tbody tr.hist-saldo-baixo td{color:#fecaca}
+tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
+
 
 /* Painel Análise Armazém */
 #armazem-wrap{position:fixed;top:46px;left:var(--sw);right:0;bottom:0;display:none;flex-direction:column;background:var(--bg);z-index:50}
@@ -503,7 +509,7 @@ function _parseDateHist(v){
 }
 function _histGetOrder(cols){
   const saved=JSON.parse(localStorage.getItem('hist_cargas_col_order')||'[]');
-  const base=cols.filter(c=>!['#','ID','Id','id','Origem','origem'].includes(c));
+  const base=cols.filter(c=>!['#','ID','Id','id','Origem','origem','DataISO','_SaldoCDNum'].includes(c));
   if(saved && saved.length){
     const ordered=saved.filter(c=>base.includes(c));
     base.forEach(c=>{if(!ordered.includes(c)) ordered.push(c)});
@@ -534,7 +540,7 @@ function render(){
   if(!allRows.length)return;
   let cols=Object.keys(allRows[0]);const lbls=CLABELS[curTable]||{};
   if(curTable==='__historico_cargas__'){
-    cols=_histGetOrder(cols).filter(c=>c!=='DataISO');
+    cols=_histGetOrder(cols).filter(c=>c!=='DataISO' && c!=='_SaldoCDNum');
     histColOrder=cols.slice();
   }
   const head=document.getElementById('dhead'),body=document.getElementById('dbody');
@@ -577,7 +583,10 @@ function render(){
   body.innerHTML='';
   slice.forEach(row=>{
     const trow=document.createElement('tr');
-    cols.forEach(col=>{const val=row[col]; const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');trow.appendChild(td);});
+    if(curTable==='__historico_cargas__' && row._SaldoCDNum!==null && row._SaldoCDNum!==undefined && Number(row._SaldoCDNum)<500){
+      trow.classList.add('hist-saldo-baixo');
+    }
+    cols.forEach(col=>{const val=row[col]; const td=document.createElement('td');td.textContent=val??'';td.title=String(val??'');if(curTable==='__historico_cargas__' && col==='Saldo CD')td.classList.add('hist-saldo-cd');trow.appendChild(td);});
     trow.style.cursor='pointer';
     trow.ondblclick=()=>openBSheet(cols,cols.map(c=>row[c]));
     trow.addEventListener('touchend',e=>{
@@ -859,6 +868,49 @@ function loadRecebimento(el){
 }
 
 
+
+function _histNum(v){
+  const n=parseFloat(String(v??'').replace(/\./g,'').replace(',','.').replace(/[^0-9.\-]/g,''));
+  return isNaN(n)?null:n;
+}
+function _histNormCod(v){
+  let s=String(v||'').trim();
+  if(s.endsWith('.0')) s=s.slice(0,-2);
+  s=s.replace(/\D/g,'');
+  return s.replace(/^0+/,'') || s;
+}
+function _histFmtNum(n){
+  if(n===null || n===undefined || isNaN(Number(n))) return '—';
+  return Math.round(Number(n)).toLocaleString('pt-BR');
+}
+async function carregarSaldoCDHistorico(rows){
+  const codigos=[...new Set(rows.map(r=>_histNormCod(r['Cód. Barras'])).filter(Boolean))];
+  const saldoMap={};
+  if(!codigos.length) return saldoMap;
+  try{
+    const chunks=[];
+    for(let i=0;i<codigos.length;i+=80) chunks.push(codigos.slice(i,i+80));
+    for(const ch of chunks){
+      const inList=ch.map(c=>`'${String(c).replace(/'/g,"''")}'`).join(',');
+      const sql=`
+        SELECT CAST(codigo AS TEXT) AS codigo, estoque
+          FROM snapshot_posicao_det
+         WHERE CAST(codigo AS TEXT) IN (${inList})
+            OR LTRIM(CAST(codigo AS TEXT),'0') IN (${inList})
+      `;
+      const rs=await qNeon(sql);
+      (rs||[]).forEach(r=>{
+        const cod=_histNormCod(r.codigo ?? r.CODIGO ?? r['Código'] ?? r['Cod.Barras'] ?? '');
+        const val=_histNum(r.estoque ?? r.ESTOQUE ?? r['Estoque CD'] ?? r['Quant.'] ?? 0) || 0;
+        if(cod) saldoMap[cod]=(saldoMap[cod]||0)+val;
+      });
+    }
+  }catch(e){
+    console.warn('Não foi possível carregar Saldo CD do histórico:', e);
+  }
+  return saldoMap;
+}
+
 async function loadHistoricoCargas(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
@@ -895,6 +947,7 @@ async function loadHistoricoCargas(el){
           Conferente: x.conferente || '',
           Produto: p.desc || p.descricao || p.produto || p.nome || '',
           'Cód. Barras': p.ean || p.cod_barras || p.codigo_barras || '',
+          'Saldo CD': '—',
           'Cód. Caixa': p.caixa || p.codigo_caixa || p.cod_caixa || '',
           Validade: p.validade || '',
           Embalagem: x.embalagem || '',
@@ -908,6 +961,13 @@ async function loadHistoricoCargas(el){
         });
       });
     }
+    const saldoMap = await carregarSaldoCDHistorico(rows);
+    rows.forEach(r=>{
+      const cod=_histNormCod(r['Cód. Barras']);
+      const saldo=saldoMap[cod];
+      r['Saldo CD']=saldo===undefined ? '—' : _histFmtNum(saldo);
+      r['_SaldoCDNum']=saldo===undefined ? null : Number(saldo);
+    });
     rows.sort((a,b)=>_parseDateHist(b.DataISO||b.Data)-_parseDateHist(a.DataISO||a.Data));
     if(!rows.length){showEmpty('__historico_cargas__'); return;}
     allRows=rows; colFilters={}; sortC=-1; sortD=1; curPage=0;
