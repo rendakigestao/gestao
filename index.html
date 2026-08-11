@@ -47,12 +47,65 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 #empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--txt3)}
 .ei{font-size:36px;opacity:.3}
 .et{font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.8}
-#cronograma-wrap{display:none;flex:1;align-items:center;justify-content:center;padding:24px;overflow:auto}
-.cronograma-card{width:min(560px,100%);background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:32px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.22)}
-.cronograma-icon{width:58px;height:58px;margin:0 auto 18px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.22);color:var(--acc);font-size:28px}
-.cronograma-tag{display:inline-block;margin-bottom:12px;padding:3px 9px;border-radius:999px;background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.2);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--acc);letter-spacing:.1em;text-transform:uppercase}
-.cronograma-card h1{font-size:22px;font-weight:600;margin-bottom:9px;color:var(--txt)}
-.cronograma-card p{font-size:13px;line-height:1.65;color:var(--txt2);max-width:410px;margin:0 auto}
+#cronograma-wrap{display:none;flex:1;flex-direction:column;overflow:auto;background:linear-gradient(180deg,rgba(74,222,128,.035),transparent 240px),var(--bg)}
+.cr-shell{width:min(1240px,100%);margin:0 auto;padding:26px 28px 44px}
+.cr-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;margin-bottom:20px}
+.cr-kicker{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--acc);margin-bottom:7px}
+.cr-hero h1{font-size:26px;line-height:1.15;font-weight:600;letter-spacing:-.02em}
+.cr-hero p{font-size:12px;color:var(--txt2);margin-top:7px;line-height:1.55}
+.cr-update{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt3);white-space:nowrap;padding-bottom:3px}
+.cr-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.cr-stat{position:relative;overflow:hidden;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:13px 14px;min-height:76px}
+.cr-stat::after{content:'';position:absolute;right:-14px;bottom:-22px;width:62px;height:62px;border-radius:50%;background:rgba(74,222,128,.05)}
+.cr-stat-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3)}
+.cr-stat-value{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;color:var(--txt);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-stat:first-child .cr-stat-value{color:var(--acc)}
+.cr-filters{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(150px,.75fr) minmax(150px,.75fr) auto;gap:8px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:20px}
+.cr-control{position:relative;display:flex;align-items:center}
+.cr-control .cr-search-icon{position:absolute;left:10px;color:var(--txt3);font-size:13px;pointer-events:none}
+.cr-control input,.cr-control select{width:100%;height:34px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:11px;outline:none;padding:0 10px}
+.cr-control input{padding-left:31px}
+.cr-control input:focus,.cr-control select:focus{border-color:var(--acc)}
+.cr-control input::placeholder{color:var(--txt3)}
+.cr-control select option{background:var(--surf2)}
+.cr-refresh{height:34px;padding:0 13px;border:1px solid rgba(74,222,128,.28);border-radius:6px;background:rgba(74,222,128,.08);color:var(--acc2);font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.cr-refresh:hover{background:rgba(74,222,128,.14);border-color:var(--acc)}
+.cr-day{margin-bottom:22px}
+.cr-day-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.cr-day-title{font-size:12px;font-weight:600;color:var(--txt)}
+.cr-day-title strong{color:var(--acc);font-weight:600}
+.cr-day-line{height:1px;flex:1;background:var(--bdr)}
+.cr-day-count{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--txt3);text-transform:uppercase}
+.cr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.cr-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:14px;transition:border-color .14s,transform .14s}
+.cr-card:hover{border-color:#3b3b44;transform:translateY(-1px)}
+.cr-card-top{display:flex;align-items:flex-start;gap:12px}
+.cr-datebox{width:42px;min-width:42px;height:44px;border-radius:8px;background:var(--surf2);border:1px solid var(--bdr);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cr-datebox b{font-family:'IBM Plex Mono',monospace;font-size:16px;line-height:1;color:var(--acc2)}
+.cr-datebox span{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt3);text-transform:uppercase;margin-top:4px}
+.cr-product{min-width:0;flex:1}
+.cr-product-name{font-size:13px;font-weight:600;line-height:1.3;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-product-sub{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--txt3);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-status{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px;border-radius:999px;border:1px solid var(--bdr);white-space:nowrap}
+.cr-status.today{color:var(--acc);border-color:rgba(74,222,128,.32);background:rgba(74,222,128,.08)}
+.cr-status.soon{color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.07)}
+.cr-status.late{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.07)}
+.cr-status.planned{color:#93c5fd;border-color:rgba(147,197,253,.25);background:rgba(147,197,253,.06)}
+.cr-card-body{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:7px;margin-top:13px;padding-top:11px;border-top:1px solid rgba(255,255,255,.05)}
+.cr-meta{min-width:0}
+.cr-meta-label{font-family:'IBM Plex Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:3px}
+.cr-meta-value{font-size:11px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-meta-value.qty{color:var(--acc2);font-family:'IBM Plex Mono',monospace;font-weight:500}
+.cr-state{min-height:280px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--surf);border:1px dashed var(--bdr);border-radius:12px;padding:30px;color:var(--txt3)}
+.cr-state-icon{font-size:27px;margin-bottom:10px;opacity:.65}
+.cr-state-title{font-size:13px;color:var(--txt2);margin-bottom:5px}
+.cr-state-text{font-family:'IBM Plex Mono',monospace;font-size:9px;line-height:1.7;max-width:430px}
+.cr-state button{margin-top:12px}
+.cr-skeleton{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.cr-skel{height:132px;border-radius:10px;background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);background-size:200% 100%;animation:crShimmer 1.2s infinite;border:1px solid var(--bdr)}
+@keyframes crShimmer{to{background-position:-200% 0}}
+@media(max-width:900px){.cr-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cr-filters{grid-template-columns:1fr 1fr}.cr-control:first-child{grid-column:1/-1}.cr-refresh{width:100%}}
+@media(max-width:680px){.cr-shell{padding:18px 14px 32px}.cr-hero{align-items:flex-start;flex-direction:column;gap:8px}.cr-hero h1{font-size:22px}.cr-update{white-space:normal}.cr-grid,.cr-skeleton{grid-template-columns:1fr}.cr-filters{grid-template-columns:1fr}.cr-control:first-child{grid-column:auto}.cr-card-body{grid-template-columns:1fr 1fr}.cr-meta:first-child{grid-column:1/-1}.cr-stat-value{font-size:19px}}
 #tcont{flex:1;overflow:auto;min-height:0;position:relative}
 table{border-collapse:collapse;font-size:11px;width:max-content;min-width:100%}
 thead{position:sticky;top:0;z-index:10}
@@ -275,11 +328,45 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
   <div id="loadbar"></div>
 
   <section id="cronograma-wrap" aria-labelledby="cronograma-title">
-    <div class="cronograma-card">
-      <div class="cronograma-icon" aria-hidden="true">▦</div>
-      <div class="cronograma-tag">Em construção</div>
-      <h1 id="cronograma-title">Cronograma de Mercadorias</h1>
-      <p>Esta área está sendo preparada para organizar e acompanhar o cronograma de mercadorias.</p>
+    <div class="cr-shell">
+      <div class="cr-hero">
+        <div>
+          <div class="cr-kicker">Planejamento de recebimentos</div>
+          <h1 id="cronograma-title">Cronograma de Entregas</h1>
+          <p>Visualize as mercadorias programadas, parcelas e quantidades previstas.</p>
+        </div>
+        <div class="cr-update" id="cr-update">Aguardando atualização</div>
+      </div>
+      <div class="cr-stats" aria-label="Resumo do cronograma">
+        <div class="cr-stat"><div class="cr-stat-label">Entregas hoje</div><div class="cr-stat-value" id="cr-stat-today">—</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Próximos 7 dias</div><div class="cr-stat-value" id="cr-stat-week">—</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Entregas exibidas</div><div class="cr-stat-value" id="cr-stat-total">—</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Quantidade programada</div><div class="cr-stat-value" id="cr-stat-qty">—</div></div>
+      </div>
+      <div class="cr-filters">
+        <label class="cr-control">
+          <span class="cr-search-icon" aria-hidden="true">⌕</span>
+          <input id="cr-search" type="search" placeholder="Buscar produto, empenho ou código..." aria-label="Buscar no cronograma" oninput="renderCronograma()">
+        </label>
+        <label class="cr-control">
+          <select id="cr-period" aria-label="Filtrar período" onchange="renderCronograma()">
+            <option value="all">Todas as datas</option>
+            <option value="today">Entregas de hoje</option>
+            <option value="week">Próximos 7 dias</option>
+            <option value="month">Próximos 30 dias</option>
+            <option value="late">Entregas atrasadas</option>
+          </select>
+        </label>
+        <label class="cr-control">
+          <select id="cr-type" aria-label="Filtrar tipo de mercadoria" onchange="renderCronograma()">
+            <option value="">Todos os tipos</option>
+          </select>
+        </label>
+        <button class="cr-refresh" type="button" onclick="loadCronogramaData(true)" aria-label="Atualizar cronograma">↻ Atualizar</button>
+      </div>
+      <div id="cr-content" aria-live="polite">
+        <div class="cr-skeleton"><div class="cr-skel"></div><div class="cr-skel"></div><div class="cr-skel"></div><div class="cr-skel"></div></div>
+      </div>
     </div>
   </section>
 
@@ -481,17 +568,109 @@ function buildSB(){
   });
 }
 
+let cronogramaRows=[];
+let cronogramaLoaded=false;
+
 function loadCronograma(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');curTable='__cronograma__';
-  document.getElementById('ttitle').textContent='Cronograma de Mercadorias';
-  document.getElementById('rcount').textContent='Em construção';
-  setLoad(false);
+  document.getElementById('ttitle').textContent='Cronograma de Entregas';
+  document.getElementById('rcount').textContent='';
   document.getElementById('twrap').style.display='none';
   document.getElementById('pgbar').style.display='none';
   document.getElementById('armazem-wrap').style.display='none';
   const rw=document.getElementById('recebimento-wrap'); if(rw) rw.style.display='none';
   document.getElementById('cronograma-wrap').style.display='flex';
+  if(!cronogramaLoaded) loadCronogramaData();
+}
+
+function crState(icon,title,text,action=''){
+  document.getElementById('cr-content').innerHTML=`<div class="cr-state"><div><div class="cr-state-icon">${icon}</div><div class="cr-state-title">${title}</div><div class="cr-state-text">${text}</div>${action}</div></div>`;
+}
+function crFold(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function crDate(v){
+  const s=String(v||'').trim().slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;
+  const [y,m,d]=s.split('-').map(Number), dt=new Date(y,m-1,d);
+  return isNaN(dt)?null:dt;
+}
+function crToday(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function crDiffDays(dt){return Math.round((dt-crToday())/86400000)}
+function crNum(v){const n=Number(v);return Number.isFinite(n)?n:0}
+function crFmtQty(v){return new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(crNum(v))}
+function crFmtDate(dt){return new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(dt)}
+function crStatus(dt){
+  const dif=crDiffDays(dt);
+  if(dif<0)return {label:'Atrasada',cls:'late'};
+  if(dif===0)return {label:'Entrega hoje',cls:'today'};
+  if(dif<=7)return {label:'Próxima',cls:'soon'};
+  return {label:'Programada',cls:'planned'};
+}
+function crLoading(){
+  document.getElementById('cr-content').innerHTML='<div class="cr-skeleton"><div class="cr-skel"></div><div class="cr-skel"></div><div class="cr-skel"></div><div class="cr-skel"></div></div>';
+}
+function crPopulateTypes(){
+  const sel=document.getElementById('cr-type'), current=sel.value;
+  const types=[...new Set(cronogramaRows.map(r=>String(r.tipo||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  sel.innerHTML='<option value="">Todos os tipos</option>'+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  if(types.includes(current))sel.value=current;
+}
+function crUpdatedLabel(){
+  const vals=cronogramaRows.map(r=>r.atualizado_em).filter(Boolean).map(v=>new Date(v)).filter(d=>!isNaN(d));
+  const el=document.getElementById('cr-update');
+  if(!vals.length){el.textContent='Dados publicados pelo Sistema de Gestão';return}
+  const last=new Date(Math.max(...vals.map(d=>d.getTime())));
+  el.textContent='Última publicação: '+last.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+}
+async function loadCronogramaData(force=false){
+  if(cronogramaLoaded&&!force){renderCronograma();return}
+  crLoading();setLoad(true);
+  try{
+    const sql=`SELECT empenho, ano, codigo, idcodbarprod, produto, tipo, saldo_restante, parcela, data_entrega, quantidade, atualizado_em FROM agenda_entregas ORDER BY data_entrega ASC, produto ASC LIMIT 5000`;
+    cronogramaRows=(await qNeon(sql)||[]).filter(r=>crDate(r.data_entrega));
+    cronogramaLoaded=true;
+    crPopulateTypes();crUpdatedLabel();renderCronograma();
+  }catch(e){
+    cronogramaLoaded=false;
+    const noCfg=!getCfg().url;
+    crState('⚠',noCfg?'Conexão necessária':'Cronograma indisponível',noCfg?'Configure a conexão para consultar as entregas publicadas.':esc(e.message||'Não foi possível consultar os dados.'),noCfg?'<button class="cr-refresh" type="button" onclick="openCfg()">Configurar conexão</button>':'<button class="cr-refresh" type="button" onclick="loadCronogramaData(true)">Tentar novamente</button>');
+    document.getElementById('rcount').textContent='';
+  }finally{setLoad(false)}
+}
+function renderCronograma(){
+  if(!cronogramaLoaded)return;
+  const q=crFold(document.getElementById('cr-search').value), type=document.getElementById('cr-type').value, period=document.getElementById('cr-period').value;
+  const base=cronogramaRows.filter(r=>{
+    if(type&&String(r.tipo||'')!==type)return false;
+    if(!q)return true;
+    return crFold([r.produto,r.empenho,r.ano,r.codigo,r.idcodbarprod,r.tipo].join(' ')).includes(q);
+  });
+  const rows=base.filter(r=>{
+    const dif=crDiffDays(crDate(r.data_entrega));
+    if(period==='today')return dif===0;
+    if(period==='week')return dif>=0&&dif<=7;
+    if(period==='month')return dif>=0&&dif<=30;
+    if(period==='late')return dif<0;
+    return true;
+  }).sort((a,b)=>String(a.data_entrega).localeCompare(String(b.data_entrega))||String(a.produto||'').localeCompare(String(b.produto||''),'pt-BR'));
+  const todayCount=base.filter(r=>crDiffDays(crDate(r.data_entrega))===0).length;
+  const weekCount=base.filter(r=>{const d=crDiffDays(crDate(r.data_entrega));return d>=0&&d<=7}).length;
+  document.getElementById('cr-stat-today').textContent=todayCount;
+  document.getElementById('cr-stat-week').textContent=weekCount;
+  document.getElementById('cr-stat-total').textContent=rows.length;
+  document.getElementById('cr-stat-qty').textContent=crFmtQty(rows.reduce((s,r)=>s+crNum(r.quantidade),0));
+  document.getElementById('rcount').textContent=rows.length+' entrega'+(rows.length===1?'':'s');
+  if(!rows.length){crState('◌','Nenhuma entrega encontrada','Ajuste os filtros ou aguarde uma nova publicação da agenda.');return}
+  const groups={};rows.forEach(r=>(groups[r.data_entrega]||(groups[r.data_entrega]=[])).push(r));
+  document.getElementById('cr-content').innerHTML=Object.entries(groups).map(([date,items])=>{
+    const dt=crDate(date), day=String(dt.getDate()).padStart(2,'0'), mon=dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
+    const cards=items.map(r=>{
+      const st=crStatus(dt), emp=[r.empenho,r.ano].filter(Boolean).join('/'), code=r.idcodbarprod||r.codigo||'—';
+      const parcela=r.parcela?`Parcela ${esc(r.parcela)}`:'Parcela —';
+      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${esc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${esc(r.produto||'Produto sem descrição')}">${esc(r.produto||'Produto sem descrição')}</div><div class="cr-product-sub">${esc(r.tipo||'Sem tipo')} · ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${esc(emp||'—')}">${esc(emp||'—')}</div></div><div class="cr-meta"><div class="cr-meta-label">Código</div><div class="cr-meta-value" title="${esc(code)}">${esc(code)}</div></div></div></article>`;
+    }).join('');
+    return `<section class="cr-day"><div class="cr-day-head"><div class="cr-day-title"><strong>${esc(crFmtDate(dt))}</strong></div><div class="cr-day-line"></div><div class="cr-day-count">${items.length} entrega${items.length===1?'':'s'}</div></div><div class="cr-grid">${cards}</div></section>`;
+  }).join('');
 }
 
 // ── Tabela genérica ────────────────────────────────────────────────────────
@@ -1324,4 +1503,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
-
