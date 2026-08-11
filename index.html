@@ -588,6 +588,7 @@ function crState(icon,title,text,action=''){
   document.getElementById('cr-content').innerHTML=`<div class="cr-state"><div><div class="cr-state-icon">${icon}</div><div class="cr-state-title">${title}</div><div class="cr-state-text">${text}</div>${action}</div></div>`;
 }
 function crFold(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function crEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function crDate(v){
   const s=String(v||'').trim().slice(0,10);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;
@@ -612,7 +613,7 @@ function crLoading(){
 function crPopulateTypes(){
   const sel=document.getElementById('cr-type'), current=sel.value;
   const types=[...new Set(cronogramaRows.map(r=>String(r.tipo||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  sel.innerHTML='<option value="">Todos os tipos</option>'+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  sel.innerHTML='<option value="">Todos os tipos</option>'+types.map(t=>`<option value="${crEsc(t)}">${crEsc(t)}</option>`).join('');
   if(types.includes(current))sel.value=current;
 }
 function crUpdatedLabel(){
@@ -633,7 +634,7 @@ async function loadCronogramaData(force=false){
   }catch(e){
     cronogramaLoaded=false;
     const noCfg=!getCfg().url;
-    crState('⚠',noCfg?'Conexão necessária':'Cronograma indisponível',noCfg?'Configure a conexão para consultar as entregas publicadas.':esc(e.message||'Não foi possível consultar os dados.'),noCfg?'<button class="cr-refresh" type="button" onclick="openCfg()">Configurar conexão</button>':'<button class="cr-refresh" type="button" onclick="loadCronogramaData(true)">Tentar novamente</button>');
+    crState('⚠',noCfg?'Conexão necessária':'Cronograma indisponível',noCfg?'Configure a conexão para consultar as entregas publicadas.':crEsc(e.message||'Não foi possível consultar os dados.'),noCfg?'<button class="cr-refresh" type="button" onclick="openCfg()">Configurar conexão</button>':'<button class="cr-refresh" type="button" onclick="loadCronogramaData(true)">Tentar novamente</button>');
     document.getElementById('rcount').textContent='';
   }finally{setLoad(false)}
 }
@@ -666,10 +667,10 @@ function renderCronograma(){
     const dt=crDate(date), day=String(dt.getDate()).padStart(2,'0'), mon=dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
     const cards=items.map(r=>{
       const st=crStatus(dt), emp=[r.empenho,r.ano].filter(Boolean).join('/'), code=r.idcodbarprod||r.codigo||'—';
-      const parcela=r.parcela?`Parcela ${esc(r.parcela)}`:'Parcela —';
-      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${esc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${esc(r.produto||'Produto sem descrição')}">${esc(r.produto||'Produto sem descrição')}</div><div class="cr-product-sub">${esc(r.tipo||'Sem tipo')} · ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${esc(emp||'—')}">${esc(emp||'—')}</div></div><div class="cr-meta"><div class="cr-meta-label">Código</div><div class="cr-meta-value" title="${esc(code)}">${esc(code)}</div></div></div></article>`;
+      const parcela=r.parcela?`Parcela ${crEsc(r.parcela)}`:'Parcela —';
+      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${crEsc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${crEsc(r.produto||'Produto sem descrição')}">${crEsc(r.produto||'Produto sem descrição')}</div><div class="cr-product-sub">${crEsc(r.tipo||'Sem tipo')} · ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${crEsc(emp||'—')}">${crEsc(emp||'—')}</div></div><div class="cr-meta"><div class="cr-meta-label">Código</div><div class="cr-meta-value" title="${crEsc(code)}">${crEsc(code)}</div></div></div></article>`;
     }).join('');
-    return `<section class="cr-day"><div class="cr-day-head"><div class="cr-day-title"><strong>${esc(crFmtDate(dt))}</strong></div><div class="cr-day-line"></div><div class="cr-day-count">${items.length} entrega${items.length===1?'':'s'}</div></div><div class="cr-grid">${cards}</div></section>`;
+    return `<section class="cr-day"><div class="cr-day-head"><div class="cr-day-title"><strong>${crEsc(crFmtDate(dt))}</strong></div><div class="cr-day-line"></div><div class="cr-day-count">${items.length} entrega${items.length===1?'':'s'}</div></div><div class="cr-grid">${cards}</div></section>`;
   }).join('');
 }
 
