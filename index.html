@@ -96,6 +96,23 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 .cr-meta-label{font-family:'IBM Plex Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:3px}
 .cr-meta-value{font-size:11px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cr-meta-value.qty{color:var(--acc2);font-family:'IBM Plex Mono',monospace;font-weight:500}
+.cr-history{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
+.cr-history-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--bdr);border-radius:7px;background:var(--surf2);color:var(--txt2);font-family:'IBM Plex Sans',sans-serif;font-size:10px;cursor:pointer;text-align:left}
+.cr-history-btn:hover,.cr-history-btn[aria-expanded="true"]{border-color:rgba(74,222,128,.32);color:var(--acc2);background:rgba(74,222,128,.06)}
+.cr-history-plus{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--acc);width:13px;text-align:center}
+.cr-history-label{flex:1}
+.cr-history-empty{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--txt3);padding:3px 1px}
+.cr-history-list{margin-top:8px;display:flex;flex-direction:column;gap:7px;max-height:290px;overflow:auto}
+.cr-history-list[hidden]{display:none}
+.cr-history-row{background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.055);border-radius:7px;padding:9px 10px}
+.cr-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.cr-history-date{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--acc2)}
+.cr-history-glosa{font-family:'IBM Plex Mono',monospace;font-size:7px;text-transform:uppercase;padding:2px 5px;border-radius:999px;color:var(--txt3);border:1px solid var(--bdr)}
+.cr-history-glosa.yes{color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}
+.cr-history-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 10px}
+.cr-history-detail{min-width:0;font-size:9px;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr-history-detail b{color:var(--txt2);font-weight:500}
+.cr-history-note{grid-column:1/-1;white-space:normal;line-height:1.45}
 .cr-state{min-height:280px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--surf);border:1px dashed var(--bdr);border-radius:12px;padding:30px;color:var(--txt3)}
 .cr-state-icon{font-size:27px;margin-bottom:10px;opacity:.65}
 .cr-state-title{font-size:13px;color:var(--txt2);margin-bottom:5px}
@@ -574,6 +591,8 @@ function buildSB(){
 
 let cronogramaRows=[];
 let cronogramaLoaded=false;
+let cronogramaHistorico={};
+let cronogramaHistoricoLoaded=false;
 
 function loadCronograma(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
@@ -593,6 +612,60 @@ function crState(icon,title,text,action=''){
 }
 function crFold(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function crEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function crHistNormCode(v){
+  let s=String(v||'').trim();
+  if(s.endsWith('.0'))s=s.slice(0,-2);
+  s=s.replace(/\D/g,'');
+  return s.replace(/^0+/,'')||s;
+}
+function crHistDateInfo(v){
+  const raw=String(v||'').trim(),d=new Date(raw);
+  if(isNaN(d))return {key:raw.slice(0,10)||'sem-data',label:raw.slice(0,10)||'Data não informada',stamp:0};
+  const parts={};
+  new Intl.DateTimeFormat('en-US',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).forEach(p=>parts[p.type]=p.value);
+  return {key:`${parts.year}-${parts.month}-${parts.day}`,label:d.toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}),stamp:d.getTime()};
+}
+function crHistAdd(set,v){const s=String(v??'').trim();if(s)set.add(s)}
+function crHistJoin(set){return [...set].join(', ')||'—'}
+async function loadCronogramaHistorico(force=false){
+  if(cronogramaHistoricoLoaded&&!force)return;
+  const response=await fetch(PROXY+'recebimento/listar');
+  if(!response.ok)throw new Error('Histórico de Cargas indisponível');
+  const payload=await response.json();
+  const baseRows=Array.isArray(payload)?payload:(payload.rows||payload.results||[]),grouped=new Map();
+  for(const x of baseRows){
+    let produtos=[];
+    try{produtos=Array.isArray(x.produtos_json)?x.produtos_json:JSON.parse(x.produtos_json||'[]')}catch(e){produtos=[]}
+    if(!Array.isArray(produtos))produtos=[];
+    const data=crHistDateInfo(x.data_geracao||x.criado_em||x.data_registro);
+    for(const p of produtos){
+      const codigo=crHistNormCode(p.ean||p.cod_barras||p.codigo_barras||'');
+      if(!codigo)continue;
+      const key=codigo+'|'+data.key;
+      let item=grouped.get(key);
+      if(!item){item={codigo,data,notas:new Set(),conferentes:new Set(),validades:new Set(),cargas:new Set(),glosas:new Set(),glosaItens:new Set(),glosaMotivos:new Set()};grouped.set(key,item)}
+      crHistAdd(item.notas,x.nota_fiscal);crHistAdd(item.conferentes,x.conferente);crHistAdd(item.validades,p.validade);crHistAdd(item.cargas,x.carga);
+      crHistAdd(item.glosas,String(x.glosa||'').toLowerCase()==='sim'?'Sim':'Não');crHistAdd(item.glosaItens,x.glosa_item);crHistAdd(item.glosaMotivos,x.glosa_motivo);
+    }
+  }
+  const byCode={};
+  grouped.forEach(item=>(byCode[item.codigo]||(byCode[item.codigo]=[])).push(item));
+  Object.values(byCode).forEach(items=>items.sort((a,b)=>b.data.stamp-a.data.stamp||b.data.key.localeCompare(a.data.key)));
+  cronogramaHistorico=byCode;cronogramaHistoricoLoaded=true;
+}
+function crToggleHistory(id,button){
+  const box=document.getElementById(id),open=box.hidden;
+  box.hidden=!open;button.setAttribute('aria-expanded',String(open));
+  const plus=button.querySelector('.cr-history-plus');if(plus)plus.textContent=open?'−':'+';
+}
+function crHistoryHtml(items,id){
+  if(!items.length)return '<div class="cr-history"><div class="cr-history-empty">Sem recebimentos anteriores registrados</div></div>';
+  const rows=items.map(item=>{
+    const glosa=[...item.glosas].includes('Sim'),obs=[crHistJoin(item.glosaItens),crHistJoin(item.glosaMotivos)].filter(v=>v!=='—').join(' · ');
+    return `<div class="cr-history-row"><div class="cr-history-head"><div class="cr-history-date">${crEsc(item.data.label)}</div><span class="cr-history-glosa ${glosa?'yes':''}">${glosa?'Com glosa':'Sem glosa'}</span></div><div class="cr-history-details"><div class="cr-history-detail"><b>NF:</b> ${crEsc(crHistJoin(item.notas))}</div><div class="cr-history-detail"><b>Conferente:</b> ${crEsc(crHistJoin(item.conferentes))}</div><div class="cr-history-detail"><b>Validade:</b> ${crEsc(crHistJoin(item.validades))}</div><div class="cr-history-detail"><b>Carga:</b> ${crEsc(crHistJoin(item.cargas))}</div>${obs?`<div class="cr-history-detail cr-history-note"><b>Glosa:</b> ${crEsc(obs)}</div>`:''}</div></div>`;
+  }).join('');
+  return `<div class="cr-history"><button class="cr-history-btn" type="button" aria-expanded="false" aria-controls="${id}" onclick="crToggleHistory('${id}',this)"><span class="cr-history-plus">+</span><span class="cr-history-label">Ver histórico do item (${items.length})</span></button><div class="cr-history-list" id="${id}" hidden>${rows}</div></div>`;
+}
 function crDate(v){
   const s=String(v||'').trim().slice(0,10);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;
@@ -633,7 +706,9 @@ async function loadCronogramaData(force=false){
   crLoading();setLoad(true);
   try{
     const sql=`SELECT a.empenho, a.ano, a.codigo, a.idcodbarprod, a.produto, a.tipo, a.saldo_restante, a.parcela, a.data_entrega, a.quantidade, a.atualizado_em FROM agenda_entregas a WHERE NOT EXISTS (SELECT 1 FROM tabela_controle c WHERE TRIM(CAST(c."Ano" AS TEXT)) = TRIM(a.ano) AND TRIM(CAST(c."O.C" AS TEXT)) = TRIM(a.empenho) AND LOWER(TRIM(COALESCE(c."Status", ''))) = 'cancelado') AND NOT EXISTS (SELECT 1 FROM snapshot_posicao_det s WHERE TRIM(CAST(s.codigo AS TEXT)) = TRIM(CAST(a.idcodbarprod AS TEXT)) AND UPPER(TRIM(COALESCE(s.t_item, ''))) LIKE '%PEREC%') ORDER BY a.data_entrega ASC, a.produto ASC LIMIT 5000`;
+    const historicoReq=loadCronogramaHistorico(force).catch(e=>console.warn('Não foi possível carregar o histórico no cronograma:',e));
     cronogramaRows=(await qNeon(sql)||[]).filter(r=>crDate(r.data_entrega));
+    await historicoReq;
     cronogramaLoaded=true;
     crPopulateTypes();crUpdatedLabel();renderCronograma();
   }catch(e){
@@ -671,13 +746,14 @@ function renderCronograma(){
   document.getElementById('cr-stat-qty').textContent=crFmtQty(rows.reduce((s,r)=>s+crNum(r.quantidade),0));
   document.getElementById('rcount').textContent=rows.length+' entrega'+(rows.length===1?'':'s');
   if(!rows.length){crState('◌','Nenhuma entrega encontrada','Ajuste os filtros ou aguarde uma nova publicação da agenda.');return}
-  const groups={};rows.forEach(r=>(groups[r.data_entrega]||(groups[r.data_entrega]=[])).push(r));
+  const groups={};let cardSeq=0;rows.forEach(r=>(groups[r.data_entrega]||(groups[r.data_entrega]=[])).push(r));
   document.getElementById('cr-content').innerHTML=Object.entries(groups).map(([date,items])=>{
     const dt=crDate(date), day=String(dt.getDate()).padStart(2,'0'), mon=dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
     const cards=items.map(r=>{
       const st=crStatus(dt), emp=[r.empenho,r.ano].filter(Boolean).join('/'), code=r.idcodbarprod||r.codigo||'—';
       const parcela=r.parcela?`Parcela ${crEsc(r.parcela)}`:'Parcela —';
-      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${crEsc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${crEsc(r.produto||'Produto sem descrição')}">${crEsc(r.produto||'Produto sem descrição')}</div><div class="cr-product-sub">${crEsc(r.tipo||'Sem tipo')} · ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${crEsc(emp||'—')}">${crEsc(emp||'—')}</div></div><div class="cr-meta"><div class="cr-meta-label">Código</div><div class="cr-meta-value" title="${crEsc(code)}">${crEsc(code)}</div></div></div></article>`;
+      const histId='cr-history-'+(++cardSeq),historico=cronogramaHistorico[crHistNormCode(code)]||[];
+      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${crEsc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${crEsc(r.produto||'Produto sem descrição')}">${crEsc(r.produto||'Produto sem descrição')}</div><div class="cr-product-sub">${crEsc(r.tipo||'Sem tipo')} · ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${crEsc(emp||'—')}">${crEsc(emp||'—')}</div></div><div class="cr-meta"><div class="cr-meta-label">Código</div><div class="cr-meta-value" title="${crEsc(code)}">${crEsc(code)}</div></div></div>${crHistoryHtml(historico,histId)}</article>`;
     }).join('');
     return `<section class="cr-day"><div class="cr-day-head"><div class="cr-day-title"><strong>${crEsc(crFmtDate(dt))}</strong></div><div class="cr-day-line"></div><div class="cr-day-count">${items.length} entrega${items.length===1?'':'s'}</div></div><div class="cr-grid">${cards}</div></section>`;
   }).join('');
