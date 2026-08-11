@@ -47,6 +47,12 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 #empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--txt3)}
 .ei{font-size:36px;opacity:.3}
 .et{font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.8}
+#cronograma-wrap{display:none;flex:1;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.cronograma-card{width:min(560px,100%);background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:32px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.22)}
+.cronograma-icon{width:58px;height:58px;margin:0 auto 18px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.22);color:var(--acc);font-size:28px}
+.cronograma-tag{display:inline-block;margin-bottom:12px;padding:3px 9px;border-radius:999px;background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.2);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--acc);letter-spacing:.1em;text-transform:uppercase}
+.cronograma-card h1{font-size:22px;font-weight:600;margin-bottom:9px;color:var(--txt)}
+.cronograma-card p{font-size:13px;line-height:1.65;color:var(--txt2);max-width:410px;margin:0 auto}
 #tcont{flex:1;overflow:auto;min-height:0;position:relative}
 table{border-collapse:collapse;font-size:11px;width:max-content;min-width:100%}
 thead{position:sticky;top:0;z-index:10}
@@ -268,6 +274,15 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
   </div>
   <div id="loadbar"></div>
 
+  <section id="cronograma-wrap" aria-labelledby="cronograma-title">
+    <div class="cronograma-card">
+      <div class="cronograma-icon" aria-hidden="true">▦</div>
+      <div class="cronograma-tag">Em construção</div>
+      <h1 id="cronograma-title">Cronograma de Mercadorias</h1>
+      <p>Esta área está sendo preparada para organizar e acompanhar o cronograma de mercadorias.</p>
+    </div>
+  </section>
+
   <!-- Tabela genérica -->
   <div id="twrap">
     <div id="empty"><div class="ei">⬡</div><div class="et">configure a conexão e selecione uma tabela</div></div>
@@ -353,6 +368,7 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
 const PROXY='https://rendakigestao.akinbyiyrendaki.workers.dev/';
 const TABLES=[
   {group:'Telas Principais',name:'tabela_controle',  label:'Controle de Mercadorias'},
+  {group:'Telas Principais',name:'__cronograma__',   label:'Cronograma de Mercadorias'},
   {group:'Telas Principais',name:'snapshot_posicao', label:'Posição de Estoque', badge:true},
   {group:'Telas Principais',name:'snapshot_sgp',     label:'SGP Empenhos',       badge:true},
   {group:'Análises',        name:'__armazem__',      label:'Análise Armazém',     badge:true},
@@ -459,10 +475,23 @@ function buildSB(){
     ts.forEach(t=>{
       const el=document.createElement('div');el.className='titem';el.dataset.l=t.label;
       el.innerHTML=`<div class="tdot"></div><div class="tname">${t.label}</div>${t.badge?'<div class="tbadge">live</div>':''}`;
-      el.onclick=()=>t.name==='__armazem__'?loadArmazem(el):(t.name==='__recebimento__'?loadRecebimento(el):(t.name==='__historico_cargas__'?loadHistoricoCargas(el):loadTable(t.name,t.label,el)));
+      el.onclick=()=>t.name==='__cronograma__'?loadCronograma(el):(t.name==='__armazem__'?loadArmazem(el):(t.name==='__recebimento__'?loadRecebimento(el):(t.name==='__historico_cargas__'?loadHistoricoCargas(el):loadTable(t.name,t.label,el))));
       list.appendChild(el);
     });
   });
+}
+
+function loadCronograma(el){
+  document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');curTable='__cronograma__';
+  document.getElementById('ttitle').textContent='Cronograma de Mercadorias';
+  document.getElementById('rcount').textContent='Em construção';
+  setLoad(false);
+  document.getElementById('twrap').style.display='none';
+  document.getElementById('pgbar').style.display='none';
+  document.getElementById('armazem-wrap').style.display='none';
+  const rw=document.getElementById('recebimento-wrap'); if(rw) rw.style.display='none';
+  document.getElementById('cronograma-wrap').style.display='flex';
 }
 
 // ── Tabela genérica ────────────────────────────────────────────────────────
@@ -473,6 +502,7 @@ async function loadTable(name,label,el){
   document.getElementById('ttitle').textContent=label;
   document.getElementById('rcount').textContent='';
   setLoad(true);
+  document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='flex';
   document.getElementById('armazem-wrap').style.display='none';
   const rw=document.getElementById('recebimento-wrap'); if(rw) rw.style.display='none';
@@ -855,6 +885,7 @@ function loadRecebimento(el){
   document.getElementById('ttitle').textContent='Recebimento de Carga';
   document.getElementById('rcount').textContent='Formulário integrado';
   setLoad(false);
+  document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='none';
   document.getElementById('pgbar').style.display='none';
   document.getElementById('armazem-wrap').style.display='none';
@@ -918,6 +949,7 @@ async function loadHistoricoCargas(el){
   document.getElementById('ttitle').textContent='Histórico de Cargas';
   document.getElementById('rcount').textContent='Últimos registros';
   setLoad(true);
+  document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='flex';
   document.getElementById('armazem-wrap').style.display='none';
   const rw=document.getElementById('recebimento-wrap'); if(rw) rw.style.display='none';
@@ -984,6 +1016,7 @@ async function loadArmazem(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');curTable='__armazem__';
   document.getElementById('ttitle').textContent='Análise Armazém';
+  document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='none';
   document.getElementById('pgbar').style.display='none';
   document.getElementById('armazem-wrap').style.display='flex';
@@ -1291,3 +1324,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+
