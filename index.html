@@ -60,7 +60,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 .cr-stat-label{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3)}
 .cr-stat-value{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;color:var(--txt);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cr-stat:first-child .cr-stat-value{color:var(--acc)}
-.cr-filters{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(150px,.75fr) minmax(150px,.75fr) auto;gap:8px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:20px}
+.cr-filters{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(130px,.65fr) minmax(150px,.75fr) minmax(150px,.75fr) auto;gap:8px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:20px}
 .cr-control{position:relative;display:flex;align-items:center}
 .cr-control .cr-search-icon{position:absolute;left:10px;color:var(--txt3);font-size:13px;pointer-events:none}
 .cr-control input,.cr-control select{width:100%;height:34px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:11px;outline:none;padding:0 10px}
@@ -346,7 +346,11 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
       <div class="cr-filters">
         <label class="cr-control">
           <span class="cr-search-icon" aria-hidden="true">⌕</span>
-          <input id="cr-search" type="search" placeholder="Buscar produto, empenho ou código..." aria-label="Buscar no cronograma" oninput="renderCronograma()">
+          <input id="cr-search" type="search" placeholder="Buscar; use % entre termos..." aria-label="Buscar no cronograma; use porcentagem para combinar termos" oninput="renderCronograma()">
+        </label>
+        <label class="cr-control">
+          <span class="cr-search-icon" aria-hidden="true">≥</span>
+          <input id="cr-min" type="number" min="0" step="any" inputmode="decimal" placeholder="Qtd. mínima" aria-label="Não mostrar quantidade inferior a" oninput="renderCronograma()">
         </label>
         <label class="cr-control">
           <select id="cr-period" aria-label="Filtrar período" onchange="renderCronograma()">
@@ -612,7 +616,8 @@ function crLoading(){
 }
 function crPopulateTypes(){
   const sel=document.getElementById('cr-type'), current=sel.value;
-  const types=[...new Set(cronogramaRows.map(r=>String(r.tipo||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const typeName=t=>crFold(String(t).replace(/^\s*\d+\s*-\s*/,''));
+  const types=[...new Set(cronogramaRows.map(r=>String(r.tipo||'').trim()).filter(Boolean))].sort((a,b)=>typeName(a).localeCompare(typeName(b),'pt-BR')||a.localeCompare(b,'pt-BR'));
   sel.innerHTML='<option value="">Todos os tipos</option>'+types.map(t=>`<option value="${crEsc(t)}">${crEsc(t)}</option>`).join('');
   if(types.includes(current))sel.value=current;
 }
@@ -627,7 +632,7 @@ async function loadCronogramaData(force=false){
   if(cronogramaLoaded&&!force){renderCronograma();return}
   crLoading();setLoad(true);
   try{
-    const sql=`SELECT empenho, ano, codigo, idcodbarprod, produto, tipo, saldo_restante, parcela, data_entrega, quantidade, atualizado_em FROM agenda_entregas ORDER BY data_entrega ASC, produto ASC LIMIT 5000`;
+    const sql=`SELECT a.empenho, a.ano, a.codigo, a.idcodbarprod, a.produto, a.tipo, a.saldo_restante, a.parcela, a.data_entrega, a.quantidade, a.atualizado_em FROM agenda_entregas a WHERE NOT EXISTS (SELECT 1 FROM tabela_controle c WHERE TRIM(CAST(c."Ano" AS TEXT)) = TRIM(a.ano) AND TRIM(CAST(c."O.C" AS TEXT)) = TRIM(a.empenho) AND LOWER(TRIM(COALESCE(c."Status", ''))) = 'cancelado') ORDER BY a.data_entrega ASC, a.produto ASC LIMIT 5000`;
     cronogramaRows=(await qNeon(sql)||[]).filter(r=>crDate(r.data_entrega));
     cronogramaLoaded=true;
     crPopulateTypes();crUpdatedLabel();renderCronograma();
@@ -640,11 +645,15 @@ async function loadCronogramaData(force=false){
 }
 function renderCronograma(){
   if(!cronogramaLoaded)return;
-  const q=crFold(document.getElementById('cr-search').value), type=document.getElementById('cr-type').value, period=document.getElementById('cr-period').value;
+  const terms=crFold(document.getElementById('cr-search').value).split('%').map(t=>t.trim()).filter(Boolean), type=document.getElementById('cr-type').value, period=document.getElementById('cr-period').value;
+  const minRaw=String(document.getElementById('cr-min').value||'').trim().replace(',','.');
+  const minQty=minRaw===''?0:Math.max(0,Number(minRaw)||0);
   const base=cronogramaRows.filter(r=>{
     if(type&&String(r.tipo||'')!==type)return false;
-    if(!q)return true;
-    return crFold([r.produto,r.empenho,r.ano,r.codigo,r.idcodbarprod,r.tipo].join(' ')).includes(q);
+    if(crNum(r.quantidade)<minQty)return false;
+    if(!terms.length)return true;
+    const haystack=crFold([r.produto,r.empenho,r.ano,r.codigo,r.idcodbarprod,r.tipo].join(' '));
+    return terms.every(term=>haystack.includes(term));
   });
   const rows=base.filter(r=>{
     const dif=crDiffDays(crDate(r.data_entrega));
