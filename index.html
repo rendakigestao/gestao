@@ -632,7 +632,7 @@ async function loadCronogramaData(force=false){
   if(cronogramaLoaded&&!force){renderCronograma();return}
   crLoading();setLoad(true);
   try{
-    const sql=`SELECT a.empenho, a.ano, a.codigo, a.idcodbarprod, a.produto, a.tipo, a.saldo_restante, a.parcela, a.data_entrega, a.quantidade, a.atualizado_em FROM agenda_entregas a WHERE NOT EXISTS (SELECT 1 FROM tabela_controle c WHERE TRIM(CAST(c."Ano" AS TEXT)) = TRIM(a.ano) AND TRIM(CAST(c."O.C" AS TEXT)) = TRIM(a.empenho) AND LOWER(TRIM(COALESCE(c."Status", ''))) = 'cancelado') ORDER BY a.data_entrega ASC, a.produto ASC LIMIT 5000`;
+    const sql=`SELECT a.empenho, a.ano, a.codigo, a.idcodbarprod, a.produto, a.tipo, a.saldo_restante, a.parcela, a.data_entrega, a.quantidade, a.atualizado_em FROM agenda_entregas a WHERE NOT EXISTS (SELECT 1 FROM tabela_controle c WHERE TRIM(CAST(c."Ano" AS TEXT)) = TRIM(a.ano) AND TRIM(CAST(c."O.C" AS TEXT)) = TRIM(a.empenho) AND LOWER(TRIM(COALESCE(c."Status", ''))) = 'cancelado') AND NOT EXISTS (SELECT 1 FROM snapshot_posicao_det s WHERE TRIM(CAST(s.codigo AS TEXT)) = TRIM(CAST(a.idcodbarprod AS TEXT)) AND UPPER(TRIM(COALESCE(s.t_item, ''))) LIKE '%PEREC%') ORDER BY a.data_entrega ASC, a.produto ASC LIMIT 5000`;
     cronogramaRows=(await qNeon(sql)||[]).filter(r=>crDate(r.data_entrega));
     cronogramaLoaded=true;
     crPopulateTypes();crUpdatedLabel();renderCronograma();
