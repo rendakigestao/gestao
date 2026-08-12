@@ -123,6 +123,45 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 @keyframes crShimmer{to{background-position:-200% 0}}
 @media(max-width:900px){.cr-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cr-filters{grid-template-columns:1fr 1fr}.cr-control:first-child{grid-column:1/-1}.cr-refresh{width:100%}}
 @media(max-width:680px){.cr-shell{padding:18px 14px 32px}.cr-hero{align-items:flex-start;flex-direction:column;gap:8px}.cr-hero h1{font-size:22px}.cr-update{white-space:normal}.cr-grid,.cr-skeleton{grid-template-columns:1fr}.cr-filters{grid-template-columns:1fr}.cr-control:first-child{grid-column:auto}.cr-card-body{grid-template-columns:1fr 1fr}.cr-meta:first-child{grid-column:1/-1}.cr-stat-value{font-size:19px}}
+
+/* Torre de Controle Gerencial */
+#tower-wrap{display:none;flex:1;flex-direction:column;overflow:auto;background:radial-gradient(circle at 82% 0,rgba(74,222,128,.075),transparent 32%),linear-gradient(180deg,rgba(96,165,250,.025),transparent 300px),var(--bg)}
+.tw-shell{width:min(1440px,100%);margin:0 auto;padding:24px 26px 48px}
+.tw-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:16px}
+.tw-kicker{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:7px}
+.tw-hero h1{font-size:27px;font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.tw-hero p{font-size:12px;color:var(--txt2);margin-top:7px;line-height:1.5}
+.tw-health{display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:10px 13px;min-width:235px}
+.tw-health-dot{width:11px;height:11px;border-radius:50%;background:var(--txt3);box-shadow:0 0 0 5px rgba(255,255,255,.03)}
+.tw-health.critical .tw-health-dot{background:var(--red);box-shadow:0 0 0 5px rgba(248,113,113,.09)}
+.tw-health.attention .tw-health-dot{background:#fbbf24;box-shadow:0 0 0 5px rgba(251,191,36,.08)}
+.tw-health.normal .tw-health-dot{background:var(--acc);box-shadow:0 0 0 5px rgba(74,222,128,.08)}
+.tw-health-copy{flex:1;min-width:0}.tw-health-label{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3)}
+.tw-health-value{font-size:13px;font-weight:600;margin-top:2px}.tw-health-time{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt3);margin-top:2px}
+.tw-filters{display:grid;grid-template-columns:minmax(190px,1.4fr) repeat(4,minmax(120px,.7fr)) 92px 92px auto;gap:7px;background:var(--surf);border:1px solid var(--bdr);border-radius:11px;padding:9px;margin-bottom:12px;position:sticky;top:0;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.tw-field{position:relative;display:flex;align-items:center;min-width:0}
+.tw-field input,.tw-field select{width:100%;height:34px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-size:10px;font-family:'IBM Plex Sans',sans-serif;outline:none;padding:0 9px;min-width:0}
+.tw-field input:focus,.tw-field select:focus{border-color:var(--acc)}.tw-field select option{background:var(--surf2)}
+.tw-field.tw-number::before{content:attr(data-prefix);position:absolute;left:9px;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--txt3);pointer-events:none}.tw-field.tw-number input{padding-left:29px}
+.tw-btn{height:34px;padding:0 12px;border:1px solid rgba(74,222,128,.28);border-radius:6px;background:rgba(74,222,128,.08);color:var(--acc2);font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap}.tw-btn:hover{background:rgba(74,222,128,.14);border-color:var(--acc)}
+.tw-source-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 1px 14px}.tw-source-label{font-family:'IBM Plex Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3)}
+.tw-source{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt2);border:1px solid var(--bdr);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.018)}.tw-source.ok{color:var(--acc2);border-color:rgba(74,222,128,.18)}.tw-source.fail{color:var(--red);border-color:rgba(248,113,113,.2)}
+.tw-kpis{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.tw-kpi{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:11px 12px;min-height:82px;position:relative;overflow:hidden;cursor:default}.tw-kpi::after{content:'';position:absolute;right:-18px;bottom:-25px;width:65px;height:65px;border-radius:50%;background:rgba(255,255,255,.022)}
+.tw-kpi-label{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.075em;text-transform:uppercase;color:var(--txt3);min-height:18px;line-height:1.35}.tw-kpi-value{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:500;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tw-kpi-sub{font-size:8px;color:var(--txt3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tw-kpi.critical{border-color:rgba(248,113,113,.22)}.tw-kpi.critical .tw-kpi-value{color:var(--red)}.tw-kpi.attention .tw-kpi-value{color:#fbbf24}.tw-kpi.good .tw-kpi-value{color:var(--acc)}.tw-kpi.info .tw-kpi-value{color:#93c5fd}
+.tw-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:10px;margin-bottom:10px}.tw-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tw-panel{background:var(--surf);border:1px solid var(--bdr);border-radius:11px;overflow:hidden;min-width:0}.tw-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-bottom:1px solid rgba(255,255,255,.05)}.tw-panel-title{font-size:12px;font-weight:600}.tw-panel-sub{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt3);margin-top:2px}.tw-panel-action{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--acc);cursor:pointer;background:none;border:none}.tw-panel-body{padding:13px}
+.tw-risk-layout{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:16px}.tw-donut{width:138px;height:138px;border-radius:50%;position:relative;background:conic-gradient(var(--txt3) 0 100%);margin:auto}.tw-donut::after{content:'';position:absolute;inset:23px;border-radius:50%;background:var(--surf)}.tw-donut-center{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center}.tw-donut-center b{font-family:'IBM Plex Mono',monospace;font-size:22px}.tw-donut-center span{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt3);text-transform:uppercase}
+.tw-legend{display:flex;flex-direction:column;gap:9px}.tw-legend-row{display:grid;grid-template-columns:8px 1fr auto;gap:8px;align-items:center;font-size:9px;color:var(--txt2)}.tw-legend-dot{width:7px;height:7px;border-radius:2px}.tw-legend-row b{font-family:'IBM Plex Mono',monospace;color:var(--txt);font-weight:500}
+.tw-bars{display:flex;flex-direction:column;gap:10px}.tw-bar-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(100px,2fr) auto;gap:8px;align-items:center}.tw-bar-label{font-size:9px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tw-bar-track{height:7px;border-radius:999px;background:var(--surf2);overflow:hidden}.tw-bar-fill{height:100%;border-radius:999px;background:var(--acc);min-width:2px}.tw-bar-fill.red{background:var(--red)}.tw-bar-fill.yellow{background:#fbbf24}.tw-bar-fill.blue{background:#60a5fa}.tw-bar-value{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--txt3);min-width:44px;text-align:right}
+.tw-horizon{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:end;height:150px;padding-top:8px}.tw-hcol{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}.tw-hvalue{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt2)}.tw-hbar{width:min(46px,70%);min-height:4px;border-radius:5px 5px 2px 2px;background:#60a5fa}.tw-hbar.late{background:var(--red)}.tw-hbar.today{background:var(--acc)}.tw-hbar.soon{background:#fbbf24}.tw-hlabel{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt3);text-align:center;min-height:18px}
+.tw-alerts{display:flex;flex-direction:column;gap:7px;max-height:430px;overflow:auto}.tw-alert{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 10px;background:var(--surf2);border:1px solid rgba(255,255,255,.045);border-radius:8px}.tw-alert:hover{border-color:#3b3b44}.tw-alert-level{font-family:'IBM Plex Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.05em;padding:3px 6px;border-radius:999px;text-align:center;border:1px solid var(--bdr);color:var(--txt3)}.tw-alert-level.critical{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.07)}.tw-alert-level.attention{color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}.tw-alert-level.excess{color:#93c5fd;border-color:rgba(147,197,253,.25);background:rgba(147,197,253,.05)}
+.tw-alert-copy{min-width:0}.tw-alert-title{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tw-alert-desc{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--txt3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tw-alert-open{background:none;border:none;color:var(--acc);font-size:9px;cursor:pointer;padding:4px}
+.tw-quality{display:flex;flex-direction:column;gap:8px}.tw-quality-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.045)}.tw-quality-row:last-child{border-bottom:0;padding-bottom:0}.tw-quality-label{font-size:9px;color:var(--txt2)}.tw-quality-value{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt)}.tw-empty{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt3);text-align:center;padding:26px 10px;line-height:1.7}
+@media(max-width:1200px){.tw-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.tw-filters{grid-template-columns:repeat(4,minmax(0,1fr))}.tw-field:first-child{grid-column:span 2}.tw-grid.three{grid-template-columns:1fr 1fr}.tw-grid.three .tw-panel:last-child{grid-column:1/-1}}
+@media(max-width:820px){.tw-shell{padding:18px 14px 36px}.tw-hero{align-items:flex-start;flex-direction:column}.tw-health{width:100%}.tw-grid,.tw-grid.three{grid-template-columns:1fr}.tw-grid.three .tw-panel:last-child{grid-column:auto}.tw-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.tw-filters{position:static;grid-template-columns:1fr 1fr}.tw-field:first-child{grid-column:1/-1}.tw-risk-layout{grid-template-columns:120px 1fr}.tw-donut{width:112px;height:112px}.tw-donut::after{inset:19px}.tw-alert{grid-template-columns:62px minmax(0,1fr) auto}}
+@media(max-width:480px){.tw-filters{grid-template-columns:1fr}.tw-field:first-child{grid-column:auto}.tw-kpis{grid-template-columns:1fr 1fr}.tw-risk-layout{grid-template-columns:1fr}.tw-alert{grid-template-columns:58px minmax(0,1fr)}.tw-alert-open{display:none}}
 #tcont{flex:1;overflow:auto;min-height:0;position:relative}
 table{border-collapse:collapse;font-size:11px;width:max-content;min-width:100%}
 thead{position:sticky;top:0;z-index:10}
@@ -344,6 +383,48 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
   </div>
   <div id="loadbar"></div>
 
+  <section id="tower-wrap" aria-labelledby="tower-title">
+    <div class="tw-shell">
+      <div class="tw-hero">
+        <div>
+          <div class="tw-kicker">Visão consolidada da operação</div>
+          <h1 id="tower-title">Torre de Controle</h1>
+          <p>Riscos, cobertura, entregas, lojas, fornecedores e recebimentos em uma única visão gerencial.</p>
+        </div>
+        <div class="tw-health" id="tw-health">
+          <span class="tw-health-dot" aria-hidden="true"></span>
+          <div class="tw-health-copy"><div class="tw-health-label">Saúde da operação</div><div class="tw-health-value" id="tw-health-value">Aguardando dados</div><div class="tw-health-time" id="tw-health-time">—</div></div>
+        </div>
+      </div>
+      <div class="tw-filters" aria-label="Filtros da Torre de Controle">
+        <label class="tw-field"><input id="tw-search" type="search" placeholder="Produto, código, empenho; use %..." aria-label="Buscar na Torre de Controle" oninput="renderTower()"></label>
+        <label class="tw-field"><select id="tw-level" aria-label="Filtrar nível" onchange="renderTower()"><option value="">Todos os níveis</option><option value="critical">Crítico</option><option value="attention">Atenção</option><option value="normal">Normal</option><option value="excess">Excesso</option></select></label>
+        <label class="tw-field"><select id="tw-type" aria-label="Filtrar tipo" onchange="renderTower()"><option value="">Todos os tipos</option></select></label>
+        <label class="tw-field"><select id="tw-supplier" aria-label="Filtrar fornecedor" onchange="renderTower()"><option value="">Todos os fornecedores</option></select></label>
+        <label class="tw-field"><select id="tw-store" aria-label="Filtrar loja" onchange="renderTower()"><option value="">Todas as lojas</option></select></label>
+        <label class="tw-field tw-number" data-prefix="MIN"><input id="tw-min-days" type="number" min="0" value="15" aria-label="Cobertura mínima em dias" title="Cobertura mínima em dias" onchange="renderTower()"></label>
+        <label class="tw-field tw-number" data-prefix="MAX"><input id="tw-max-days" type="number" min="1" value="90" aria-label="Cobertura máxima em dias" title="Cobertura máxima em dias" onchange="renderTower()"></label>
+        <button class="tw-btn" type="button" onclick="loadTowerData(true)">↻ Atualizar</button>
+      </div>
+      <div class="tw-source-line" id="tw-sources"><span class="tw-source-label">Fontes</span></div>
+      <div class="tw-kpis" id="tw-kpis"></div>
+      <div class="tw-grid">
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Central de atenção</div><div class="tw-panel-sub" id="tw-alert-sub">Ocorrências priorizadas pelos dados atuais</div></div><button class="tw-panel-action" type="button" onclick="twExportAlerts()">Exportar CSV</button></div><div class="tw-panel-body"><div class="tw-alerts" id="tw-alerts"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Distribuição do estoque</div><div class="tw-panel-sub">Níveis calculados pela cobertura CD/P</div></div></div><div class="tw-panel-body"><div class="tw-risk-layout"><div class="tw-donut" id="tw-risk-donut"><div class="tw-donut-center"><b id="tw-risk-total">—</b><span>itens</span></div></div><div class="tw-legend" id="tw-risk-legend"></div></div></div></section>
+      </div>
+      <div class="tw-grid three">
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Horizonte de entregas</div><div class="tw-panel-sub">Agenda vigente por data prevista</div></div></div><div class="tw-panel-body"><div class="tw-horizon" id="tw-horizon"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Exposição por fornecedor</div><div class="tw-panel-sub">Maiores saldos restantes vigentes</div></div></div><div class="tw-panel-body"><div class="tw-bars" id="tw-suppliers"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Lojas em atenção</div><div class="tw-panel-sub">Itens com solicitação ou baixa cobertura</div></div></div><div class="tw-panel-body"><div class="tw-bars" id="tw-stores"></div></div></section>
+      </div>
+      <div class="tw-grid three">
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Recebimentos e qualidade</div><div class="tw-panel-sub">Registros do Histórico de Cargas</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-receipts"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Empenhos e pendências</div><div class="tw-panel-sub">Controle de mercadorias e agenda</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-orders"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Qualidade dos dados</div><div class="tw-panel-sub">Campos essenciais e correspondências</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-quality"></div></div></section>
+      </div>
+    </div>
+  </section>
+
   <section id="cronograma-wrap" aria-labelledby="cronograma-title">
     <div class="cr-shell">
       <div class="cr-hero">
@@ -479,6 +560,7 @@ const TABLES=[
   {group:'Telas Principais',name:'__cronograma__',   label:'Cronograma de Mercadorias'},
   {group:'Telas Principais',name:'snapshot_posicao', label:'Posição de Estoque', badge:true},
   {group:'Telas Principais',name:'snapshot_sgp',     label:'SGP Empenhos',       badge:true},
+  {group:'Análises',        name:'__torre__',        label:'Torre de Controle',   badge:true},
   {group:'Análises',        name:'__armazem__',      label:'Análise Armazém',     badge:true},
   {group:'Operacional',     name:'__recebimento__',  label:'Recebimento de Carga', badge:true},
   {group:'Operacional',     name:'__historico_cargas__',  label:'Histórico de Cargas', badge:true},
@@ -583,11 +665,128 @@ function buildSB(){
     ts.forEach(t=>{
       const el=document.createElement('div');el.className='titem';el.dataset.l=t.label;
       el.innerHTML=`<div class="tdot"></div><div class="tname">${t.label}</div>${t.badge?'<div class="tbadge">live</div>':''}`;
-      el.onclick=()=>t.name==='__cronograma__'?loadCronograma(el):(t.name==='__armazem__'?loadArmazem(el):(t.name==='__recebimento__'?loadRecebimento(el):(t.name==='__historico_cargas__'?loadHistoricoCargas(el):loadTable(t.name,t.label,el))));
+      el.onclick=()=>t.name==='__cronograma__'?loadCronograma(el):(t.name==='__torre__'?loadTower(el):(t.name==='__armazem__'?loadArmazem(el):(t.name==='__recebimento__'?loadRecebimento(el):(t.name==='__historico_cargas__'?loadHistoricoCargas(el):loadTable(t.name,t.label,el)))));
       list.appendChild(el);
     });
   });
 }
+
+// ── Torre de Controle Gerencial ───────────────────────────────────────────
+let towerLoaded=false,towerData={stock:[],control:[],agenda:[],stores:[],sgp:[],history:[]},towerSources={},towerAlerts=[];
+function twFold(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function twKey(v){return twFold(v).replace(/[^a-z0-9]/g,'')}
+function twGet(row,...names){
+  for(const n of names)if(row&&row[n]!==undefined&&row[n]!==null)return row[n];
+  if(!row)return '';
+  const wanted=new Set(names.map(twKey));
+  const key=Object.keys(row).find(k=>wanted.has(twKey(k)));
+  return key===undefined?'':row[key];
+}
+function twNum(v){
+  if(typeof v==='number')return Number.isFinite(v)?v:null;
+  let s=String(v??'').trim();if(!s)return null;
+  s=s.replace(/\s/g,'').replace(/[^0-9,.-]/g,'');
+  if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+  else if(/^-?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  const n=Number(s);return Number.isFinite(n)?n:null;
+}
+function twCode(v){let s=String(v||'').trim();if(s.endsWith('.0'))s=s.slice(0,-2);s=s.replace(/\D/g,'');return s.replace(/^0+/,'')||s}
+function twDate(v){const d=new Date(v);return isNaN(d)?null:d}
+function twDay(v){const raw=String(v??'').trim(),m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));const d=twDate(v);if(!d)return null;return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function twDiff(v){const d=twDay(v),now=twDay(new Date());return d?Math.round((d-now)/86400000):null}
+function twFmt(v){return new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(Number(v)||0)}
+function twPct(v,total){return total?Math.max(0,Math.min(100,(v/total)*100)):0}
+function twOrderKey(ano,oc){return String(ano||'').trim()+'|'+String(oc||'').trim()}
+function twStockNorm(r){return {raw:r,code:twCode(twGet(r,'codigo','Código','Cod.Barras')),product:String(twGet(r,'descricao','Descrição','produto','Produto')||'').trim(),type:String(twGet(r,'tipo','Tipo')||'').trim(),group:String(twGet(r,'gr','G','grupo')||'').trim(),itemType:String(twGet(r,'t_item','T.Item','tipo_item')||'').trim(),stock:twNum(twGet(r,'estoque','Estoque CD','CD')),media:twNum(twGet(r,'media','Média')),cover:twNum(twGet(r,'cdp','CD/P','Dias')),orders:twNum(twGet(r,'s_ocs','S.Ocs','ocs','OCs')),updated:String(twGet(r,'updated_at','atualizado_em')||'')}}
+function twControlNorm(r){return {raw:r,year:String(twGet(r,'Ano','ano')||'').trim(),oc:String(twGet(r,'O.C','OC','empenho')||'').trim(),code:twCode(twGet(r,'Cod.Barras','codigo')),product:String(twGet(r,'Produto','produto')||'').trim(),type:String(twGet(r,'Tipo','tipo')||'').trim(),supplier:String(twGet(r,'Fornecedor','fornecedor')||'').trim(),ordered:twNum(twGet(r,'Qtd_Pedido','Comprado','comprado'))||0,received:twNum(twGet(r,'Qtd_Recebida'))||0,remaining:twNum(twGet(r,'S_Restante','saldo_restante'))||0,situation:String(twGet(r,'Situacao','Situação','situacao')||'').trim(),status:String(twGet(r,'Status','status')||'').trim()}}
+function twAgendaNorm(r){return {raw:r,year:String(twGet(r,'ano','Ano')||'').trim(),oc:String(twGet(r,'empenho','O.C')||'').trim(),code:twCode(twGet(r,'idcodbarprod','codigo','Cod.Barras')),product:String(twGet(r,'produto','Produto')||'').trim(),type:String(twGet(r,'tipo','Tipo')||'').trim(),date:String(twGet(r,'data_entrega','Data')||'').trim(),qty:twNum(twGet(r,'quantidade','Quantidade'))||0,remaining:twNum(twGet(r,'saldo_restante'))||0,updated:String(twGet(r,'atualizado_em')||'')}}
+function twStoreNorm(r){return {raw:r,store:String(twGet(r,'loja','Loja')||'').trim(),storeId:String(twGet(r,'loja_id','ID')||'').trim(),product:String(twGet(r,'produto','Produto')||'').trim(),stockCd:twNum(twGet(r,'est_cd','Est.CD'))||0,stockStore:twNum(twGet(r,'saldo_loja','SaldoL.'))||0,days:twNum(twGet(r,'dias_at','DiasAT')),media:twNum(twGet(r,'media','Média')),requestRaw:String(twGet(r,'solicitar_e','SolicitarE')||'').trim(),request:twNum(twGet(r,'solicitar_e','SolicitarE'))||0}}
+function twHistoryNorm(base){
+  const out=[];
+  for(const x of base){let products=[];try{products=Array.isArray(x.produtos_json)?x.produtos_json:JSON.parse(x.produtos_json||'[]')}catch(e){products=[]}if(!Array.isArray(products))products=[];
+    if(!products.length)products=[{}];for(const p of products)out.push({raw:x,date:String(x.data_geracao||x.criado_em||x.data_registro||''),note:String(x.nota_fiscal||''),checker:String(x.conferente||''),product:String(p.desc||p.descricao||p.produto||p.nome||''),code:twCode(p.ean||p.cod_barras||p.codigo_barras||''),validity:String(p.validade||''),load:String(x.carga||''),glosa:twFold(x.glosa)==='sim',reason:String(x.glosa_motivo||''),glosaItem:String(x.glosa_item||'')})}
+  return out;
+}
+function twStockLevel(r,minDays,maxDays){if(r.stock<=0||r.cover===0)return'critical';if(r.cover===null||r.media===null||r.media<=0)return'attention';if(r.cover<minDays)return'attention';if(r.cover>maxDays)return'excess';return'normal'}
+function twTerms(){return twFold(document.getElementById('tw-search').value).split('%').map(x=>x.trim()).filter(Boolean)}
+function twMatch(parts,terms){const hay=twFold(parts.join(' '));return terms.every(t=>hay.includes(t))}
+function twPopulateFilters(){
+  const fill=(id,values,label)=>{const el=document.getElementById(id),cur=el.value;const vals=[...new Set(values.map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>twFold(a).localeCompare(twFold(b),'pt-BR'));el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option value="${crEsc(v)}">${crEsc(v)}</option>`).join('');if(vals.includes(cur))el.value=cur};
+  fill('tw-type',[...towerData.stock.map(r=>r.type),...towerData.control.map(r=>r.type)],'Todos os tipos');fill('tw-supplier',towerData.control.map(r=>r.supplier),'Todos os fornecedores');fill('tw-store',towerData.stores.map(r=>r.store),'Todas as lojas');
+}
+function twShowOnly(){
+  document.getElementById('tower-wrap').style.display='flex';document.getElementById('cronograma-wrap').style.display='none';document.getElementById('twrap').style.display='none';document.getElementById('pgbar').style.display='none';document.getElementById('armazem-wrap').style.display='none';const rw=document.getElementById('recebimento-wrap');if(rw)rw.style.display='none';
+}
+function loadTower(el){document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));el.classList.add('active');curTable='__torre__';document.getElementById('ttitle').textContent='Torre de Controle';document.getElementById('rcount').textContent='Visão gerencial';twShowOnly();if(!towerLoaded)loadTowerData()}
+function twLoading(){document.getElementById('tw-kpis').innerHTML=Array.from({length:8},()=>'<div class="tw-kpi"><div class="tw-kpi-label">Carregando</div><div class="tw-kpi-value">—</div></div>').join('');document.getElementById('tw-alerts').innerHTML='<div class="tw-empty">Consolidando as fontes publicadas...</div>'}
+async function loadTowerData(force=false){
+  if(towerLoaded&&!force){renderTower();return}twLoading();setLoad(true);
+  const tasks={
+    stock:qNeon('SELECT tipo, gr, codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas, updated_at FROM snapshot_posicao_det LIMIT 15000'),
+    control:qNeon('SELECT "Ano","O.C","Cod.Barras","Produto","Tipo","Fornecedor","G","Comprado","Qtd_Pedido","Qtd_Recebida","S_Restante","Media","Dias","Percentual","Situacao","L","CD","Status" FROM tabela_controle LIMIT 10000'),
+    agenda:qNeon('SELECT a.empenho, a.ano, a.codigo, a.idcodbarprod, a.produto, a.tipo, a.saldo_restante, a.parcela, a.data_entrega, a.quantidade, a.atualizado_em FROM agenda_entregas a WHERE NOT EXISTS (SELECT 1 FROM tabela_controle c WHERE TRIM(CAST(c."Ano" AS TEXT))=TRIM(a.ano) AND TRIM(CAST(c."O.C" AS TEXT))=TRIM(a.empenho) AND LOWER(TRIM(COALESCE(c."Status",\'\')))=\'cancelado\') ORDER BY a.data_entrega LIMIT 10000'),
+    stores:qNeon('SELECT loja, loja_id, produto, emb, est_cd, saldo_loja, saida, dias_a, media, dias_at, e_estim, est_e_est, est_emb_a, solicitar_e FROM analise_armazem LIMIT 50000'),
+    sgp:qNeon('SELECT * FROM snapshot_sgp LIMIT 10000'),
+    history:fetch(PROXY+'recebimento/listar').then(async r=>{if(!r.ok)throw new Error('Erro '+r.status);const j=await r.json();return Array.isArray(j)?j:(j.rows||j.results||[])})
+  };
+  const entries=Object.entries(tasks),results=await Promise.allSettled(entries.map(x=>x[1]));towerSources={};
+  results.forEach((res,i)=>{const name=entries[i][0];if(res.status==='fulfilled'){towerSources[name]={ok:true,count:(res.value||[]).length};towerData[name]=res.value||[]}else{towerSources[name]={ok:false,count:0};towerData[name]=[];console.warn('Torre de Controle — fonte indisponível:',name,res.reason)}});
+  towerData.stock=towerData.stock.map(twStockNorm);towerData.control=towerData.control.map(twControlNorm);towerData.agenda=towerData.agenda.map(twAgendaNorm);towerData.stores=towerData.stores.map(twStoreNorm);towerData.history=twHistoryNorm(towerData.history);
+  towerLoaded=Object.values(towerSources).some(s=>s.ok);twSourceChips();
+  if(!towerLoaded){document.getElementById('tw-kpis').innerHTML=twKpi('Conexão necessária','—','Configure a conexão para consultar as fontes','attention');document.getElementById('tw-alerts').innerHTML='<div class="tw-empty">Não foi possível consultar as fontes publicadas.<br>Verifique a conexão e tente atualizar novamente.</div>';setLoad(false);return}
+  twPopulateFilters();renderTower();setLoad(false);
+}
+function twSourceChips(){const labels={stock:'Posição',control:'Controle',agenda:'Agenda',stores:'Lojas',sgp:'SGP',history:'Cargas'},box=document.getElementById('tw-sources');box.innerHTML='<span class="tw-source-label">Fontes</span>'+Object.entries(labels).map(([k,l])=>`<span class="tw-source ${towerSources[k]?.ok?'ok':'fail'}">${towerSources[k]?.ok?'●':'○'} ${l} · ${twFmt(towerSources[k]?.count||0)}</span>`).join('')}
+function twKpi(label,value,sub,cls=''){return `<div class="tw-kpi ${cls}"><div class="tw-kpi-label">${label}</div><div class="tw-kpi-value">${value}</div><div class="tw-kpi-sub">${sub}</div></div>`}
+function twQualityRow(label,value){return `<div class="tw-quality-row"><span class="tw-quality-label">${crEsc(label)}</span><span class="tw-quality-value">${crEsc(value)}</span></div>`}
+function twBarRows(entries,cls='',formatter=twFmt){if(!entries.length)return'<div class="tw-empty">Sem dados para o filtro selecionado.</div>';const max=Math.max(...entries.map(x=>x[1]),1);return entries.slice(0,7).map(([label,value])=>`<div class="tw-bar-row"><div class="tw-bar-label" title="${crEsc(label)}">${crEsc(label)}</div><div class="tw-bar-track"><div class="tw-bar-fill ${cls}" style="width:${twPct(value,max)}%"></div></div><div class="tw-bar-value">${formatter(value)}</div></div>`).join('')}
+function twOpenSource(source){const names={stock:'Posição de Estoque',control:'Controle de Mercadorias',agenda:'Cronograma de Mercadorias',stores:'Análise Armazém',history:'Histórico de Cargas',sgp:'SGP Empenhos'},label=names[source];if(!label)return;const el=[...document.querySelectorAll('.titem')].find(x=>x.dataset.l===label);if(el)el.click()}
+function renderTower(){
+  if(!towerLoaded)return;twSourceChips();
+  const terms=twTerms(),levelFilter=document.getElementById('tw-level').value,type=document.getElementById('tw-type').value,supplier=document.getElementById('tw-supplier').value,store=document.getElementById('tw-store').value,minDays=Math.max(0,Number(document.getElementById('tw-min-days').value)||15),maxDays=Math.max(minDays+1,Number(document.getElementById('tw-max-days').value)||90);
+  const activeControl=towerData.control.filter(r=>twFold(r.status)!=='cancelado'),supplierCodes=new Set(activeControl.filter(r=>!supplier||r.supplier===supplier).map(r=>r.code).filter(Boolean));
+  const stocks=towerData.stock.filter(r=>(!type||r.type===type)&&(!supplier||supplierCodes.has(r.code))&&twMatch([r.product,r.code,r.type,r.group,r.itemType],terms)).map(r=>({...r,level:twStockLevel(r,minDays,maxDays)})).filter(r=>!levelFilter||r.level===levelFilter);
+  const controls=activeControl.filter(r=>(!type||r.type===type)&&(!supplier||r.supplier===supplier)&&twMatch([r.product,r.code,r.oc,r.year,r.type,r.supplier,r.situation],terms));
+  const orderSupplier=new Map(activeControl.map(r=>[twOrderKey(r.year,r.oc),r.supplier]));
+  const agendas=towerData.agenda.filter(r=>{const sup=orderSupplier.get(twOrderKey(r.year,r.oc))||'';return(!type||r.type===type)&&(!supplier||sup===supplier)&&twMatch([r.product,r.code,r.oc,r.year,r.type,sup],terms)&&twDay(r.date)});
+  const stores=towerData.stores.filter(r=>(!store||r.store===store)&&twMatch([r.store,r.storeId,r.product],terms));
+  const histories=towerData.history.filter(r=>twMatch([r.product,r.code,r.note,r.checker,r.reason,r.glosaItem],terms));
+  const sgp=towerData.sgp.filter(r=>twMatch(Object.values(r),terms));
+  const risk={critical:0,attention:0,normal:0,excess:0};stocks.forEach(r=>risk[r.level]++);
+  const today=agendas.filter(r=>twDiff(r.date)===0),late=agendas.filter(r=>twDiff(r.date)<0),week=agendas.filter(r=>{const d=twDiff(r.date);return d>=1&&d<=7}),month=agendas.filter(r=>{const d=twDiff(r.date);return d>=8&&d<=30});
+  const pendingQty=controls.reduce((s,r)=>s+Math.max(0,r.remaining),0),storesNeed=stores.filter(r=>r.request>0||twFold(r.requestRaw)==='s'||(r.days!==null&&r.days<minDays)),storeNames=new Set(storesNeed.map(r=>r.store)),glosas=histories.filter(r=>r.glosa);
+  const futureOrders=new Set(agendas.filter(r=>twDiff(r.date)>=0).map(r=>twOrderKey(r.year,r.oc))),orderGroups=new Map();
+  controls.forEach(r=>{const k=twOrderKey(r.year,r.oc);if(!orderGroups.has(k))orderGroups.set(k,{key:k,year:r.year,oc:r.oc,supplier:r.supplier,remaining:0,partial:false});const o=orderGroups.get(k);o.remaining+=Math.max(0,r.remaining);o.partial=o.partial||twFold(r.situation).includes('parcial')});
+  const pendingOrders=[...orderGroups.values()].filter(o=>o.remaining>0),noSchedule=pendingOrders.filter(o=>!futureOrders.has(o.key)),partialOrders=pendingOrders.filter(o=>o.partial);
+  const stockCodes=new Set(towerData.stock.map(r=>r.code).filter(Boolean)),invalidAgenda=towerData.agenda.filter(r=>!twDay(r.date)||r.qty<=0).length,missingCode=towerData.stock.filter(r=>!r.code).length,missingAverage=towerData.stock.filter(r=>r.media===null||r.media<=0).length,unmatchedAgenda=towerData.agenda.filter(r=>r.code&&!stockCodes.has(r.code)).length,missingValidity=towerData.history.filter(r=>!r.validity).length;
+  const qualityIssues=missingCode+missingAverage+invalidAgenda+unmatchedAgenda+missingValidity;
+  const alerts=[];
+  stocks.forEach(r=>{if(r.level==='normal')return;const desc=r.level==='critical'?(r.stock<=0?'Estoque do CD zerado':`Cobertura de ${twFmt(r.cover)} dia(s)`):r.level==='excess'?`Cobertura acima de ${twFmt(maxDays)} dias`:(r.cover===null?'Média ou cobertura indisponível':`Cobertura abaixo de ${twFmt(minDays)} dias`);alerts.push({level:r.level,source:'stock',title:r.product||r.code||'Produto sem descrição',desc:`${desc} · estoque ${twFmt(r.stock)}`,search:[r.product,r.code,r.type].join(' ')})});
+  late.forEach(r=>alerts.push({level:'critical',source:'agenda',title:r.product||r.code||'Entrega programada',desc:`Empenho ${r.oc}/${r.year} · ${Math.abs(twDiff(r.date))} dia(s) em atraso · qtd. ${twFmt(r.qty)}`,search:[r.product,r.code,r.oc,r.year,r.type].join(' ')}));
+  today.forEach(r=>alerts.push({level:'attention',source:'agenda',title:r.product||r.code||'Entrega para hoje',desc:`Entrega prevista hoje · empenho ${r.oc}/${r.year} · qtd. ${twFmt(r.qty)}`,search:[r.product,r.code,r.oc,r.year,r.type].join(' ')}));
+  noSchedule.slice(0,150).forEach(o=>alerts.push({level:'attention',source:'control',title:`Empenho ${o.oc}/${o.year}`,desc:`Saldo ${twFmt(o.remaining)} sem agenda futura · ${o.supplier||'fornecedor não informado'}`,search:[o.oc,o.year,o.supplier].join(' ')}));
+  storesNeed.slice(0,180).forEach(r=>alerts.push({level:r.stockStore<=0||r.stockCd<=0?'critical':'attention',source:'stores',title:r.product||'Produto sem descrição',desc:`${r.store||'Loja'} · ${r.days===null?'cobertura indisponível':twFmt(r.days)+' dia(s)'} · solicitar ${r.requestRaw||'—'}`,search:[r.product,r.store].join(' ')}));
+  glosas.slice(0,120).forEach(r=>alerts.push({level:'critical',source:'history',title:r.product||r.glosaItem||'Recebimento com glosa',desc:`NF ${r.note||'—'} · ${r.reason||'motivo não informado'} · ${r.checker||'conferente não informado'}`,search:[r.product,r.code,r.note,r.reason,r.checker].join(' ')}));
+  if(missingAverage)alerts.push({level:'attention',source:'stock',title:'Produtos sem média de consumo',desc:`${twFmt(missingAverage)} registro(s) impedem o cálculo confiável da cobertura`,search:'qualidade média'});
+  if(unmatchedAgenda)alerts.push({level:'attention',source:'agenda',title:'Códigos da agenda sem posição correspondente',desc:`${twFmt(unmatchedAgenda)} registro(s) precisam de conferência cadastral`,search:'qualidade código agenda'});
+  if(missingValidity)alerts.push({level:'attention',source:'history',title:'Recebimentos sem validade informada',desc:`${twFmt(missingValidity)} produto(s) no histórico`,search:'qualidade validade'});
+  const levelOrder={critical:0,attention:1,excess:2,normal:3};alerts.sort((a,b)=>levelOrder[a.level]-levelOrder[b.level]||a.title.localeCompare(b.title,'pt-BR'));
+  const relevantAlerts=alerts.filter(a=>twMatch([a.title,a.desc,a.search],terms));towerAlerts=relevantAlerts.filter(a=>!levelFilter||a.level===levelFilter);
+  const criticalAlerts=relevantAlerts.filter(a=>a.level==='critical').length,attentionAlerts=relevantAlerts.filter(a=>a.level==='attention').length,health=criticalAlerts?'critical':attentionAlerts?'attention':'normal',healthText=health==='critical'?'Operação crítica':health==='attention'?'Operação em atenção':'Operação normal';
+  const healthEl=document.getElementById('tw-health');healthEl.className='tw-health '+health;document.getElementById('tw-health-value').textContent=healthText;
+  const dates=[...towerData.stock.map(r=>r.updated),...towerData.agenda.map(r=>r.updated)].map(twDate).filter(Boolean),latest=dates.length?new Date(Math.max(...dates.map(d=>d.getTime()))):null;document.getElementById('tw-health-time').textContent=latest?'Dados publicados em '+latest.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'Atualização não informada';
+  document.getElementById('tw-kpis').innerHTML=[twKpi('Itens críticos',twFmt(risk.critical),'estoque ou cobertura zerada','critical'),twKpi('Itens em atenção',twFmt(risk.attention),`abaixo de ${twFmt(minDays)} dias`,'attention'),twKpi('Itens normais',twFmt(risk.normal),'dentro dos parâmetros','good'),twKpi('Entregas atrasadas',twFmt(late.length),'agenda vigente','critical'),twKpi('Saldo pendente',twFmt(pendingQty),'quantidade em empenhos','info'),twKpi('Lojas em atenção',twFmt(storeNames.size),`${twFmt(storesNeed.length)} item(ns)`,'attention'),twKpi('Registros com glosa',twFmt(glosas.length),'Histórico de Cargas','critical'),twKpi('SGP monitorado',twFmt(sgp.length),'registros publicados','info')].join('');
+  const alertBox=document.getElementById('tw-alerts');document.getElementById('tw-alert-sub').textContent=`${twFmt(towerAlerts.length)} ocorrência(s) · ${twFmt(criticalAlerts)} crítica(s)`;alertBox.innerHTML=towerAlerts.length?towerAlerts.slice(0,250).map(a=>`<div class="tw-alert"><span class="tw-alert-level ${a.level}">${a.level==='critical'?'Crítico':a.level==='attention'?'Atenção':'Excesso'}</span><div class="tw-alert-copy"><div class="tw-alert-title" title="${crEsc(a.title)}">${crEsc(a.title)}</div><div class="tw-alert-desc" title="${crEsc(a.desc)}">${crEsc(a.desc)}</div></div><button class="tw-alert-open" type="button" onclick="twOpenSource('${a.source}')">Abrir →</button></div>`).join(''):'<div class="tw-empty">Nenhuma ocorrência encontrada com os filtros atuais.</div>';
+  const totalRisk=Object.values(risk).reduce((a,b)=>a+b,0),segments=[['critical',risk.critical,'#f87171'],['attention',risk.attention,'#fbbf24'],['normal',risk.normal,'#4ade80'],['excess',risk.excess,'#60a5fa']],gradient=[];let acc=0;segments.forEach(([,v,c])=>{const end=acc+twPct(v,totalRisk);gradient.push(`${c} ${acc}% ${end}%`);acc=end});document.getElementById('tw-risk-donut').style.background=`conic-gradient(${gradient.join(',')||'#55556a 0 100%'})`;document.getElementById('tw-risk-total').textContent=twFmt(totalRisk);document.getElementById('tw-risk-legend').innerHTML=segments.map(([k,v,c])=>`<div class="tw-legend-row"><span class="tw-legend-dot" style="background:${c}"></span><span>${k==='critical'?'Crítico':k==='attention'?'Atenção':k==='normal'?'Normal':'Excesso'}</span><b>${twFmt(v)}</b></div>`).join('');
+  const horizon=[['Atrasadas',late.length,'late'],['Hoje',today.length,'today'],['1–7 dias',week.length,'soon'],['8–30 dias',month.length,'']],hmax=Math.max(...horizon.map(x=>x[1]),1);document.getElementById('tw-horizon').innerHTML=horizon.map(([l,v,c])=>`<div class="tw-hcol"><div class="tw-hvalue">${twFmt(v)}</div><div class="tw-hbar ${c}" style="height:${Math.max(4,twPct(v,hmax))}%"></div><div class="tw-hlabel">${l}</div></div>`).join('');
+  const supMap=new Map();controls.forEach(r=>{if(r.remaining>0)supMap.set(r.supplier||'Sem fornecedor',(supMap.get(r.supplier||'Sem fornecedor')||0)+r.remaining)});document.getElementById('tw-suppliers').innerHTML=twBarRows([...supMap.entries()].sort((a,b)=>b[1]-a[1]),'blue');
+  const storeMap=new Map();storesNeed.forEach(r=>storeMap.set(r.store||'Sem loja',(storeMap.get(r.store||'Sem loja')||0)+1));document.getElementById('tw-stores').innerHTML=twBarRows([...storeMap.entries()].sort((a,b)=>b[1]-a[1]),'yellow');
+  const uniqueLoads=new Set(histories.map(r=>[r.date,r.note,r.checker].join('|'))),uniqueNotes=new Set(histories.map(r=>r.note).filter(Boolean)),uniqueProducts=new Set(histories.map(r=>r.code||r.product).filter(Boolean));document.getElementById('tw-receipts').innerHTML=[twQualityRow('Cargas registradas',twFmt(uniqueLoads.size)),twQualityRow('Notas fiscais',twFmt(uniqueNotes.size)),twQualityRow('Produtos diferentes',twFmt(uniqueProducts.size)),twQualityRow('Registros com glosa',twFmt(glosas.length)),twQualityRow('Validade não informada',twFmt(missingValidity))].join('');
+  const cancelled=towerData.control.filter(r=>twFold(r.status)==='cancelado').length;document.getElementById('tw-orders').innerHTML=[twQualityRow('Empenhos vigentes com saldo',twFmt(pendingOrders.length)),twQualityRow('Parcialmente entregues',twFmt(partialOrders.length)),twQualityRow('Sem agenda futura',twFmt(noSchedule.length)),twQualityRow('Entregas atrasadas',twFmt(late.length)),twQualityRow('Cancelados fora dos cálculos',twFmt(cancelled))].join('');
+  document.getElementById('tw-quality').innerHTML=[twQualityRow('Ocorrências de qualidade',twFmt(qualityIssues)),twQualityRow('Produtos sem código',twFmt(missingCode)),twQualityRow('Produtos sem média',twFmt(missingAverage)),twQualityRow('Agenda inválida',twFmt(invalidAgenda)),twQualityRow('Agenda sem posição correspondente',twFmt(unmatchedAgenda))].join('');
+  document.getElementById('rcount').textContent=healthText+' · '+twFmt(towerAlerts.length)+' alerta(s)';
+}
+function twExportAlerts(){if(!towerAlerts.length)return alert('Não há alertas para exportar.');const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',rows=[['Nível','Origem','Título','Detalhe'],...towerAlerts.map(a=>[a.level,a.source,a.title,a.desc])],csv='\ufeff'+rows.map(r=>r.map(q).join(';')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='torre_controle_alertas_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
 
 let cronogramaRows=[];
 let cronogramaLoaded=false;
@@ -599,6 +798,7 @@ function loadCronograma(el){
   el.classList.add('active');curTable='__cronograma__';
   document.getElementById('ttitle').textContent='Cronograma de Entregas';
   document.getElementById('rcount').textContent='';
+  document.getElementById('tower-wrap').style.display='none';
   document.getElementById('twrap').style.display='none';
   document.getElementById('pgbar').style.display='none';
   document.getElementById('armazem-wrap').style.display='none';
@@ -766,6 +966,7 @@ async function loadTable(name,label,el){
   el.classList.add('active');curTable=name;
   document.getElementById('ttitle').textContent=label;
   document.getElementById('rcount').textContent='';
+  document.getElementById('tower-wrap').style.display='none';
   setLoad(true);
   document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='flex';
@@ -1147,6 +1348,7 @@ function loadRecebimento(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
   curTable='__recebimento__';
+  document.getElementById('tower-wrap').style.display='none';
   document.getElementById('ttitle').textContent='Recebimento de Carga';
   document.getElementById('rcount').textContent='Formulário integrado';
   setLoad(false);
@@ -1211,6 +1413,7 @@ async function loadHistoricoCargas(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
   curTable='__historico_cargas__';
+  document.getElementById('tower-wrap').style.display='none';
   document.getElementById('ttitle').textContent='Histórico de Cargas';
   document.getElementById('rcount').textContent='Últimos registros';
   setLoad(true);
@@ -1280,6 +1483,7 @@ async function loadHistoricoCargas(el){
 async function loadArmazem(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');curTable='__armazem__';
+  document.getElementById('tower-wrap').style.display='none';
   document.getElementById('ttitle').textContent='Análise Armazém';
   document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='none';
