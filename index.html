@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de GestÃ£o â€” Consulta</title>
+<title>Sistema de Gestão — Consulta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -185,14 +185,14 @@ tbody tr.sol-s:hover{background:rgba(251,191,36,.1)}
 td{padding:3px 8px;border-right:1px solid rgba(255,255,255,.03);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
 td.sol-val{color:var(--acc);font-weight:600}
 td.sol-s-val{color:#fbbf24;font-weight:600}
-/* HistÃ³rico de Cargas â€” saldo CD abaixo de 500 */
+/* Histórico de Cargas — saldo CD abaixo de 500 */
 tbody tr.hist-saldo-baixo{background:rgba(248,113,113,.10)!important}
 tbody tr.hist-saldo-baixo:hover{background:rgba(248,113,113,.16)!important}
 tbody tr.hist-saldo-baixo td{color:#fecaca}
 tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
 
 
-/* Painel AnÃ¡lise ArmazÃ©m */
+/* Painel Análise Armazém */
 #armazem-wrap{position:fixed;top:46px;left:var(--sw);right:0;bottom:0;display:none;flex-direction:column;background:var(--bg);z-index:50}
 /* Painel Recebimento integrado */
 #recebimento-wrap{position:fixed;top:46px;left:var(--sw);right:0;bottom:0;display:none;background:var(--bg);z-index:55;overflow:hidden}
@@ -346,7 +346,7 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
   <div id="bsheet" onclick="event.stopPropagation()">
     <div class="bshtop">
       <div class="bsh" onclick="closeBSheet()"></div>
-      <div class="bsclose" onclick="closeBSheet()">âœ•</div>
+      <div class="bsclose" onclick="closeBSheet()">✕</div>
     </div>
     <div id="bshead">
       <div id="bsbadge">detalhe do item</div>
@@ -358,7 +358,7 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
         <button class="cdd-btn" id="cdd-btn" onclick="toggleCDD()">
           <div class="cdd-dot sc0" id="cdd-sel-dot"></div>
           <span id="cdd-sel-txt">Selecione um produto...</span>
-          <span class="cdd-arr">â–¼</span>
+          <span class="cdd-arr">▼</span>
         </button>
         <div class="cdd-list" id="cdd-list"></div>
       </div>
@@ -367,19 +367,19 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
     <div id="bsbody"></div>
   </div>
 </div>
-<button id="tog-float" onclick="toggleSB()">â˜°</button>
+<button id="tog-float" onclick="toggleSB()">☰</button>
 <div id="sidebar">
-  <div class="sb-head"><div class="sb-logo">Sistema de GestÃ£o</div><div class="sb-title">Consulta de Tabelas</div></div>
+  <div class="sb-head"><div class="sb-logo">Sistema de Gestão</div><div class="sb-title">Consulta de Tabelas</div></div>
   <div class="sb-srch"><input type="text" placeholder="Buscar tabela..." oninput="filterTbls(this.value)"></div>
   <div class="tlist" id="tlist"></div>
 </div>
 
 <div id="main">
   <div id="topbar">
-    <button id="tog" onclick="toggleSB()">â˜°</button>
+    <button id="tog" onclick="toggleSB()">☰</button>
     <div id="ttitle" style="color:var(--txt3)">Selecione uma tabela</div>
     <div id="rcount"></div>
-    <button id="cfgbtn" onclick="openCfg()">âš™ ConexÃ£o</button>
+    <button id="cfgbtn" onclick="openCfg()">⚙ Conexão</button>
   </div>
   <div id="loadbar"></div>
 
@@ -387,40 +387,40 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
     <div class="tw-shell">
       <div class="tw-hero">
         <div>
-          <div class="tw-kicker">VisÃ£o consolidada da operaÃ§Ã£o</div>
+          <div class="tw-kicker">Visão consolidada da operação</div>
           <h1 id="tower-title">Torre de Controle</h1>
-          <p>Riscos, cobertura, entregas, lojas, fornecedores e recebimentos em uma Ãºnica visÃ£o gerencial.</p>
+          <p>Riscos, cobertura, entregas, lojas, fornecedores e recebimentos em uma única visão gerencial.</p>
         </div>
         <div class="tw-health" id="tw-health">
           <span class="tw-health-dot" aria-hidden="true"></span>
-          <div class="tw-health-copy"><div class="tw-health-label">SaÃºde da operaÃ§Ã£o</div><div class="tw-health-value" id="tw-health-value">Aguardando dados</div><div class="tw-health-time" id="tw-health-time">â€”</div></div>
+          <div class="tw-health-copy"><div class="tw-health-label">Saúde da operação</div><div class="tw-health-value" id="tw-health-value">Aguardando dados</div><div class="tw-health-time" id="tw-health-time">—</div></div>
         </div>
       </div>
       <div class="tw-filters" aria-label="Filtros da Torre de Controle">
-        <label class="tw-field"><input id="tw-search" type="search" placeholder="Produto, cÃ³digo, empenho; use %..." aria-label="Buscar na Torre de Controle" oninput="renderTower()"></label>
-        <label class="tw-field"><select id="tw-level" aria-label="Filtrar nÃ­vel" onchange="renderTower()"><option value="">Todos os nÃ­veis</option><option value="critical">CrÃ­tico</option><option value="attention">AtenÃ§Ã£o</option><option value="normal">Normal</option><option value="excess">Excesso</option></select></label>
+        <label class="tw-field"><input id="tw-search" type="search" placeholder="Produto, código, empenho; use %..." aria-label="Buscar na Torre de Controle" oninput="renderTower()"></label>
+        <label class="tw-field"><select id="tw-level" aria-label="Filtrar nível" onchange="renderTower()"><option value="">Todos os níveis</option><option value="critical">Crítico</option><option value="attention">Atenção</option><option value="normal">Normal</option><option value="excess">Excesso</option></select></label>
         <label class="tw-field"><select id="tw-type" aria-label="Filtrar tipo" onchange="renderTower()"><option value="">Todos os tipos</option></select></label>
         <label class="tw-field"><select id="tw-supplier" aria-label="Filtrar fornecedor" onchange="renderTower()"><option value="">Todos os fornecedores</option></select></label>
         <label class="tw-field"><select id="tw-store" aria-label="Filtrar loja" onchange="renderTower()"><option value="">Todas as lojas</option></select></label>
-        <label class="tw-field tw-number" data-prefix="MIN"><input id="tw-min-days" type="number" min="0" value="15" aria-label="Cobertura mÃ­nima em dias" title="Cobertura mÃ­nima em dias" onchange="renderTower()"></label>
-        <label class="tw-field tw-number" data-prefix="MAX"><input id="tw-max-days" type="number" min="1" value="90" aria-label="Cobertura mÃ¡xima em dias" title="Cobertura mÃ¡xima em dias" onchange="renderTower()"></label>
-        <button class="tw-btn" type="button" onclick="loadTowerData(true)">â†» Atualizar</button>
+        <label class="tw-field tw-number" data-prefix="MIN"><input id="tw-min-days" type="number" min="0" value="15" aria-label="Cobertura mínima em dias" title="Cobertura mínima em dias" onchange="renderTower()"></label>
+        <label class="tw-field tw-number" data-prefix="MAX"><input id="tw-max-days" type="number" min="1" value="90" aria-label="Cobertura máxima em dias" title="Cobertura máxima em dias" onchange="renderTower()"></label>
+        <button class="tw-btn" type="button" onclick="loadTowerData(true)">↻ Atualizar</button>
       </div>
       <div class="tw-source-line" id="tw-sources"><span class="tw-source-label">Fontes</span></div>
       <div class="tw-kpis" id="tw-kpis"></div>
       <div class="tw-grid">
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Central de atenÃ§Ã£o</div><div class="tw-panel-sub" id="tw-alert-sub">OcorrÃªncias priorizadas pelos dados atuais</div></div><button class="tw-panel-action" type="button" onclick="twExportAlerts()">Exportar CSV</button></div><div class="tw-panel-body"><div class="tw-alerts" id="tw-alerts"></div></div></section>
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">DistribuiÃ§Ã£o do estoque</div><div class="tw-panel-sub">Cobertura consolidada por tipo de item</div></div></div><div class="tw-panel-body"><div class="tw-risk-layout"><div class="tw-donut" id="tw-risk-donut"><div class="tw-donut-center"><b id="tw-risk-total">â€”</b><span>tipos</span></div></div><div class="tw-legend" id="tw-risk-legend"></div></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Central de atenção</div><div class="tw-panel-sub" id="tw-alert-sub">Ocorrências priorizadas pelos dados atuais</div></div><button class="tw-panel-action" type="button" onclick="twExportAlerts()">Exportar CSV</button></div><div class="tw-panel-body"><div class="tw-alerts" id="tw-alerts"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Distribuição do estoque</div><div class="tw-panel-sub">Cobertura consolidada por tipo de item</div></div></div><div class="tw-panel-body"><div class="tw-risk-layout"><div class="tw-donut" id="tw-risk-donut"><div class="tw-donut-center"><b id="tw-risk-total">—</b><span>tipos</span></div></div><div class="tw-legend" id="tw-risk-legend"></div></div></div></section>
       </div>
       <div class="tw-grid three">
         <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Horizonte de entregas</div><div class="tw-panel-sub">Agenda vigente por data prevista</div></div></div><div class="tw-panel-body"><div class="tw-horizon" id="tw-horizon"></div></div></section>
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">ExposiÃ§Ã£o por fornecedor</div><div class="tw-panel-sub">Maiores saldos restantes vigentes</div></div></div><div class="tw-panel-body"><div class="tw-bars" id="tw-suppliers"></div></div></section>
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Lojas em atenÃ§Ã£o</div><div class="tw-panel-sub">Itens com solicitaÃ§Ã£o ou baixa cobertura</div></div></div><div class="tw-panel-body"><div class="tw-bars" id="tw-stores"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Exposição por fornecedor</div><div class="tw-panel-sub">Maiores saldos restantes vigentes</div></div></div><div class="tw-panel-body"><div class="tw-bars" id="tw-suppliers"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Lojas em atenção</div><div class="tw-panel-sub">Itens com solicitação ou baixa cobertura</div></div></div><div class="tw-panel-body"><div class="tw-bars" id="tw-stores"></div></div></section>
       </div>
       <div class="tw-grid three">
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Recebimentos e qualidade</div><div class="tw-panel-sub">Registros do HistÃ³rico de Cargas</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-receipts"></div></div></section>
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Empenhos e pendÃªncias</div><div class="tw-panel-sub">Controle de mercadorias e agenda</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-orders"></div></div></section>
-        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Qualidade dos dados</div><div class="tw-panel-sub">Campos essenciais e correspondÃªncias</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-quality"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Recebimentos e qualidade</div><div class="tw-panel-sub">Registros do Histórico de Cargas</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-receipts"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Empenhos e pendências</div><div class="tw-panel-sub">Controle de mercadorias e agenda</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-orders"></div></div></section>
+        <section class="tw-panel"><div class="tw-panel-head"><div><div class="tw-panel-title">Qualidade dos dados</div><div class="tw-panel-sub">Campos essenciais e correspondências</div></div></div><div class="tw-panel-body"><div class="tw-quality" id="tw-quality"></div></div></section>
       </div>
     </div>
   </section>
@@ -433,29 +433,29 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
           <h1 id="cronograma-title">Cronograma de Entregas</h1>
           <p>Visualize as mercadorias programadas, parcelas e quantidades previstas.</p>
         </div>
-        <div class="cr-update" id="cr-update">Aguardando atualizaÃ§Ã£o</div>
+        <div class="cr-update" id="cr-update">Aguardando atualização</div>
       </div>
       <div class="cr-stats" aria-label="Resumo do cronograma">
-        <div class="cr-stat"><div class="cr-stat-label">Entregas hoje</div><div class="cr-stat-value" id="cr-stat-today">â€”</div></div>
-        <div class="cr-stat"><div class="cr-stat-label">PrÃ³ximos 7 dias</div><div class="cr-stat-value" id="cr-stat-week">â€”</div></div>
-        <div class="cr-stat"><div class="cr-stat-label">Entregas exibidas</div><div class="cr-stat-value" id="cr-stat-total">â€”</div></div>
-        <div class="cr-stat"><div class="cr-stat-label">Quantidade programada</div><div class="cr-stat-value" id="cr-stat-qty">â€”</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Entregas hoje</div><div class="cr-stat-value" id="cr-stat-today">—</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Próximos 7 dias</div><div class="cr-stat-value" id="cr-stat-week">—</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Entregas exibidas</div><div class="cr-stat-value" id="cr-stat-total">—</div></div>
+        <div class="cr-stat"><div class="cr-stat-label">Quantidade programada</div><div class="cr-stat-value" id="cr-stat-qty">—</div></div>
       </div>
       <div class="cr-filters">
         <label class="cr-control">
-          <span class="cr-search-icon" aria-hidden="true">âŒ•</span>
+          <span class="cr-search-icon" aria-hidden="true">⌕</span>
           <input id="cr-search" type="search" placeholder="Buscar; use % entre termos..." aria-label="Buscar no cronograma; use porcentagem para combinar termos" oninput="renderCronograma()">
         </label>
         <label class="cr-control">
-          <span class="cr-search-icon" aria-hidden="true">â‰¥</span>
-          <input id="cr-min" type="number" min="0" step="any" inputmode="decimal" placeholder="Qtd. mÃ­nima" aria-label="NÃ£o mostrar quantidade inferior a" oninput="renderCronograma()">
+          <span class="cr-search-icon" aria-hidden="true">≥</span>
+          <input id="cr-min" type="number" min="0" step="any" inputmode="decimal" placeholder="Qtd. mínima" aria-label="Não mostrar quantidade inferior a" oninput="renderCronograma()">
         </label>
         <label class="cr-control">
-          <select id="cr-period" aria-label="Filtrar perÃ­odo" onchange="renderCronograma()">
+          <select id="cr-period" aria-label="Filtrar período" onchange="renderCronograma()">
             <option value="all">Todas as datas</option>
             <option value="today">Entregas de hoje</option>
-            <option value="week">PrÃ³ximos 7 dias</option>
-            <option value="month">PrÃ³ximos 30 dias</option>
+            <option value="week">Próximos 7 dias</option>
+            <option value="month">Próximos 30 dias</option>
             <option value="late">Entregas atrasadas</option>
           </select>
         </label>
@@ -464,7 +464,7 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
             <option value="">Todos os tipos</option>
           </select>
         </label>
-        <button class="cr-refresh" type="button" onclick="loadCronogramaData(true)" aria-label="Atualizar cronograma">â†» Atualizar</button>
+        <button class="cr-refresh" type="button" onclick="loadCronogramaData(true)" aria-label="Atualizar cronograma">↻ Atualizar</button>
       </div>
       <div id="cr-content" aria-live="polite">
         <div class="cr-skeleton"><div class="cr-skel"></div><div class="cr-skel"></div><div class="cr-skel"></div><div class="cr-skel"></div></div>
@@ -472,28 +472,28 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
     </div>
   </section>
 
-  <!-- Tabela genÃ©rica -->
+  <!-- Tabela genérica -->
   <div id="twrap">
-    <div id="empty"><div class="ei">â¬¡</div><div class="et">configure a conexÃ£o e selecione uma tabela</div></div>
+    <div id="empty"><div class="ei">⬡</div><div class="et">configure a conexão e selecione uma tabela</div></div>
     <div id="tcont" style="display:none"><table><thead id="dhead"></thead><tbody id="dbody"></tbody></table></div>
   </div>
   <div id="pgbar" style="display:none">
-    <button onclick="goPage(0)">Â«</button>
-    <button onclick="goPage(curPage-1)">â€¹</button>
+    <button onclick="goPage(0)">«</button>
+    <button onclick="goPage(curPage-1)">‹</button>
     <div id="pginfo"></div>
-    <button onclick="goPage(curPage+1)">â€º</button>
-    <button onclick="goPage(totalPages-1)">Â»</button>
-    <span style="color:var(--txt3);font-size:10px">por pÃ¡g:</span>
+    <button onclick="goPage(curPage+1)">›</button>
+    <button onclick="goPage(totalPages-1)">»</button>
+    <span style="color:var(--txt3);font-size:10px">por pág:</span>
     <select id="pgsz" onchange="chgPs(this.value)"><option>100</option><option>250</option><option>500</option><option selected>1000</option></select>
   </div>
 
 </div>
 
-<!-- AnÃ¡lise ArmazÃ©m -->
+<!-- Análise Armazém -->
   <div id="armazem-wrap">
     <div id="arm-filters">
       <div class="arm-fbox">
-        <div class="arm-flbl">ParÃ¢metro</div>
+        <div class="arm-flbl">Parâmetro</div>
         <input class="arm-finp" id="arm-param" type="number" value="8" min="1" onchange="armRecalc()">
       </div>
       <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-start">
@@ -505,19 +505,19 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
       </div>
 
       <div class="arm-fbox">
-        <div class="arm-flbl">Est. Central MÃ­n.</div>
+        <div class="arm-flbl">Est. Central Mín.</div>
         <input class="arm-finp" id="arm-estcd" type="number" value="200" min="0" onchange="armRecalc()">
       </div>
       <div class="arm-card">
         <div class="arm-card-n" id="arm-count-sol">0</div>
-        <div class="arm-card-l">Ã€ Solicitar</div>
+        <div class="arm-card-l">À Solicitar</div>
       </div>
-      <button class="arm-btn-excel" onclick="armExportarExcel()">ðŸ“¥ Excel</button>
+      <button class="arm-btn-excel" onclick="armExportarExcel()">📥 Excel</button>
     </div>
     <div id="arm-body">
       <div id="arm-lojas">
-        <div class="arm-lhdr">IdentificaÃ§Ã£o</div>
-        <div class="arm-lsrch"><input type="text" placeholder="ðŸ” Buscar loja..." oninput="armFiltrarLojas(this.value)"></div>
+        <div class="arm-lhdr">Identificação</div>
+        <div class="arm-lsrch"><input type="text" placeholder="🔍 Buscar loja..." oninput="armFiltrarLojas(this.value)"></div>
         <div class="arm-llist" id="arm-llist"></div>
       </div>
       <div id="arm-table">
@@ -546,7 +546,7 @@ tbody tr.hist-saldo-baixo td.hist-saldo-cd{color:#f87171;font-weight:700}
 <!-- Config modal -->
 <div id="cfgmod">
   <div class="mbox">
-    <div class="mtit">âš™ Configurar ConexÃ£o <span>Cloudflare D1</span></div>
+    <div class="mtit">⚙ Configurar Conexão <span>Cloudflare D1</span></div>
     <div class="mhint">Cole a <strong>DATABASE_URL</strong> do banco.</div>
     <div class="mf"><label>Database URL</label><input type="password" id="dburl" placeholder="postgresql://user:pass@host/dbname"></div>
     <div class="mbtns"><button class="btn btng" onclick="closeCfg()">Cancelar</button><button class="btn btnp" onclick="saveCfg()">Conectar</button></div>
@@ -558,21 +558,21 @@ const PROXY='https://rendakigestao.akinbyiyrendaki.workers.dev/';
 const TABLES=[
   {group:'Telas Principais',name:'tabela_controle',  label:'Controle de Mercadorias'},
   {group:'Telas Principais',name:'__cronograma__',   label:'Cronograma de Mercadorias'},
-  {group:'Telas Principais',name:'snapshot_posicao', label:'PosiÃ§Ã£o de Estoque', badge:true},
+  {group:'Telas Principais',name:'snapshot_posicao', label:'Posição de Estoque', badge:true},
   {group:'Telas Principais',name:'snapshot_sgp',     label:'SGP Empenhos',       badge:true},
-  {group:'AnÃ¡lises',        name:'__torre__',        label:'Torre de Controle',   badge:true},
-  {group:'AnÃ¡lises',        name:'__armazem__',      label:'AnÃ¡lise ArmazÃ©m',     badge:true},
+  {group:'Análises',        name:'__torre__',        label:'Torre de Controle',   badge:true},
+  {group:'Análises',        name:'__armazem__',      label:'Análise Armazém',     badge:true},
   {group:'Operacional',     name:'__recebimento__',  label:'Recebimento de Carga', badge:true},
-  {group:'Operacional',     name:'__historico_cargas__',  label:'HistÃ³rico de Cargas', badge:true},
+  {group:'Operacional',     name:'__historico_cargas__',  label:'Histórico de Cargas', badge:true},
 ];
 const QUERIES={
   tabela_controle:`SELECT "Ano","O.C","Cod.Barras","Produto","Tipo","Fornecedor","G","Comprado","Qtd_Pedido","Qtd_Recebida","S_Restante","Media","Dias","Percentual","Situacao","L","CD","Status" FROM tabela_controle ORDER BY "Ano" DESC,"O.C" LIMIT 5000`,
 };
 const CLABELS={
-  tabela_controle:{Qtd_Pedido:'Qtd Pedido',Qtd_Recebida:'Qtd.Recebida',S_Restante:'S.Restante',Media:'MÃ©dia',Percentual:'%',Situacao:'SituaÃ§Ã£o'},
+  tabela_controle:{Qtd_Pedido:'Qtd Pedido',Qtd_Recebida:'Qtd.Recebida',S_Restante:'S.Restante',Media:'Média',Percentual:'%',Situacao:'Situação'},
 };
 const ARM_COLS=['loja','loja_id','produto','emb','est_cd','saldo_loja','saida','dias_a','media','dias_at','e_estim','est_e_est','est_emb_a','solicitar_e'];
-const ARM_HDRS=['Loja','ID','Produto','Emb.','Est.CD','SaldoL.','SaÃ­da','DiasA.','MÃ©dia','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
+const ARM_HDRS=['Loja','ID','Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
 const RECEBIMENTO_CONFERENTES_SNAPSHOT={
   "rows": [
     {
@@ -637,7 +637,7 @@ let curTable=null,colW=[];
 let histColOrder=null;
 let fdCI=-1,fdAllVals=[],fdSel=new Set(),fdTerm='';
 
-// State armazÃ©m
+// State armazém
 let armAllRows=[],armLojas=[],armLojaAtual='',armFiltro='solicitar';
 let armExpedicao={};
 
@@ -671,7 +671,7 @@ function buildSB(){
   });
 }
 
-// â”€â”€ Torre de Controle Gerencial â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Torre de Controle Gerencial ───────────────────────────────────────────
 let towerLoaded=false,towerData={stock:[],control:[],agenda:[],stores:[],history:[]},towerSources={},towerAlerts=[];
 function twFold(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function twKey(v){return twFold(v).replace(/[^a-z0-9]/g,'')}
@@ -697,10 +697,10 @@ function twDiff(v){const d=twDay(v),now=twDay(new Date());return d?Math.round((d
 function twFmt(v){return new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(Number(v)||0)}
 function twPct(v,total){return total?Math.max(0,Math.min(100,(v/total)*100)):0}
 function twOrderKey(ano,oc){return String(ano||'').trim()+'|'+String(oc||'').trim()}
-function twStockNorm(r){return {raw:r,code:twCode(twGet(r,'codigo','CÃ³digo','Cod.Barras')),product:String(twGet(r,'descricao','DescriÃ§Ã£o','produto','Produto')||'').trim(),type:String(twGet(r,'tipo','Tipo')||'').trim(),group:String(twGet(r,'gr','G','grupo')||'').trim(),itemType:String(twGet(r,'t_item','T.Item','tipo_item')||'').trim(),stock:twNum(twGet(r,'estoque','Estoque CD','CD')),media:twNum(twGet(r,'media','MÃ©dia')),cover:twNum(twGet(r,'cdp','CD/P','Dias')),orders:twNum(twGet(r,'s_ocs','S.Ocs','ocs','OCs')),updated:String(twGet(r,'updated_at','atualizado_em')||'')}}
-function twControlNorm(r){return {raw:r,year:String(twGet(r,'Ano','ano')||'').trim(),oc:String(twGet(r,'O.C','OC','empenho')||'').trim(),code:twCode(twGet(r,'Cod.Barras','codigo')),product:String(twGet(r,'Produto','produto')||'').trim(),type:String(twGet(r,'Tipo','tipo')||'').trim(),supplier:String(twGet(r,'Fornecedor','fornecedor')||'').trim(),ordered:twNum(twGet(r,'Qtd_Pedido','Comprado','comprado'))||0,received:twNum(twGet(r,'Qtd_Recebida'))||0,remaining:twNum(twGet(r,'S_Restante','saldo_restante'))||0,situation:String(twGet(r,'Situacao','SituaÃ§Ã£o','situacao')||'').trim(),status:String(twGet(r,'Status','status')||'').trim()}}
+function twStockNorm(r){return {raw:r,code:twCode(twGet(r,'codigo','Código','Cod.Barras')),product:String(twGet(r,'descricao','Descrição','produto','Produto')||'').trim(),type:String(twGet(r,'tipo','Tipo')||'').trim(),group:String(twGet(r,'gr','G','grupo')||'').trim(),itemType:String(twGet(r,'t_item','T.Item','tipo_item')||'').trim(),stock:twNum(twGet(r,'estoque','Estoque CD','CD')),media:twNum(twGet(r,'media','Média')),cover:twNum(twGet(r,'cdp','CD/P','Dias')),orders:twNum(twGet(r,'s_ocs','S.Ocs','ocs','OCs')),updated:String(twGet(r,'updated_at','atualizado_em')||'')}}
+function twControlNorm(r){return {raw:r,year:String(twGet(r,'Ano','ano')||'').trim(),oc:String(twGet(r,'O.C','OC','empenho')||'').trim(),code:twCode(twGet(r,'Cod.Barras','codigo')),product:String(twGet(r,'Produto','produto')||'').trim(),type:String(twGet(r,'Tipo','tipo')||'').trim(),supplier:String(twGet(r,'Fornecedor','fornecedor')||'').trim(),ordered:twNum(twGet(r,'Qtd_Pedido','Comprado','comprado'))||0,received:twNum(twGet(r,'Qtd_Recebida'))||0,remaining:twNum(twGet(r,'S_Restante','saldo_restante'))||0,situation:String(twGet(r,'Situacao','Situação','situacao')||'').trim(),status:String(twGet(r,'Status','status')||'').trim()}}
 function twAgendaNorm(r){return {raw:r,year:String(twGet(r,'ano','Ano')||'').trim(),oc:String(twGet(r,'empenho','O.C')||'').trim(),code:twCode(twGet(r,'idcodbarprod','codigo','Cod.Barras')),product:String(twGet(r,'produto','Produto')||'').trim(),type:String(twGet(r,'tipo','Tipo')||'').trim(),date:String(twGet(r,'data_entrega','Data')||'').trim(),qty:twNum(twGet(r,'quantidade','Quantidade'))||0,remaining:twNum(twGet(r,'saldo_restante'))||0,updated:String(twGet(r,'atualizado_em')||'')}}
-function twStoreNorm(r){return {raw:r,store:String(twGet(r,'loja','Loja')||'').trim(),storeId:String(twGet(r,'loja_id','ID')||'').trim(),product:String(twGet(r,'produto','Produto')||'').trim(),stockCd:twNum(twGet(r,'est_cd','Est.CD'))||0,stockStore:twNum(twGet(r,'saldo_loja','SaldoL.'))||0,days:twNum(twGet(r,'dias_at','DiasAT')),media:twNum(twGet(r,'media','MÃ©dia')),requestRaw:String(twGet(r,'solicitar_e','SolicitarE')||'').trim(),request:twNum(twGet(r,'solicitar_e','SolicitarE'))||0}}
+function twStoreNorm(r){return {raw:r,store:String(twGet(r,'loja','Loja')||'').trim(),storeId:String(twGet(r,'loja_id','ID')||'').trim(),product:String(twGet(r,'produto','Produto')||'').trim(),stockCd:twNum(twGet(r,'est_cd','Est.CD'))||0,stockStore:twNum(twGet(r,'saldo_loja','SaldoL.'))||0,days:twNum(twGet(r,'dias_at','DiasAT')),media:twNum(twGet(r,'media','Média')),requestRaw:String(twGet(r,'solicitar_e','SolicitarE')||'').trim(),request:twNum(twGet(r,'solicitar_e','SolicitarE'))||0}}
 function twHistoryNorm(base){
   const out=[];
   for(const x of base){let products=[];try{products=Array.isArray(x.produtos_json)?x.produtos_json:JSON.parse(x.produtos_json||'[]')}catch(e){products=[]}if(!Array.isArray(products))products=[];
@@ -722,8 +722,8 @@ function twPopulateFilters(){
 function twShowOnly(){
   document.getElementById('tower-wrap').style.display='flex';document.getElementById('cronograma-wrap').style.display='none';document.getElementById('twrap').style.display='none';document.getElementById('pgbar').style.display='none';document.getElementById('armazem-wrap').style.display='none';const rw=document.getElementById('recebimento-wrap');if(rw)rw.style.display='none';
 }
-function loadTower(el){document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));el.classList.add('active');curTable='__torre__';document.getElementById('ttitle').textContent='Torre de Controle';document.getElementById('rcount').textContent='VisÃ£o gerencial';twShowOnly();if(!towerLoaded)loadTowerData()}
-function twLoading(){document.getElementById('tw-kpis').innerHTML=Array.from({length:8},()=>'<div class="tw-kpi"><div class="tw-kpi-label">Carregando</div><div class="tw-kpi-value">â€”</div></div>').join('');document.getElementById('tw-alerts').innerHTML='<div class="tw-empty">Consolidando as fontes publicadas...</div>'}
+function loadTower(el){document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));el.classList.add('active');curTable='__torre__';document.getElementById('ttitle').textContent='Torre de Controle';document.getElementById('rcount').textContent='Visão gerencial';twShowOnly();if(!towerLoaded)loadTowerData()}
+function twLoading(){document.getElementById('tw-kpis').innerHTML=Array.from({length:8},()=>'<div class="tw-kpi"><div class="tw-kpi-label">Carregando</div><div class="tw-kpi-value">—</div></div>').join('');document.getElementById('tw-alerts').innerHTML='<div class="tw-empty">Consolidando as fontes publicadas...</div>'}
 async function loadTowerData(force=false){
   if(towerLoaded&&!force){renderTower();return}twLoading();setLoad(true);
   const tasks={
@@ -734,17 +734,17 @@ async function loadTowerData(force=false){
     history:fetch(PROXY+'recebimento/listar').then(async r=>{if(!r.ok)throw new Error('Erro '+r.status);const j=await r.json();return Array.isArray(j)?j:(j.rows||j.results||[])})
   };
   const entries=Object.entries(tasks),results=await Promise.allSettled(entries.map(x=>x[1]));towerSources={};
-  results.forEach((res,i)=>{const name=entries[i][0];if(res.status==='fulfilled'){towerSources[name]={ok:true,count:(res.value||[]).length};towerData[name]=res.value||[]}else{towerSources[name]={ok:false,count:0};towerData[name]=[];console.warn('Torre de Controle â€” fonte indisponÃ­vel:',name,res.reason)}});
+  results.forEach((res,i)=>{const name=entries[i][0];if(res.status==='fulfilled'){towerSources[name]={ok:true,count:(res.value||[]).length};towerData[name]=res.value||[]}else{towerSources[name]={ok:false,count:0};towerData[name]=[];console.warn('Torre de Controle — fonte indisponível:',name,res.reason)}});
   towerData.stock=towerData.stock.map(twStockNorm);towerData.control=towerData.control.map(twControlNorm);towerData.agenda=towerData.agenda.map(twAgendaNorm);towerData.stores=towerData.stores.map(twStoreNorm);towerData.history=twHistoryNorm(towerData.history);
   towerLoaded=Object.values(towerSources).some(s=>s.ok);twSourceChips();
-  if(!towerLoaded){document.getElementById('tw-kpis').innerHTML=twKpi('ConexÃ£o necessÃ¡ria','â€”','Configure a conexÃ£o para consultar as fontes','attention');document.getElementById('tw-alerts').innerHTML='<div class="tw-empty">NÃ£o foi possÃ­vel consultar as fontes publicadas.<br>Verifique a conexÃ£o e tente atualizar novamente.</div>';setLoad(false);return}
+  if(!towerLoaded){document.getElementById('tw-kpis').innerHTML=twKpi('Conexão necessária','—','Configure a conexão para consultar as fontes','attention');document.getElementById('tw-alerts').innerHTML='<div class="tw-empty">Não foi possível consultar as fontes publicadas.<br>Verifique a conexão e tente atualizar novamente.</div>';setLoad(false);return}
   twPopulateFilters();renderTower();setLoad(false);
 }
-function twSourceChips(){const labels={stock:'PosiÃ§Ã£o',control:'Controle',agenda:'Agenda ativa',stores:'Lojas',history:'Cargas'},box=document.getElementById('tw-sources');box.innerHTML='<span class="tw-source-label">Fontes</span>'+Object.entries(labels).map(([k,l])=>`<span class="tw-source ${towerSources[k]?.ok?'ok':'fail'}">${towerSources[k]?.ok?'â—':'â—‹'} ${l} Â· ${twFmt(towerSources[k]?.count||0)}</span>`).join('')}
+function twSourceChips(){const labels={stock:'Posição',control:'Controle',agenda:'Agenda ativa',stores:'Lojas',history:'Cargas'},box=document.getElementById('tw-sources');box.innerHTML='<span class="tw-source-label">Fontes</span>'+Object.entries(labels).map(([k,l])=>`<span class="tw-source ${towerSources[k]?.ok?'ok':'fail'}">${towerSources[k]?.ok?'●':'○'} ${l} · ${twFmt(towerSources[k]?.count||0)}</span>`).join('')}
 function twKpi(label,value,sub,cls=''){return `<div class="tw-kpi ${cls}"><div class="tw-kpi-label">${label}</div><div class="tw-kpi-value">${value}</div><div class="tw-kpi-sub">${sub}</div></div>`}
 function twQualityRow(label,value){return `<div class="tw-quality-row"><span class="tw-quality-label">${crEsc(label)}</span><span class="tw-quality-value">${crEsc(value)}</span></div>`}
 function twBarRows(entries,cls='',formatter=twFmt){if(!entries.length)return'<div class="tw-empty">Sem dados para o filtro selecionado.</div>';const max=Math.max(...entries.map(x=>x[1]),1);return entries.slice(0,7).map(([label,value])=>`<div class="tw-bar-row"><div class="tw-bar-label" title="${crEsc(label)}">${crEsc(label)}</div><div class="tw-bar-level"><div class="tw-bar-track"><div class="tw-bar-fill ${cls}" style="width:${twPct(value,max)}%"></div></div><div class="tw-bar-value">${formatter(value)}</div></div></div>`).join('')}
-function twOpenSource(source){const names={stock:'PosiÃ§Ã£o de Estoque',control:'Controle de Mercadorias',agenda:'Cronograma de Mercadorias',stores:'AnÃ¡lise ArmazÃ©m',history:'HistÃ³rico de Cargas'},label=names[source];if(!label)return;const el=[...document.querySelectorAll('.titem')].find(x=>x.dataset.l===label);if(el)el.click()}
+function twOpenSource(source){const names={stock:'Posição de Estoque',control:'Controle de Mercadorias',agenda:'Cronograma de Mercadorias',stores:'Análise Armazém',history:'Histórico de Cargas'},label=names[source];if(!label)return;const el=[...document.querySelectorAll('.titem')].find(x=>x.dataset.l===label);if(el)el.click()}
 function renderTower(){
   if(!towerLoaded)return;twSourceChips();
   const terms=twTerms(),levelFilter=document.getElementById('tw-level').value,type=document.getElementById('tw-type').value,supplier=document.getElementById('tw-supplier').value,store=document.getElementById('tw-store').value,minDays=Math.max(0,Number(document.getElementById('tw-min-days').value)||15),maxDays=Math.max(minDays+1,Number(document.getElementById('tw-max-days').value)||90);
@@ -765,31 +765,31 @@ function renderTower(){
   const stockCodes=new Set(towerData.stock.map(r=>r.code).filter(Boolean)),invalidAgenda=towerData.agenda.filter(r=>!twDay(r.date)||r.qty<=0).length,missingCode=towerData.stock.filter(r=>!r.code).length,missingAverage=towerData.stock.filter(r=>r.media===null||r.media<=0).length,unmatchedAgenda=towerData.agenda.filter(r=>r.code&&!stockCodes.has(r.code)).length,missingValidity=towerData.history.filter(r=>!r.validity).length;
   const qualityIssues=missingCode+missingAverage+invalidAgenda+unmatchedAgenda+missingValidity;
   const alerts=[];
-  stocks.forEach(r=>{if(r.level==='normal')return;const desc=r.level==='critical'?(r.stock<=0?'Estoque agregado do tipo zerado':`Cobertura agregada de ${twFmt(r.cover)} dia(s)`):r.level==='excess'?`Cobertura agregada acima de ${twFmt(maxDays)} dias`:(r.cover===null?'MÃ©dia agregada indisponÃ­vel':`Cobertura agregada abaixo de ${twFmt(minDays)} dias`);alerts.push({level:r.level,source:'stock',title:r.type,desc:`${desc} Â· estoque ${twFmt(r.stock)} Â· ${twFmt(r.items)} item(ns)`,search:[r.type,...r.products,...r.codes].join(' ')})});
-  late.forEach(r=>alerts.push({level:'critical',source:'agenda',title:r.product||r.code||'Entrega programada',desc:`Empenho ${r.oc}/${r.year} Â· ${Math.abs(twDiff(r.date))} dia(s) em atraso Â· qtd. ${twFmt(r.qty)}`,search:[r.product,r.code,r.oc,r.year,r.type].join(' ')}));
-  today.forEach(r=>alerts.push({level:'attention',source:'agenda',title:r.product||r.code||'Entrega para hoje',desc:`Entrega prevista hoje Â· empenho ${r.oc}/${r.year} Â· qtd. ${twFmt(r.qty)}`,search:[r.product,r.code,r.oc,r.year,r.type].join(' ')}));
-  noSchedule.slice(0,150).forEach(o=>alerts.push({level:'attention',source:'control',title:`Empenho ${o.oc}/${o.year}`,desc:`Saldo ${twFmt(o.remaining)} sem agenda futura Â· ${o.supplier||'fornecedor nÃ£o informado'}`,search:[o.oc,o.year,o.supplier].join(' ')}));
-  storesNeed.slice(0,180).forEach(r=>alerts.push({level:'attention',source:'stores',title:r.product||'Produto sem descriÃ§Ã£o',desc:`${r.store||'Loja'} Â· ${r.days===null?'cobertura indisponÃ­vel':twFmt(r.days)+' dia(s)'} Â· solicitar ${r.requestRaw||'â€”'}`,search:[r.product,r.store].join(' ')}));
-  if(missingAverage)alerts.push({level:'attention',source:'stock',title:'Produtos sem mÃ©dia de consumo',desc:`${twFmt(missingAverage)} registro(s) impedem o cÃ¡lculo confiÃ¡vel da cobertura`,search:'qualidade mÃ©dia'});
-  if(unmatchedAgenda)alerts.push({level:'attention',source:'agenda',title:'CÃ³digos da agenda sem posiÃ§Ã£o correspondente',desc:`${twFmt(unmatchedAgenda)} registro(s) precisam de conferÃªncia cadastral`,search:'qualidade cÃ³digo agenda'});
-  if(missingValidity)alerts.push({level:'attention',source:'history',title:'Recebimentos sem validade informada',desc:`${twFmt(missingValidity)} produto(s) no histÃ³rico`,search:'qualidade validade'});
+  stocks.forEach(r=>{if(r.level==='normal')return;const desc=r.level==='critical'?(r.stock<=0?'Estoque agregado do tipo zerado':`Cobertura agregada de ${twFmt(r.cover)} dia(s)`):r.level==='excess'?`Cobertura agregada acima de ${twFmt(maxDays)} dias`:(r.cover===null?'Média agregada indisponível':`Cobertura agregada abaixo de ${twFmt(minDays)} dias`);alerts.push({level:r.level,source:'stock',title:r.type,desc:`${desc} · estoque ${twFmt(r.stock)} · ${twFmt(r.items)} item(ns)`,search:[r.type,...r.products,...r.codes].join(' ')})});
+  late.forEach(r=>alerts.push({level:'critical',source:'agenda',title:r.product||r.code||'Entrega programada',desc:`Empenho ${r.oc}/${r.year} · ${Math.abs(twDiff(r.date))} dia(s) em atraso · qtd. ${twFmt(r.qty)}`,search:[r.product,r.code,r.oc,r.year,r.type].join(' ')}));
+  today.forEach(r=>alerts.push({level:'attention',source:'agenda',title:r.product||r.code||'Entrega para hoje',desc:`Entrega prevista hoje · empenho ${r.oc}/${r.year} · qtd. ${twFmt(r.qty)}`,search:[r.product,r.code,r.oc,r.year,r.type].join(' ')}));
+  noSchedule.slice(0,150).forEach(o=>alerts.push({level:'attention',source:'control',title:`Empenho ${o.oc}/${o.year}`,desc:`Saldo ${twFmt(o.remaining)} sem agenda futura · ${o.supplier||'fornecedor não informado'}`,search:[o.oc,o.year,o.supplier].join(' ')}));
+  storesNeed.slice(0,180).forEach(r=>alerts.push({level:'attention',source:'stores',title:r.product||'Produto sem descrição',desc:`${r.store||'Loja'} · ${r.days===null?'cobertura indisponível':twFmt(r.days)+' dia(s)'} · solicitar ${r.requestRaw||'—'}`,search:[r.product,r.store].join(' ')}));
+  if(missingAverage)alerts.push({level:'attention',source:'stock',title:'Produtos sem média de consumo',desc:`${twFmt(missingAverage)} registro(s) impedem o cálculo confiável da cobertura`,search:'qualidade média'});
+  if(unmatchedAgenda)alerts.push({level:'attention',source:'agenda',title:'Códigos da agenda sem posição correspondente',desc:`${twFmt(unmatchedAgenda)} registro(s) precisam de conferência cadastral`,search:'qualidade código agenda'});
+  if(missingValidity)alerts.push({level:'attention',source:'history',title:'Recebimentos sem validade informada',desc:`${twFmt(missingValidity)} produto(s) no histórico`,search:'qualidade validade'});
   const levelOrder={critical:0,attention:1,excess:2,normal:3};alerts.sort((a,b)=>levelOrder[a.level]-levelOrder[b.level]||a.title.localeCompare(b.title,'pt-BR'));
   const relevantAlerts=alerts.filter(a=>twMatch([a.title,a.desc,a.search],terms));towerAlerts=relevantAlerts.filter(a=>!levelFilter||a.level===levelFilter);
-  const criticalAlerts=relevantAlerts.filter(a=>a.level==='critical').length,attentionAlerts=relevantAlerts.filter(a=>a.level==='attention').length,health=criticalAlerts?'critical':attentionAlerts?'attention':'normal',healthText=health==='critical'?'OperaÃ§Ã£o crÃ­tica':health==='attention'?'OperaÃ§Ã£o em atenÃ§Ã£o':'OperaÃ§Ã£o normal';
+  const criticalAlerts=relevantAlerts.filter(a=>a.level==='critical').length,attentionAlerts=relevantAlerts.filter(a=>a.level==='attention').length,health=criticalAlerts?'critical':attentionAlerts?'attention':'normal',healthText=health==='critical'?'Operação crítica':health==='attention'?'Operação em atenção':'Operação normal';
   const healthEl=document.getElementById('tw-health');healthEl.className='tw-health '+health;document.getElementById('tw-health-value').textContent=healthText;
-  const dates=[...towerData.stock.map(r=>r.updated),...towerData.agenda.map(r=>r.updated)].map(twDate).filter(Boolean),latest=dates.length?new Date(Math.max(...dates.map(d=>d.getTime()))):null;document.getElementById('tw-health-time').textContent=latest?'Dados publicados em '+latest.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'AtualizaÃ§Ã£o nÃ£o informada';
-  document.getElementById('tw-kpis').innerHTML=[twKpi('Tipos crÃ­ticos',twFmt(risk.critical),'estoque agregado zerado','critical'),twKpi('Tipos em atenÃ§Ã£o',twFmt(risk.attention),`cobertura abaixo de ${twFmt(minDays)} dias`,'attention'),twKpi('Tipos normais',twFmt(risk.normal),'dentro dos parÃ¢metros','good'),twKpi('Tipos em excesso',twFmt(risk.excess),`cobertura acima de ${twFmt(maxDays)} dias`,'info'),twKpi('Entregas atrasadas',twFmt(late.length),'somente empenhos ativos','critical'),twKpi('Saldo pendente',twFmt(pendingQty),'quantidade em empenhos ativos','info'),twKpi('Lojas em atenÃ§Ã£o',twFmt(storeNames.size),`${twFmt(storesNeed.length)} item(ns)`,'attention'),twKpi('Empenhos sem agenda',twFmt(noSchedule.length),'com saldo e sem entrega futura','attention')].join('');
-  const alertBox=document.getElementById('tw-alerts');document.getElementById('tw-alert-sub').textContent=`${twFmt(towerAlerts.length)} ocorrÃªncia(s) Â· ${twFmt(criticalAlerts)} crÃ­tica(s)`;alertBox.innerHTML=towerAlerts.length?towerAlerts.slice(0,250).map(a=>`<div class="tw-alert"><span class="tw-alert-level ${a.level}">${a.level==='critical'?'CrÃ­tico':a.level==='attention'?'AtenÃ§Ã£o':'Excesso'}</span><div class="tw-alert-copy"><div class="tw-alert-title" title="${crEsc(a.title)}">${crEsc(a.title)}</div><div class="tw-alert-desc" title="${crEsc(a.desc)}">${crEsc(a.desc)}</div></div><button class="tw-alert-open" type="button" onclick="twOpenSource('${a.source}')">Abrir â†’</button></div>`).join(''):'<div class="tw-empty">Nenhuma ocorrÃªncia encontrada com os filtros atuais.</div>';
-  const totalRisk=Object.values(risk).reduce((a,b)=>a+b,0),segments=[['critical',risk.critical,'#f87171'],['attention',risk.attention,'#fbbf24'],['normal',risk.normal,'#4ade80'],['excess',risk.excess,'#60a5fa']],gradient=[];let acc=0;segments.forEach(([,v,c])=>{const end=acc+twPct(v,totalRisk);gradient.push(`${c} ${acc}% ${end}%`);acc=end});document.getElementById('tw-risk-donut').style.background=`conic-gradient(${gradient.join(',')||'#55556a 0 100%'})`;document.getElementById('tw-risk-total').textContent=twFmt(totalRisk);document.getElementById('tw-risk-legend').innerHTML=segments.map(([k,v,c])=>`<div class="tw-legend-row"><span class="tw-legend-dot" style="background:${c}"></span><span>${k==='critical'?'CrÃ­tico':k==='attention'?'AtenÃ§Ã£o':k==='normal'?'Normal':'Excesso'}</span><b>${twFmt(v)}</b></div>`).join('');
-  const horizon=[['Atrasadas',late.length,'late'],['Hoje',today.length,'today'],['1â€“7 dias',week.length,'soon'],['8â€“30 dias',month.length,'']],hmax=Math.max(...horizon.map(x=>x[1]),1);document.getElementById('tw-horizon').innerHTML=horizon.map(([l,v,c])=>`<div class="tw-hcol"><div class="tw-hvalue">${twFmt(v)}</div><div class="tw-hbar ${c}" style="height:${Math.max(4,twPct(v,hmax))}%"></div><div class="tw-hlabel">${l}</div></div>`).join('');
+  const dates=[...towerData.stock.map(r=>r.updated),...towerData.agenda.map(r=>r.updated)].map(twDate).filter(Boolean),latest=dates.length?new Date(Math.max(...dates.map(d=>d.getTime()))):null;document.getElementById('tw-health-time').textContent=latest?'Dados publicados em '+latest.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'Atualização não informada';
+  document.getElementById('tw-kpis').innerHTML=[twKpi('Tipos críticos',twFmt(risk.critical),'estoque agregado zerado','critical'),twKpi('Tipos em atenção',twFmt(risk.attention),`cobertura abaixo de ${twFmt(minDays)} dias`,'attention'),twKpi('Tipos normais',twFmt(risk.normal),'dentro dos parâmetros','good'),twKpi('Tipos em excesso',twFmt(risk.excess),`cobertura acima de ${twFmt(maxDays)} dias`,'info'),twKpi('Entregas atrasadas',twFmt(late.length),'somente empenhos ativos','critical'),twKpi('Saldo pendente',twFmt(pendingQty),'quantidade em empenhos ativos','info'),twKpi('Lojas em atenção',twFmt(storeNames.size),`${twFmt(storesNeed.length)} item(ns)`,'attention'),twKpi('Empenhos sem agenda',twFmt(noSchedule.length),'com saldo e sem entrega futura','attention')].join('');
+  const alertBox=document.getElementById('tw-alerts');document.getElementById('tw-alert-sub').textContent=`${twFmt(towerAlerts.length)} ocorrência(s) · ${twFmt(criticalAlerts)} crítica(s)`;alertBox.innerHTML=towerAlerts.length?towerAlerts.slice(0,250).map(a=>`<div class="tw-alert"><span class="tw-alert-level ${a.level}">${a.level==='critical'?'Crítico':a.level==='attention'?'Atenção':'Excesso'}</span><div class="tw-alert-copy"><div class="tw-alert-title" title="${crEsc(a.title)}">${crEsc(a.title)}</div><div class="tw-alert-desc" title="${crEsc(a.desc)}">${crEsc(a.desc)}</div></div><button class="tw-alert-open" type="button" onclick="twOpenSource('${a.source}')">Abrir →</button></div>`).join(''):'<div class="tw-empty">Nenhuma ocorrência encontrada com os filtros atuais.</div>';
+  const totalRisk=Object.values(risk).reduce((a,b)=>a+b,0),segments=[['critical',risk.critical,'#f87171'],['attention',risk.attention,'#fbbf24'],['normal',risk.normal,'#4ade80'],['excess',risk.excess,'#60a5fa']],gradient=[];let acc=0;segments.forEach(([,v,c])=>{const end=acc+twPct(v,totalRisk);gradient.push(`${c} ${acc}% ${end}%`);acc=end});document.getElementById('tw-risk-donut').style.background=`conic-gradient(${gradient.join(',')||'#55556a 0 100%'})`;document.getElementById('tw-risk-total').textContent=twFmt(totalRisk);document.getElementById('tw-risk-legend').innerHTML=segments.map(([k,v,c])=>`<div class="tw-legend-row"><span class="tw-legend-dot" style="background:${c}"></span><span>${k==='critical'?'Crítico':k==='attention'?'Atenção':k==='normal'?'Normal':'Excesso'}</span><b>${twFmt(v)}</b></div>`).join('');
+  const horizon=[['Atrasadas',late.length,'late'],['Hoje',today.length,'today'],['1–7 dias',week.length,'soon'],['8–30 dias',month.length,'']],hmax=Math.max(...horizon.map(x=>x[1]),1);document.getElementById('tw-horizon').innerHTML=horizon.map(([l,v,c])=>`<div class="tw-hcol"><div class="tw-hvalue">${twFmt(v)}</div><div class="tw-hbar ${c}" style="height:${Math.max(4,twPct(v,hmax))}%"></div><div class="tw-hlabel">${l}</div></div>`).join('');
   const supMap=new Map();controls.forEach(r=>{if(r.remaining>0)supMap.set(r.supplier||'Sem fornecedor',(supMap.get(r.supplier||'Sem fornecedor')||0)+r.remaining)});document.getElementById('tw-suppliers').innerHTML=twBarRows([...supMap.entries()].sort((a,b)=>b[1]-a[1]),'blue');
   const storeMap=new Map();storesNeed.forEach(r=>storeMap.set(r.store||'Sem loja',(storeMap.get(r.store||'Sem loja')||0)+1));document.getElementById('tw-stores').innerHTML=twBarRows([...storeMap.entries()].sort((a,b)=>b[1]-a[1]),'yellow');
-  const uniqueLoads=new Set(histories.map(r=>[r.date,r.note,r.checker].join('|'))),uniqueNotes=new Set(histories.map(r=>r.note).filter(Boolean)),uniqueProducts=new Set(histories.map(r=>r.code||r.product).filter(Boolean)),uniqueCheckers=new Set(histories.map(r=>r.checker).filter(Boolean));document.getElementById('tw-receipts').innerHTML=[twQualityRow('Cargas registradas',twFmt(uniqueLoads.size)),twQualityRow('Notas fiscais',twFmt(uniqueNotes.size)),twQualityRow('Produtos diferentes',twFmt(uniqueProducts.size)),twQualityRow('Conferentes registrados',twFmt(uniqueCheckers.size)),twQualityRow('Validade nÃ£o informada',twFmt(missingValidity))].join('');
-  const cancelled=towerData.control.filter(r=>twFold(r.status)==='cancelado').length;document.getElementById('tw-orders').innerHTML=[twQualityRow('Empenhos vigentes com saldo',twFmt(pendingOrders.length)),twQualityRow('Parcialmente entregues',twFmt(partialOrders.length)),twQualityRow('Sem agenda futura',twFmt(noSchedule.length)),twQualityRow('Entregas atrasadas',twFmt(late.length)),twQualityRow('Cancelados fora dos cÃ¡lculos',twFmt(cancelled))].join('');
-  document.getElementById('tw-quality').innerHTML=[twQualityRow('OcorrÃªncias de qualidade',twFmt(qualityIssues)),twQualityRow('Produtos sem cÃ³digo',twFmt(missingCode)),twQualityRow('Produtos sem mÃ©dia',twFmt(missingAverage)),twQualityRow('Agenda invÃ¡lida',twFmt(invalidAgenda)),twQualityRow('Agenda sem posiÃ§Ã£o correspondente',twFmt(unmatchedAgenda))].join('');
-  document.getElementById('rcount').textContent=healthText+' Â· '+twFmt(towerAlerts.length)+' alerta(s)';
+  const uniqueLoads=new Set(histories.map(r=>[r.date,r.note,r.checker].join('|'))),uniqueNotes=new Set(histories.map(r=>r.note).filter(Boolean)),uniqueProducts=new Set(histories.map(r=>r.code||r.product).filter(Boolean)),uniqueCheckers=new Set(histories.map(r=>r.checker).filter(Boolean));document.getElementById('tw-receipts').innerHTML=[twQualityRow('Cargas registradas',twFmt(uniqueLoads.size)),twQualityRow('Notas fiscais',twFmt(uniqueNotes.size)),twQualityRow('Produtos diferentes',twFmt(uniqueProducts.size)),twQualityRow('Conferentes registrados',twFmt(uniqueCheckers.size)),twQualityRow('Validade não informada',twFmt(missingValidity))].join('');
+  const cancelled=towerData.control.filter(r=>twFold(r.status)==='cancelado').length;document.getElementById('tw-orders').innerHTML=[twQualityRow('Empenhos vigentes com saldo',twFmt(pendingOrders.length)),twQualityRow('Parcialmente entregues',twFmt(partialOrders.length)),twQualityRow('Sem agenda futura',twFmt(noSchedule.length)),twQualityRow('Entregas atrasadas',twFmt(late.length)),twQualityRow('Cancelados fora dos cálculos',twFmt(cancelled))].join('');
+  document.getElementById('tw-quality').innerHTML=[twQualityRow('Ocorrências de qualidade',twFmt(qualityIssues)),twQualityRow('Produtos sem código',twFmt(missingCode)),twQualityRow('Produtos sem média',twFmt(missingAverage)),twQualityRow('Agenda inválida',twFmt(invalidAgenda)),twQualityRow('Agenda sem posição correspondente',twFmt(unmatchedAgenda))].join('');
+  document.getElementById('rcount').textContent=healthText+' · '+twFmt(towerAlerts.length)+' alerta(s)';
 }
-function twExportAlerts(){if(!towerAlerts.length)return alert('NÃ£o hÃ¡ alertas para exportar.');const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',rows=[['NÃ­vel','Origem','TÃ­tulo','Detalhe'],...towerAlerts.map(a=>[a.level,a.source,a.title,a.desc])],csv='\ufeff'+rows.map(r=>r.map(q).join(';')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='torre_controle_alertas_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+function twExportAlerts(){if(!towerAlerts.length)return alert('Não há alertas para exportar.');const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',rows=[['Nível','Origem','Título','Detalhe'],...towerAlerts.map(a=>[a.level,a.source,a.title,a.desc])],csv='\ufeff'+rows.map(r=>r.map(q).join(';')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='torre_controle_alertas_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
 
 let cronogramaRows=[];
 let cronogramaLoaded=false;
@@ -823,17 +823,17 @@ function crHistNormCode(v){
 }
 function crHistDateInfo(v){
   const raw=String(v||'').trim(),d=new Date(raw);
-  if(isNaN(d))return {key:raw.slice(0,10)||'sem-data',label:raw.slice(0,10)||'Data nÃ£o informada',stamp:0};
+  if(isNaN(d))return {key:raw.slice(0,10)||'sem-data',label:raw.slice(0,10)||'Data não informada',stamp:0};
   const parts={};
   new Intl.DateTimeFormat('en-US',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).forEach(p=>parts[p.type]=p.value);
   return {key:`${parts.year}-${parts.month}-${parts.day}`,label:d.toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}),stamp:d.getTime()};
 }
 function crHistAdd(set,v){const s=String(v??'').trim();if(s)set.add(s)}
-function crHistJoin(set){return [...set].join(', ')||'â€”'}
+function crHistJoin(set){return [...set].join(', ')||'—'}
 async function loadCronogramaHistorico(force=false){
   if(cronogramaHistoricoLoaded&&!force)return;
   const response=await fetch(PROXY+'recebimento/listar');
-  if(!response.ok)throw new Error('HistÃ³rico de Cargas indisponÃ­vel');
+  if(!response.ok)throw new Error('Histórico de Cargas indisponível');
   const payload=await response.json();
   const baseRows=Array.isArray(payload)?payload:(payload.rows||payload.results||[]),grouped=new Map();
   for(const x of baseRows){
@@ -848,7 +848,7 @@ async function loadCronogramaHistorico(force=false){
       let item=grouped.get(key);
       if(!item){item={codigo,data,notas:new Set(),conferentes:new Set(),validades:new Set(),cargas:new Set(),glosas:new Set(),glosaItens:new Set(),glosaMotivos:new Set()};grouped.set(key,item)}
       crHistAdd(item.notas,x.nota_fiscal);crHistAdd(item.conferentes,x.conferente);crHistAdd(item.validades,p.validade);crHistAdd(item.cargas,x.carga);
-      crHistAdd(item.glosas,String(x.glosa||'').toLowerCase()==='sim'?'Sim':'NÃ£o');crHistAdd(item.glosaItens,x.glosa_item);crHistAdd(item.glosaMotivos,x.glosa_motivo);
+      crHistAdd(item.glosas,String(x.glosa||'').toLowerCase()==='sim'?'Sim':'Não');crHistAdd(item.glosaItens,x.glosa_item);crHistAdd(item.glosaMotivos,x.glosa_motivo);
     }
   }
   const byCode={};
@@ -859,15 +859,15 @@ async function loadCronogramaHistorico(force=false){
 function crToggleHistory(id,button){
   const box=document.getElementById(id),open=box.hidden;
   box.hidden=!open;button.setAttribute('aria-expanded',String(open));
-  const plus=button.querySelector('.cr-history-plus');if(plus)plus.textContent=open?'âˆ’':'+';
+  const plus=button.querySelector('.cr-history-plus');if(plus)plus.textContent=open?'−':'+';
 }
 function crHistoryHtml(items,id){
   if(!items.length)return '<div class="cr-history"><div class="cr-history-empty">Sem recebimentos anteriores registrados</div></div>';
   const rows=items.map(item=>{
-    const glosa=[...item.glosas].includes('Sim'),obs=[crHistJoin(item.glosaItens),crHistJoin(item.glosaMotivos)].filter(v=>v!=='â€”').join(' Â· ');
+    const glosa=[...item.glosas].includes('Sim'),obs=[crHistJoin(item.glosaItens),crHistJoin(item.glosaMotivos)].filter(v=>v!=='—').join(' · ');
     return `<div class="cr-history-row"><div class="cr-history-head"><div class="cr-history-date">${crEsc(item.data.label)}</div><span class="cr-history-glosa ${glosa?'yes':''}">${glosa?'Com glosa':'Sem glosa'}</span></div><div class="cr-history-details"><div class="cr-history-detail"><b>NF:</b> ${crEsc(crHistJoin(item.notas))}</div><div class="cr-history-detail"><b>Conferente:</b> ${crEsc(crHistJoin(item.conferentes))}</div><div class="cr-history-detail"><b>Validade:</b> ${crEsc(crHistJoin(item.validades))}</div><div class="cr-history-detail"><b>Carga:</b> ${crEsc(crHistJoin(item.cargas))}</div>${obs?`<div class="cr-history-detail cr-history-note"><b>Glosa:</b> ${crEsc(obs)}</div>`:''}</div></div>`;
   }).join('');
-  return `<div class="cr-history"><button class="cr-history-btn" type="button" aria-expanded="false" aria-controls="${id}" onclick="crToggleHistory('${id}',this)"><span class="cr-history-plus">+</span><span class="cr-history-label">Ver histÃ³rico do item (${items.length})</span></button><div class="cr-history-list" id="${id}" hidden>${rows}</div></div>`;
+  return `<div class="cr-history"><button class="cr-history-btn" type="button" aria-expanded="false" aria-controls="${id}" onclick="crToggleHistory('${id}',this)"><span class="cr-history-plus">+</span><span class="cr-history-label">Ver histórico do item (${items.length})</span></button><div class="cr-history-list" id="${id}" hidden>${rows}</div></div>`;
 }
 function crDate(v){
   const s=String(v||'').trim().slice(0,10);
@@ -884,7 +884,7 @@ function crStatus(dt){
   const dif=crDiffDays(dt);
   if(dif<0)return {label:'Atrasada',cls:'late'};
   if(dif===0)return {label:'Entrega hoje',cls:'today'};
-  if(dif<=7)return {label:'PrÃ³xima',cls:'soon'};
+  if(dif<=7)return {label:'Próxima',cls:'soon'};
   return {label:'Programada',cls:'planned'};
 }
 function crLoading(){
@@ -900,16 +900,16 @@ function crPopulateTypes(){
 function crUpdatedLabel(){
   const vals=cronogramaRows.map(r=>r.atualizado_em).filter(Boolean).map(v=>new Date(v)).filter(d=>!isNaN(d));
   const el=document.getElementById('cr-update');
-  if(!vals.length){el.textContent='Dados publicados pelo Sistema de GestÃ£o';return}
+  if(!vals.length){el.textContent='Dados publicados pelo Sistema de Gestão';return}
   const last=new Date(Math.max(...vals.map(d=>d.getTime())));
-  el.textContent='Ãšltima publicaÃ§Ã£o: '+last.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+  el.textContent='Última publicação: '+last.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
 }
 async function loadCronogramaData(force=false){
   if(cronogramaLoaded&&!force){renderCronograma();return}
   crLoading();setLoad(true);
   try{
     const sql=`SELECT a.empenho, a.ano, a.codigo, a.idcodbarprod, a.produto, a.tipo, a.saldo_restante, a.parcela, a.data_entrega, a.quantidade, a.atualizado_em FROM agenda_entregas a WHERE NOT EXISTS (SELECT 1 FROM tabela_controle c WHERE TRIM(CAST(c."Ano" AS TEXT)) = TRIM(a.ano) AND TRIM(CAST(c."O.C" AS TEXT)) = TRIM(a.empenho) AND LOWER(TRIM(COALESCE(c."Status", ''))) = 'cancelado') AND NOT EXISTS (SELECT 1 FROM snapshot_posicao_det s WHERE TRIM(CAST(s.codigo AS TEXT)) = TRIM(CAST(a.idcodbarprod AS TEXT)) AND UPPER(TRIM(COALESCE(s.t_item, ''))) LIKE '%PEREC%') ORDER BY a.data_entrega ASC, a.produto ASC LIMIT 5000`;
-    const historicoReq=loadCronogramaHistorico(force).catch(e=>console.warn('NÃ£o foi possÃ­vel carregar o histÃ³rico no cronograma:',e));
+    const historicoReq=loadCronogramaHistorico(force).catch(e=>console.warn('Não foi possível carregar o histórico no cronograma:',e));
     cronogramaRows=(await qNeon(sql)||[]).filter(r=>crDate(r.data_entrega));
     await historicoReq;
     cronogramaLoaded=true;
@@ -917,7 +917,7 @@ async function loadCronogramaData(force=false){
   }catch(e){
     cronogramaLoaded=false;
     const noCfg=!getCfg().url;
-    crState('âš ',noCfg?'ConexÃ£o necessÃ¡ria':'Cronograma indisponÃ­vel',noCfg?'Configure a conexÃ£o para consultar as entregas publicadas.':crEsc(e.message||'NÃ£o foi possÃ­vel consultar os dados.'),noCfg?'<button class="cr-refresh" type="button" onclick="openCfg()">Configurar conexÃ£o</button>':'<button class="cr-refresh" type="button" onclick="loadCronogramaData(true)">Tentar novamente</button>');
+    crState('⚠',noCfg?'Conexão necessária':'Cronograma indisponível',noCfg?'Configure a conexão para consultar as entregas publicadas.':crEsc(e.message||'Não foi possível consultar os dados.'),noCfg?'<button class="cr-refresh" type="button" onclick="openCfg()">Configurar conexão</button>':'<button class="cr-refresh" type="button" onclick="loadCronogramaData(true)">Tentar novamente</button>');
     document.getElementById('rcount').textContent='';
   }finally{setLoad(false)}
 }
@@ -948,21 +948,21 @@ function renderCronograma(){
   document.getElementById('cr-stat-total').textContent=rows.length;
   document.getElementById('cr-stat-qty').textContent=crFmtQty(rows.reduce((s,r)=>s+crNum(r.quantidade),0));
   document.getElementById('rcount').textContent=rows.length+' entrega'+(rows.length===1?'':'s');
-  if(!rows.length){crState('â—Œ','Nenhuma entrega encontrada','Ajuste os filtros ou aguarde uma nova publicaÃ§Ã£o da agenda.');return}
+  if(!rows.length){crState('◌','Nenhuma entrega encontrada','Ajuste os filtros ou aguarde uma nova publicação da agenda.');return}
   const groups={};let cardSeq=0;rows.forEach(r=>(groups[r.data_entrega]||(groups[r.data_entrega]=[])).push(r));
   document.getElementById('cr-content').innerHTML=Object.entries(groups).map(([date,items])=>{
     const dt=crDate(date), day=String(dt.getDate()).padStart(2,'0'), mon=dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
     const cards=items.map(r=>{
-      const st=crStatus(dt), emp=[r.empenho,r.ano].filter(Boolean).join('/'), code=r.idcodbarprod||r.codigo||'â€”';
-      const parcela=r.parcela?`Parcela ${crEsc(r.parcela)}`:'Parcela â€”';
+      const st=crStatus(dt), emp=[r.empenho,r.ano].filter(Boolean).join('/'), code=r.idcodbarprod||r.codigo||'—';
+      const parcela=r.parcela?`Parcela ${crEsc(r.parcela)}`:'Parcela —';
       const histId='cr-history-'+(++cardSeq),historico=cronogramaHistorico[crHistNormCode(code)]||[];
-      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${crEsc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${crEsc(r.produto||'Produto sem descriÃ§Ã£o')}">${crEsc(r.produto||'Produto sem descriÃ§Ã£o')}</div><div class="cr-product-sub">${crEsc(r.tipo||'Sem tipo')} Â· ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${crEsc(emp||'â€”')}">${crEsc(emp||'â€”')}</div></div><div class="cr-meta"><div class="cr-meta-label">CÃ³digo</div><div class="cr-meta-value" title="${crEsc(code)}">${crEsc(code)}</div></div></div>${crHistoryHtml(historico,histId)}</article>`;
+      return `<article class="cr-card"><div class="cr-card-top"><div class="cr-datebox"><b>${day}</b><span>${crEsc(mon)}</span></div><div class="cr-product"><div class="cr-product-name" title="${crEsc(r.produto||'Produto sem descrição')}">${crEsc(r.produto||'Produto sem descrição')}</div><div class="cr-product-sub">${crEsc(r.tipo||'Sem tipo')} · ${parcela}</div></div><span class="cr-status ${st.cls}">${st.label}</span></div><div class="cr-card-body"><div class="cr-meta"><div class="cr-meta-label">Quantidade</div><div class="cr-meta-value qty">${crFmtQty(r.quantidade)}</div></div><div class="cr-meta"><div class="cr-meta-label">Empenho</div><div class="cr-meta-value" title="${crEsc(emp||'—')}">${crEsc(emp||'—')}</div></div><div class="cr-meta"><div class="cr-meta-label">Código</div><div class="cr-meta-value" title="${crEsc(code)}">${crEsc(code)}</div></div></div>${crHistoryHtml(historico,histId)}</article>`;
     }).join('');
     return `<section class="cr-day"><div class="cr-day-head"><div class="cr-day-title"><strong>${crEsc(crFmtDate(dt))}</strong></div><div class="cr-day-line"></div><div class="cr-day-count">${items.length} entrega${items.length===1?'':'s'}</div></div><div class="cr-grid">${cards}</div></section>`;
   }).join('');
 }
 
-// â”€â”€ Tabela genÃ©rica â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Tabela genérica ────────────────────────────────────────────────────────
 
 async function loadTable(name,label,el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
@@ -990,8 +990,8 @@ async function loadTable(name,label,el){
   }catch(e){showErr(e.message)}
   setLoad(false);
 }
-function showEmpty(n){setLoad(false);document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">â³</div><div class="et">Snapshot ainda nÃ£o gerado.</div>`}
-function showErr(m){document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">âš </div><div class="et" style="color:var(--red)">${m}</div>`}
+function showEmpty(n){setLoad(false);document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">⏳</div><div class="et">Snapshot ainda não gerado.</div>`}
+function showErr(m){document.getElementById('empty').style.display='flex';document.getElementById('empty').innerHTML=`<div class="ei">⚠</div><div class="et" style="color:var(--red)">${m}</div>`}
 function _parseDateHist(v){
   if(!v) return 0;
   const s=String(v).trim();
@@ -1026,7 +1026,7 @@ function _histSaveConfig(cols){
 function applyAll(){
   filtRows=allRows.filter(row=>{const v=Object.values(row);return Object.entries(colFilters).every(([ci,sel])=>!sel||sel.has(String(v[ci]??'')));});
   if(curTable==='__historico_cargas__'){
-    // Ordem fixa correta para HistÃ³rico: maior ano > maior mÃªs > maior dia > hora.
+    // Ordem fixa correta para Histórico: maior ano > maior mês > maior dia > hora.
     filtRows.sort((a,b)=>_parseDateHist(b.DataISO||b.Data||b.criado_em||b.data_geracao)-_parseDateHist(a.DataISO||a.Data||a.criado_em||a.data_geracao));
   }else if(sortC>=0){
     filtRows.sort((a,b)=>{const av=Object.values(a)[sortC]??'',bv=Object.values(b)[sortC]??'';const an=parseFloat(String(av).replace(/\./g,'').replace(',','.')),bn=parseFloat(String(bv).replace(/\./g,'').replace(',','.'));if(!isNaN(an)&&!isNaN(bn))return(an-bn)*sortD;return String(av).localeCompare(String(bv),'pt-BR')*sortD;});
@@ -1053,7 +1053,7 @@ function render(){
     const hf=colFilters[realCi]?'on':'';const sa=sortC===realCi&&sortD===1,sd=sortC===realCi&&sortD===-1;
     th.draggable = curTable==='__historico_cargas__';
     th.dataset.col=col;
-    th.innerHTML=`<div class="thi"><div class="thl" title="${col}">${lbls[col]||col}</div><div class="ths">${sa?'â–²':sd?'â–¼':''}</div><div class="thf ${hf}" data-ci="${realCi}">â–¼</div></div><div class="rzh"></div>`;
+    th.innerHTML=`<div class="thi"><div class="thl" title="${col}">${lbls[col]||col}</div><div class="ths">${sa?'▲':sd?'▼':''}</div><div class="thf ${hf}" data-ci="${realCi}">▼</div></div><div class="rzh"></div>`;
     th.querySelector('.thl').onclick=()=>{if(curTable==='__historico_cargas__' && col==='Data'){ sortC=-1; applyAll(); return; } if(sortC===realCi)sortD*=-1;else{sortC=realCi;sortD=1}applyAll()};
     th.querySelector('.thf').onclick=e=>{e.stopPropagation();openFD(realCi,e.target)};
     th.querySelector('.rzh').onmousedown=e=>startRz(e,realCi,th,col);
@@ -1095,12 +1095,12 @@ function render(){
     },{passive:false});
     body.appendChild(trow);
   });
-  document.getElementById('pginfo').textContent=`PÃ¡gina ${curPage+1} de ${totalPages}  â€”  ${filtRows.length.toLocaleString('pt-BR')} linhas`;
+  document.getElementById('pginfo').textContent=`Página ${curPage+1} de ${totalPages}  —  ${filtRows.length.toLocaleString('pt-BR')} linhas`;
   document.querySelectorAll('#pgbar button').forEach((b,i)=>{b.disabled=i<2?curPage===0:curPage>=totalPages-1;});
 }
 function goPage(p){curPage=Math.max(0,Math.min(p,totalPages-1));render()}
 function chgPs(v){pageSize=parseInt(v);curPage=0;applyAll()}
-function updCount(){const af=Object.values(colFilters).filter(Boolean).length;let t=`${filtRows.length.toLocaleString('pt-BR')} / ${allRows.length.toLocaleString('pt-BR')} linhas`;if(af)t+=` Â· ${af} filtro(s)`;document.getElementById('rcount').textContent=t}
+function updCount(){const af=Object.values(colFilters).filter(Boolean).length;let t=`${filtRows.length.toLocaleString('pt-BR')} / ${allRows.length.toLocaleString('pt-BR')} linhas`;if(af)t+=` · ${af} filtro(s)`;document.getElementById('rcount').textContent=t}
 function startRz(e,ci,th,colName=null){e.preventDefault();const sx=e.clientX,sw=th.offsetWidth;const mv=e2=>{const w=Math.max(40,sw+e2.clientX-sx);if(curTable==='__historico_cargas__' && colName){colW[colName]=w;}else{colW[ci]=w;}th.style.width=w+'px'};const up=()=>{if(curTable==='__historico_cargas__')_histSaveConfig(histColOrder||[]);document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up)};document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)}
 function openFD(ci,btn){const d=document.getElementById('fdrop');if(d.classList.contains('open')&&fdCI===ci){closeFD();return}fdCI=ci;document.getElementById('fdsrch').value='';fdTerm='';const vals=[...new Set(allRows.map(r=>String(Object.values(r)[ci]??'')))].sort((a,b)=>{const an=parseFloat(a.replace(/\./g,'').replace(',','.')),bn=parseFloat(b.replace(/\./g,'').replace(',','.'));if(!isNaN(an)&&!isNaN(bn))return an-bn;return a.localeCompare(b,'pt-BR')});fdAllVals=vals;const cur=colFilters[ci];fdSel=cur?new Set(cur):new Set(vals);renderFD();const r=btn.getBoundingClientRect();d.style.top=(r.bottom+2)+'px';d.style.left=Math.min(r.left,window.innerWidth-240)+'px';d.classList.add('open');setTimeout(()=>document.addEventListener('click',outsideFD),0)}
 function closeFD(){document.getElementById('fdrop').classList.remove('open');document.removeEventListener('click',outsideFD)}
@@ -1111,7 +1111,7 @@ function fdAll2(){fdSel=new Set(fdAllVals);renderFD()}
 function fdNone(){fdSel=new Set();renderFD()}
 function applyFD(){if(fdSel.size===fdAllVals.length)delete colFilters[fdCI];else colFilters[fdCI]=new Set(fdSel);curPage=0;closeFD();applyAll()}
 
-// â”€â”€ Bottom sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Bottom sheet ───────────────────────────────────────────────────────────
 let _lastTap=0,_lastTapRow=null;
 
 function openBSheet(cols,vals){
@@ -1119,10 +1119,10 @@ function openBSheet(cols,vals){
   document.getElementById('bstitle').textContent=String(vals[0]||'');
   const body=document.getElementById('bsbody');
   body.innerHTML='';
-  // Long columns (descriÃ§Ã£o, tipo, fornecedor, observaÃ§Ãµes) â†’ full width
+  // Long columns (descrição, tipo, fornecedor, observações) → full width
   const longCols=new Set(['Tipo','T. De Merc.','tipo','Fornecedor','fornecedor','Produto','produto',
-    'ObservaÃ§Ãµes','observacoes','Obs','DESCRICAO','Descricao','descricao']);
-  const hlCols=new Set(['Est.Lojas','Dias Estoque','SituaÃ§Ã£o Pauta','Dias RC',
+    'Observações','observacoes','Obs','DESCRICAO','Descricao','descricao']);
+  const hlCols=new Set(['Est.Lojas','Dias Estoque','Situação Pauta','Dias RC',
     'CD/P','CD+OC','Comprar','Shelf']);
   cols.forEach((col,i)=>{
     if(i===0)return;
@@ -1134,7 +1134,7 @@ function openBSheet(cols,vals){
     const d=document.createElement('div');
     d.className='bsr'+(isLong?' full':'')+(isEmpty?' empty':'')+(isHL?' highlight':'');
     d.innerHTML=`<div class="bslbl">${label}</div>
-                 <div class="bsval${isEmpty?' mt':''}">${val||'â€”'}</div>`;
+                 <div class="bsval${isEmpty?' mt':''}">${val||'—'}</div>`;
     body.appendChild(d);
   });
   // Load detail dropdown if it's posicao table
@@ -1158,10 +1158,10 @@ function openBSheet(cols,vals){
 }
 function closeBSheet(){document.getElementById('bsov').classList.remove('open')}
 
-// â”€â”€ Detail dropdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Detail dropdown ────────────────────────────────────────────────────────
 let _bsDetRows = [];
 
-// Score â†’ classe (0=cinza, 1=branco, 2=amarelo, 3=laranja, 4=vermelho)
+// Score → classe (0=cinza, 1=branco, 2=amarelo, 3=laranja, 4=vermelho)
 function scoreClass(score) {
   if(score === 0) return 0;       // cinza
   if(score <= 2)  return 1;       // branco
@@ -1195,7 +1195,7 @@ function selectCDDItem(i) {
   const sc  = _bsDetScores[i];
   const cl  = scoreClass(sc);
   document.getElementById('cdd-sel-dot').className = `cdd-dot sc${cl}`;
-  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} â€” ${r.descricao}`;
+  document.getElementById('cdd-sel-txt').textContent = `${r.codigo} — ${r.descricao}`;
   document.querySelectorAll('.cdd-item').forEach((el,j) => el.classList.toggle('sel', j===i));
   closeCDD();
   loadDetItem(i);
@@ -1220,9 +1220,9 @@ async function loadDetSection(tipo, gr) {
     const tipoSafe = String(tipo || '').replace(/'/g,"''").trim();
     const grSafe   = String(gr   || '').replace(/'/g,"''").trim();
 
-    // Fonte correta: a snapshot detalhada jÃ¡ Ã© a prÃ³pria posiÃ§Ã£o expandida publicada.
-    // NÃ£o usa cadastro_produtos aqui, pois o cadastro sÃ³ traz produto/cÃ³digo e nÃ£o traz
-    // as informaÃ§Ãµes que geram a pontuaÃ§Ã£o (OC, mÃ©dia, CD/P, CD+OC, shelf etc.).
+    // Fonte correta: a snapshot detalhada já é a própria posição expandida publicada.
+    // Não usa cadastro_produtos aqui, pois o cadastro só traz produto/código e não traz
+    // as informações que geram a pontuação (OC, média, CD/P, CD+OC, shelf etc.).
     const rawRows = await qNeon(
       `SELECT codigo, descricao, estoque, ocs, s_ocs, s_emp, media, cdp, cdpoc, drp, t_item, shelf, est_lojas, dias_lojas
        FROM snapshot_posicao_det
@@ -1232,13 +1232,13 @@ async function loadDetSection(tipo, gr) {
 
     // Normaliza chaves caso o worker/driver retorne nomes em outro formato.
     const normRow = (r) => ({
-      codigo:     r.codigo     ?? r.CODIGO     ?? r['CÃ³digo']      ?? r['Cod.Barras'] ?? '',
-      descricao:  r.descricao  ?? r.DESCRICAO  ?? r['DescriÃ§Ã£o']   ?? r.Produto      ?? '',
+      codigo:     r.codigo     ?? r.CODIGO     ?? r['Código']      ?? r['Cod.Barras'] ?? '',
+      descricao:  r.descricao  ?? r.DESCRICAO  ?? r['Descrição']   ?? r.Produto      ?? '',
       estoque:    r.estoque    ?? r.ESTOQUE    ?? r['Estoque CD']  ?? r['Quant.']    ?? '',
       ocs:        r.ocs        ?? r.OCS        ?? r.Ocs            ?? '',
       s_ocs:      r.s_ocs      ?? r.S_OCS      ?? r['S.Ocs']       ?? '',
-      s_emp:      r.s_emp      ?? r.S_EMP      ?? r['S.Ã  Emp.']    ?? '',
-      media:      r.media      ?? r.MEDIA      ?? r['MÃ©dia']       ?? '',
+      s_emp:      r.s_emp      ?? r.S_EMP      ?? r['S.à Emp.']    ?? '',
+      media:      r.media      ?? r.MEDIA      ?? r['Média']       ?? '',
       cdp:        r.cdp        ?? r.CDP        ?? r['CD/P']        ?? '',
       cdpoc:      r.cdpoc      ?? r.CDPOC      ?? r['CD+OC']       ?? '',
       drp:        r.drp        ?? r.DRP        ?? r['D.R.P.']      ?? '',
@@ -1269,7 +1269,7 @@ async function loadDetSection(tipo, gr) {
     dVolt.innerHTML = `
       <div class="cdd-dot" style="background:#333340"></div>
       <div class="cdd-txt">
-        <div class="cdd-cod" style="color:#8888a0">â† VisÃ£o geral</div>
+        <div class="cdd-cod" style="color:#8888a0">← Visão geral</div>
         <div class="cdd-desc" style="color:#55556a">Mostrar todos os campos do tipo</div>
       </div>`;
     dVolt.onclick = () => {
@@ -1289,8 +1289,8 @@ async function loadDetSection(tipo, gr) {
       d.innerHTML = `
         <div class="cdd-dot sc${cl}"></div>
         <div class="cdd-txt">
-          <div class="cdd-cod sc${cl}t">${r.codigo || 'â€”'}</div>
-          <div class="cdd-desc">${r.descricao || 'Produto sem descriÃ§Ã£o'}</div>
+          <div class="cdd-cod sc${cl}t">${r.codigo || '—'}</div>
+          <div class="cdd-desc">${r.descricao || 'Produto sem descrição'}</div>
         </div>
         <div class="cdd-score sc${cl}t">${sc}pts</div>`;
       d.onclick = () => selectCDDItem(i);
@@ -1323,7 +1323,7 @@ function loadDetItem(idx) {
     {l:'Est. Lojas',  v:r.est_lojas,  hl:true},
     {l:'Dias Estoque',v:r.dias_lojas, hl:true},
     {l:'OCs',         v:r.ocs,        hl:false},
-    {l:'MÃ©dia',       v:r.media,      hl:false},
+    {l:'Média',       v:r.media,      hl:false},
     {l:'S.OCs',       v:r.s_ocs,      hl:false},
     {l:'CD+OC',       v:r.cdpoc,      hl:false},
     {l:'T.Item',      v:r.t_item,     hl:false},
@@ -1332,15 +1332,15 @@ function loadDetItem(idx) {
   fields.forEach(f => {
     const d = document.createElement('div');
     d.className = 'bsdet-card'+(f.hl?' hl':'');
-    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'â€”'}</div>`;
+    d.innerHTML = `<div class="bslbl">${f.l}</div><div class="bsval">${f.v||'—'}</div>`;
     grid.appendChild(d);
   });
 }
 
-// Swipe to close removido â€” fechar apenas pelo botÃ£o âœ•
+// Swipe to close removido — fechar apenas pelo botão ✕
 
 
-// â”€â”€ Recebimento de Carga â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Recebimento de Carga ──────────────────────────────────────────────────
 function _decodeB64Utf8(b64){
   const bin=atob(b64);
   const bytes=new Uint8Array(bin.length);
@@ -1353,7 +1353,7 @@ function loadRecebimento(el){
   curTable='__recebimento__';
   document.getElementById('tower-wrap').style.display='none';
   document.getElementById('ttitle').textContent='Recebimento de Carga';
-  document.getElementById('rcount').textContent='FormulÃ¡rio integrado';
+  document.getElementById('rcount').textContent='Formulário integrado';
   setLoad(false);
   document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='none';
@@ -1381,11 +1381,11 @@ function _histNormCod(v){
   return s.replace(/^0+/,'') || s;
 }
 function _histFmtNum(n){
-  if(n===null || n===undefined || isNaN(Number(n))) return 'â€”';
+  if(n===null || n===undefined || isNaN(Number(n))) return '—';
   return Math.round(Number(n)).toLocaleString('pt-BR');
 }
 async function carregarSaldoCDHistorico(rows){
-  const codigos=[...new Set(rows.map(r=>_histNormCod(r['CÃ³d. Barras'])).filter(Boolean))];
+  const codigos=[...new Set(rows.map(r=>_histNormCod(r['Cód. Barras'])).filter(Boolean))];
   const saldoMap={};
   if(!codigos.length) return saldoMap;
   try{
@@ -1401,13 +1401,13 @@ async function carregarSaldoCDHistorico(rows){
       `;
       const rs=await qNeon(sql);
       (rs||[]).forEach(r=>{
-        const cod=_histNormCod(r.codigo ?? r.CODIGO ?? r['CÃ³digo'] ?? r['Cod.Barras'] ?? '');
+        const cod=_histNormCod(r.codigo ?? r.CODIGO ?? r['Código'] ?? r['Cod.Barras'] ?? '');
         const val=_histNum(r.estoque ?? r.ESTOQUE ?? r['Estoque CD'] ?? r['Quant.'] ?? 0) || 0;
         if(cod) saldoMap[cod]=(saldoMap[cod]||0)+val;
       });
     }
   }catch(e){
-    console.warn('NÃ£o foi possÃ­vel carregar Saldo CD do histÃ³rico:', e);
+    console.warn('Não foi possível carregar Saldo CD do histórico:', e);
   }
   return saldoMap;
 }
@@ -1417,8 +1417,8 @@ async function loadHistoricoCargas(el){
   el.classList.add('active');
   curTable='__historico_cargas__';
   document.getElementById('tower-wrap').style.display='none';
-  document.getElementById('ttitle').textContent='HistÃ³rico de Cargas';
-  document.getElementById('rcount').textContent='Ãšltimos registros';
+  document.getElementById('ttitle').textContent='Histórico de Cargas';
+  document.getElementById('rcount').textContent='Últimos registros';
   setLoad(true);
   document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='flex';
@@ -1449,14 +1449,14 @@ async function loadHistoricoCargas(el){
           Nota: x.nota_fiscal || '',
           Conferente: x.conferente || '',
           Produto: p.desc || p.descricao || p.produto || p.nome || '',
-          'CÃ³d. Barras': p.ean || p.cod_barras || p.codigo_barras || '',
-          'Saldo CD': 'â€”',
-          'CÃ³d. Caixa': p.caixa || p.codigo_caixa || p.cod_caixa || '',
+          'Cód. Barras': p.ean || p.cod_barras || p.codigo_barras || '',
+          'Saldo CD': '—',
+          'Cód. Caixa': p.caixa || p.codigo_caixa || p.cod_caixa || '',
           Validade: p.validade || '',
           Embalagem: x.embalagem || '',
           Livro: x.livro || '',
           Carga: x.carga || '',
-          Glosa: String(x.glosa||'').toLowerCase()==='sim' ? 'Sim' : 'NÃ£o',
+          Glosa: String(x.glosa||'').toLowerCase()==='sim' ? 'Sim' : 'Não',
           'Glosa Item': x.glosa_item || '',
           'Glosa Qtd': x.glosa_qtd || '',
           'Glosa Motivo': x.glosa_motivo || '',
@@ -1466,9 +1466,9 @@ async function loadHistoricoCargas(el){
     }
     const saldoMap = await carregarSaldoCDHistorico(rows);
     rows.forEach(r=>{
-      const cod=_histNormCod(r['CÃ³d. Barras']);
+      const cod=_histNormCod(r['Cód. Barras']);
       const saldo=saldoMap[cod];
-      r['Saldo CD']=saldo===undefined ? 'â€”' : _histFmtNum(saldo);
+      r['Saldo CD']=saldo===undefined ? '—' : _histFmtNum(saldo);
       r['_SaldoCDNum']=saldo===undefined ? null : Number(saldo);
     });
     rows.sort((a,b)=>_parseDateHist(b.DataISO||b.Data)-_parseDateHist(a.DataISO||a.Data));
@@ -1482,12 +1482,12 @@ async function loadHistoricoCargas(el){
   setLoad(false);
 }
 
-// â”€â”€ AnÃ¡lise ArmazÃ©m â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Análise Armazém ────────────────────────────────────────────────────────
 async function loadArmazem(el){
   document.querySelectorAll('.titem').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');curTable='__armazem__';
   document.getElementById('tower-wrap').style.display='none';
-  document.getElementById('ttitle').textContent='AnÃ¡lise ArmazÃ©m';
+  document.getElementById('ttitle').textContent='Análise Armazém';
   document.getElementById('cronograma-wrap').style.display='none';
   document.getElementById('twrap').style.display='none';
   document.getElementById('pgbar').style.display='none';
@@ -1498,17 +1498,17 @@ async function loadArmazem(el){
     // Carrega todos os dados
     const rows = await qNeon(`SELECT loja, loja_id, produto, emb, est_cd, saldo_loja, saida, dias_a, media, dias_at, e_estim, est_e_est, est_emb_a, solicitar_e FROM analise_armazem ORDER BY loja_id, produto LIMIT 50000`);
     armAllRows = rows || [];
-    // Carrega config de expediÃ§Ã£o
+    // Carrega config de expedição
     try {
       const cfgRows = await qNeon(`SELECT valor FROM config WHERE chave='armazem_expedicao' LIMIT 1`);
       if(cfgRows && cfgRows[0]) armExpedicao = JSON.parse(cfgRows[0].valor);
     } catch(e) { armExpedicao = {}; }
-    // Monta lista de lojas â€” exclui IDEMPRESA=1 (CD)
+    // Monta lista de lojas — exclui IDEMPRESA=1 (CD)
     const lojaMap = {};
     armAllRows.forEach(r => {
       if(r.loja && parseInt(r.loja_id) !== 1 && !lojaMap[r.loja]) lojaMap[r.loja] = r.loja_id;
     });
-    // Filtra: id > 1, nome com " - ", e nome nÃ£o Ã© sÃ³ nÃºmero
+    // Filtra: id > 1, nome com " - ", e nome não é só número
     armLojas = Object.entries(lojaMap)
       .filter(([n,id]) => +id > 1 && n.includes(' - ') && !/^\d+$/.test(n.trim()))
       .sort((a,b)=>+a[1]-+b[1])
@@ -1519,8 +1519,8 @@ async function loadArmazem(el){
     const isNotFound = e.message && (e.message.includes('does not exist') || e.message.includes('not exist'));
     document.getElementById('arm-llist').innerHTML = `<div style="padding:20px 14px;color:${isNotFound?'var(--txt2)':'var(--red)'};font-size:12px;line-height:1.8;text-align:center">
       ${isNotFound
-        ? 'ðŸ“¦ Tabela <strong>analise_armazem</strong> ainda nÃ£o publicada.<br><span style="font-size:10px;color:var(--txt3)">Abra o app desktop â†’ Publicar no Site.</span>'
-        : 'âš  ' + e.message}
+        ? '📦 Tabela <strong>analise_armazem</strong> ainda não publicada.<br><span style="font-size:10px;color:var(--txt3)">Abra o app desktop → Publicar no Site.</span>'
+        : '⚠ ' + e.message}
     </div>`;
   }
   setLoad(false);
@@ -1554,7 +1554,7 @@ function armSelecionarLoja(loja){
 
 function armGetDiasCarga(loja){
   const nome = loja.replace(/^\d+\s*-\s*/,'').trim().toUpperCase();
-  const DIAS_MAP = {'SÃ¡bâ†’Seg':0,'TerÃ§a':1,'Quarta':2,'Quinta':3,'Sexta':4};
+  const DIAS_MAP = {'Sáb→Seg':0,'Terça':1,'Quarta':2,'Quinta':3,'Sexta':4};
   const hoje = new Date().getDay();
   const hojeIdx = hoje===0?6:hoje-1;
   let diasLoja=[];
@@ -1594,7 +1594,7 @@ function armRenderTabela(){
 
   let rows = armAllRows.filter(r=>r.loja===armLojaAtual);
 
-  // Recalcula com parÃ¢metro atual
+  // Recalcula com parâmetro atual
   rows = rows.map(r=>{
     const media  = parseFloat(r.media)||0;
     const saldo  = parseFloat(r.saldo_loja)||0;
@@ -1620,10 +1620,10 @@ function armRenderTabela(){
   const nSol = rows.filter(r=>r.solicitar_e==='S'||(parseFloat(r.solicitar_e)||0)>0).length;
   document.getElementById('arm-count-sol').textContent=nSol;
 
-  // CabeÃ§alho (sem loja e loja_id)
+  // Cabeçalho (sem loja e loja_id)
   const thead = document.getElementById('arm-thead');
   thead.innerHTML='';
-  ['Produto','Emb.','Est.CD','SaldoL.','SaÃ­da','DiasA.','MÃ©dia','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE']
+  ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE']
     .forEach(h=>{const th=document.createElement('th');th.textContent=h;thead.appendChild(th);});
 
   // Linhas
@@ -1646,19 +1646,19 @@ function armRenderTabela(){
   });
 }
 
-// â”€â”€ Exportar Excel com ExcelJS (estilos completos) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Exportar Excel com ExcelJS (estilos completos) ────────────────────────
 async function armExportarExcel(){
   if(!armLojaAtual){ alert('Nenhuma loja selecionada.'); return; }
-  if(typeof ExcelJS === 'undefined'){ alert('ExcelJS nÃ£o carregado.'); return; }
+  if(typeof ExcelJS === 'undefined'){ alert('ExcelJS não carregado.'); return; }
 
   const param     = parseFloat(document.getElementById('arm-param').value)||8;
   const estCdMin  = parseFloat(document.getElementById('arm-estcd').value)||0;
   const lojaLabel = armLojaAtual.replace(/^\d+\s*-\s*/,'').trim();
   const agora     = new Date().toLocaleString('pt-BR');
-  const HDRS      = ['Produto','Emb.','Est.CD','SaldoL.','SaÃ­da','DiasA.','MÃ©dia','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
+  const HDRS      = ['Produto','Emb.','Est.CD','SaldoL.','Saída','DiasA.','Média','DiasAT','E.Estim','Est.E.Est','Est.Emb.A','SolicitarE'];
   const WIDTHS    = [42,7,9,9,8,8,8,8,10,10,10,10];
 
-  // Coleta linhas visÃ­veis
+  // Coleta linhas visíveis
   const rows = [];
   document.querySelectorAll('#arm-tbody tr').forEach(tr=>{
     const cells = [...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
@@ -1667,24 +1667,24 @@ async function armExportarExcel(){
   if(!rows.length){ alert('Nenhum dado para exportar.'); return; }
 
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Sistema de GestÃ£o';
+  wb.creator = 'Sistema de Gestão';
   wb.created = new Date();
   const ws = wb.addWorksheet(lojaLabel.substring(0,31));
 
   // Larguras
   ws.columns = WIDTHS.map(w=>({width:w}));
 
-  // Linha 1 â€” tÃ­tulo
+  // Linha 1 — título
   ws.mergeCells(1,1,1,HDRS.length);
   const r1 = ws.getRow(1);
   r1.height = 22;
   const c1 = r1.getCell(1);
-  c1.value = `AnÃ¡lise ArmazÃ©m â€” ${lojaLabel}   |   ParÃ¢metro: ${param}   |   Est.Central MÃ­n: ${estCdMin}   |   Gerado: ${agora}`;
+  c1.value = `Análise Armazém — ${lojaLabel}   |   Parâmetro: ${param}   |   Est.Central Mín: ${estCdMin}   |   Gerado: ${agora}`;
   c1.font  = {bold:true, color:{argb:'FFFFFFFF'}, size:12};
   c1.fill  = {type:'pattern', pattern:'solid', fgColor:{argb:'FF217346'}};
   c1.alignment = {vertical:'middle', horizontal:'left'};
 
-  // Linha 2 â€” cabeÃ§alhos
+  // Linha 2 — cabeçalhos
   const r2 = ws.getRow(2);
   r2.height = 16;
   HDRS.forEach((h,i)=>{
@@ -1714,7 +1714,7 @@ async function armExportarExcel(){
     cells.forEach((v,ci)=>{
       const cell = row.getCell(ci+1);
 
-      // Valor numÃ©rico onde possÃ­vel
+      // Valor numérico onde possível
       if(ci>0 && v!=='S' && v!==''){
         const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
         cell.value = isNaN(n)?v:n;
@@ -1755,9 +1755,9 @@ async function armExportarExcel(){
   URL.revokeObjectURL(url);
 }
 
-// â”€â”€ Neon/D1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Neon/D1 ────────────────────────────────────────────────────────────────
 async function qNeon(sql){
-  const url=getCfg().url;if(!url)throw new Error('Configure a conexÃ£o.');
+  const url=getCfg().url;if(!url)throw new Error('Configure a conexão.');
   const r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:sql,params:[],connectionString:url})});
   if(!r.ok)throw new Error(`Erro ${r.status}: ${await r.text()}`);
   const d=await r.json();if(d.message)throw new Error(d.message);
@@ -1765,7 +1765,7 @@ async function qNeon(sql){
 }
 
 // Ponte para o iframe do Recebimento: o iframe srcdoc tem origem "null" e pode receber 403 direto no Worker.
-// Por isso ele pede para a pÃ¡gina principal executar o qNeon(), usando a mesma conexÃ£o que jÃ¡ funciona nas demais telas.
+// Por isso ele pede para a página principal executar o qNeon(), usando a mesma conexão que já funciona nas demais telas.
 window.addEventListener('message', async (ev)=>{
   const d = ev.data || {};
   if(d.type !== 'recebimento-qneon' || !d.id) return;
@@ -1779,13 +1779,13 @@ window.addEventListener('message', async (ev)=>{
 
 function setLoad(on){document.getElementById('loadbar').classList.toggle('on',on)}
 
-// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('.fda')[0].onclick=fdAll2;
   document.querySelectorAll('.fda')[1].onclick=fdNone;
   buildSB();
   if(!getCfg().url) setTimeout(openCfg,300);
-  // Mobile: esconde sidebar e mostra botÃ£o flutuante
+  // Mobile: esconde sidebar e mostra botão flutuante
   if(window.innerWidth<=640){
     document.getElementById('sidebar').classList.add('hidden');
     document.getElementById('tog-float').style.display='flex';
@@ -1796,4 +1796,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
-
